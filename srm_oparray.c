@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.27 2004-04-16 19:45:29 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.28 2004-04-17 13:14:00 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -208,6 +208,7 @@ inline void vld_dump_zval_long(zvalue_value value)
 
 inline void vld_dump_zval_double(zvalue_value value)
 {
+	fprintf (stderr, "%g", value.dval);
 }
 
 inline void vld_dump_zval_string(zvalue_value value)
@@ -222,26 +223,32 @@ inline void vld_dump_zval_string(zvalue_value value)
 
 inline void vld_dump_zval_array(zvalue_value value)
 {
+	fprintf (stderr, "<array>");
 }
 
 inline void vld_dump_zval_object(zvalue_value value)
 {
+	fprintf (stderr, "<object>");
 }
 
 inline void vld_dump_zval_bool(zvalue_value value)
 {
+	fprintf (stderr, value.lval ? "true" : "false");
 }
 
 inline void vld_dump_zval_resource(zvalue_value value)
 {
+	fprintf (stderr, "<resource>");
 }
 
 inline void vld_dump_zval_constant(zvalue_value value)
 {
+	fprintf (stderr, "<const>");
 }
 
 inline void vld_dump_zval_constant_array(zvalue_value value)
 {
+	fprintf (stderr, "<const array>");
 }
 
 
