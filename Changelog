@@ -1,3 +1,7 @@
+Fri Feb 1 09:54:32 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/vle.c:
+- Fixed hash apply functions
+
 Fri Feb 1 09:48:38 CET 2002 Varun Shoor <plot@ript.net 
 >
 /vle/vle.c:
