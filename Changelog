@@ -1,3 +1,7 @@
+Mon Oct 20 12:07:27 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c:
+- Fixed some opcode displays
+
 Fri Sep 19 10:44:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c:
 - Added new opcode
