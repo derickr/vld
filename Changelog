@@ -1,3 +1,10 @@
+Wed Nov 13 21:49:56 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
+>
+/vle/srm_oparray.c
+/vle/srm_oparray.h
+/vle/vld.c:
+Fix compilation warnings.
+
 Mon Oct 28 16:41:40 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c
 /vle/vld.c:
