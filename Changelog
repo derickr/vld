@@ -1,3 +1,14 @@
+Wed Oct 23 20:55:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/php_vld.h
+/vle/vld.c
+/vle/Makefile.in
+/vle/config.m4
+/vle/srm_oparray.c
+/vle/srm_oparray.h
+/vle/php_vle.h
+/vle/vle.c:
+- %s/vle/vld/i
+
 Sun Feb 17 14:47:32 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/vle.c:
 - Enable optimize
