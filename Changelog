@@ -1,9 +1,8 @@
 Mon Apr 7 22:14:21 CEST 2003 Sterling Hughes <sterling@php.net>
 /vle/vld.c:
-Fix a segfault under Zend Engine 2, by checking for class_entry->type ==
-ZEND_USER_CLASS, instead of apply'ing on non-user classes (which causes 
-a segfault).
-- 
+- Fix a segfault under Zend Engine 2, by checking for class_entry->type ==
+  ZEND_USER_CLASS, instead of apply'ing on non-user classes (which causes a
+  segfault).
 
 Mon Apr 7 20:28:15 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c:
