@@ -1,3 +1,8 @@
+Wed Jan 19 15:36:00 CET 2005 Derick Rethans <derick@derickrethans.nl>
+package.xml
+vle/vld.c:
+- Go with 0.8.0
+
 Thu Nov 04 22:51:36 CET 2004 Marcus Börger <helly@php.net>
 srm_oparray.c
 vle/srm_oparray.h:
