@@ -1,3 +1,8 @@
+Sat Apr 17 15:14:00 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- Show all zval types even though this may currently not be used.
+  It helps debugging the interpreter.
+
 Fri Apr 16 21:45:29 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c:
 The 2nd op is the constant's name in FETCH_CONSTANT's RT mode
