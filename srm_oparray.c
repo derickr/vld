@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.36 2004-09-09 13:15:56 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.37 2004-11-04 21:51:36 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -287,6 +287,11 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 		case IS_VAR: /* 4 */
 			fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
+		case IS_CV:  /* 16 */
+			fprintf (stderr, "!%d", node.u.var / sizeof(temp_variable));
+			break;
+#endif
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
 			break;
@@ -340,10 +345,9 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 			break;
 
 		case ZEND_JMPZNZ:
-			flags = ALL_USED;
+			flags = OP1_USED | OP2_USED;
 			op->result = op->op1;
-			op->op1.op_type = VLD_IS_OPLINE;
-			op->op1.u.opline_num = op->extended_value;
+			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
 			op->op2.op_type = VLD_IS_OPLINE;
 			break;
 
@@ -447,6 +451,8 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
 		vld_dump_znode (&print_sep, op.result, base_address);
+	} else {
+		fprintf(stderr, "    ");
 	}
 	if (flags & OP1_USED) {
 		if (flags & OP1_OPLINE) {
