@@ -26,7 +26,6 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 
-static int le_vld;
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
 
@@ -125,7 +124,6 @@ static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array *op_array;
-	HashTable     *tmp;
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
