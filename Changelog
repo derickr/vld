@@ -1,3 +1,7 @@
+Thu Sep 09 15:15:56 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- JMP_NO_CTOR's jump address is already valid for ZE1
+
 Thu Sep 09 14:59:50 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - Remove opcode 150 which is not yet comitted to ZE2
