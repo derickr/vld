@@ -1,3 +1,7 @@
+Fri Aug 06 10:29:26 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- ZEND_HANDLE_EXCEPTION does not use any opcode info
+
 Sun Jun 06 14:17:24 CEST 2004 Marcus Börger <helly@php.net>
 vld.c:
 - Fix memleak
