@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.26 2004-04-16 07:46:27 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.27 2004-04-16 19:45:29 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -127,7 +127,7 @@ static const op_usage opcodes[] = {
 	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
 	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
-	/*  99 */	{ "FETCH_CONSTANT", RES_USED | OP1_USED },
+	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
 	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
 	/*  101 */	{ "EXT_STMT", ALL_USED },
 	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
