@@ -99,12 +99,21 @@ PHP_MINFO_FUNCTION(vld)
 
 }
 
+static int srm_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
+{
+	if (fe->type == ZEND_USER_FUNCTION) {
+		*have_fe = 1;
+	}
+
+	return 0;
+}
+
 static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		printf("Function %s:\n", fe->function_name);
+		printf("Method %s:\n", fe->function_name);
 		srm_dump_oparray(fe);
-		printf("End of Function %s.\n\n", fe->function_name);
+		printf("End of method %s.\n\n", fe->function_name);
 	}
 
 	return 0;
@@ -112,9 +121,15 @@ static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
 
 static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 {
-	printf("Class %s:\n", class_entry->name);
-	zend_hash_apply(&class_entry->function_table, (apply_func_t) srm_dump_fe TSRMLS_CC);
-	printf("End of class %s.\n\n", class_entry->name);
+	zend_bool have_fe = 0;
+	zend_hash_apply_with_argument(&class_entry->function_table, (apply_func_arg_t) srm_check_fe, (void *)&have_fe TSRMLS_CC);
+	if (have_fe) {
+		printf("Class %s:\n", class_entry->name);
+		zend_hash_apply(&class_entry->function_table, (apply_func_t) srm_dump_fe TSRMLS_CC);
+		printf("End of class %s.\n\n", class_entry->name);
+	} else {
+		printf("Class %s: [no user functions]\n", class_entry->name);
+	}
 
 	return 0;
 }

@@ -218,9 +218,7 @@ void srm_dump_op (int nr, zend_op op)
 	zend_uchar flags = opcodes[op.opcode].flags;
 
 	if (flags & OP_FETCH) {
-		if (op.op2.u.fetch_type == ZEND_FETCH_LOCAL) {
-			fetch_type = "local";
-		} else if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
+		if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
 			fetch_type = "global";
 		} else if (op.op2.u.fetch_type == ZEND_FETCH_STATIC) {
 			fetch_type = "static";
@@ -273,6 +271,7 @@ void srm_dump_oparray (zend_op_array *opa)
 	for (i = 0; i < opa->size; i++) {
 		srm_dump_op (i, opa->opcodes[i]);
 	}
+	zend_printf("\n");
 }
 
 void opt_set_nop (zend_op_array *opa, int nr)
