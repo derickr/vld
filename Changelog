@@ -1,3 +1,7 @@
+Sat Jan 29 23:26:51 CET 2005 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- Now commit correct check for FE_RESET jump
+
 Sat Jan 29 23:21:17 CET 2005 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - FE_RESET is a jump only since 4.3.11
