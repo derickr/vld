@@ -12,9 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
+   | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
+/* $Id: vld.c,v 1.15 2003-10-20 10:08:01 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

@@ -12,9 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
+   | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
+/* $Id: php_vld.h,v 1.2 2003-10-20 10:08:01 derick Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
