@@ -61,10 +61,10 @@ static const op_usage opcodes[] = {
 	/*  37 */	{ "POST_DEC", ALL_USED },
 	/*  38 */	{ "ASSIGN", ALL_USED },
 	/*  39 */	{ "ASSIGN_REF", ALL_USED },
-	/*  40 */	{ "ECHO", ALL_USED },
-	/*  41 */	{ "PRINT", ALL_USED },
-	/*  42 */	{ "JMP", ALL_USED },
-	/*  43 */	{ "JMPZ", ALL_USED },
+	/*  40 */	{ "ECHO", OP1_USED },
+	/*  41 */	{ "PRINT", RES_USED | OP1_USED },
+	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
+	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  44 */	{ "JMPNZ", ALL_USED },
 	/*  45 */	{ "JMPZNZ", ALL_USED },
 	/*  46 */	{ "JMPZ_EX", ALL_USED },
@@ -91,7 +91,7 @@ static const op_usage opcodes[] = {
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", ALL_USED },
 	/*  69 */	{ "JMP_NO_CTOR", ALL_USED },
-	/*  70 */	{ "FREE", ALL_USED },
+	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
 	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED },
@@ -101,13 +101,13 @@ static const op_usage opcodes[] = {
 	/*  77 */	{ "FE_RESET", ALL_USED },
 	/*  78 */	{ "FE_FETCH", ALL_USED },
 	/*  79 */	{ "EXIT", ALL_USED },
-	/*  80 */	{ "FETCH_R", ALL_USED },
+	/*  80 */	{ "FETCH_R", RES_USED | OP1_USED | OP_FETCH },
 	/*  81 */	{ "FETCH_DIM_R", ALL_USED },
 	/*  82 */	{ "FETCH_OBJ_R", ALL_USED },
-	/*  83 */	{ "FETCH_W", ALL_USED },
+	/*  83 */	{ "FETCH_W", RES_USED | OP1_USED | OP_FETCH },
 	/*  84 */	{ "FETCH_DIM_W", ALL_USED },
 	/*  85 */	{ "FETCH_OBJ_W", ALL_USED },
-	/*  86 */	{ "FETCH_RW", ALL_USED },
+	/*  86 */	{ "FETCH_RW", RES_USED | OP1_USED | OP_FETCH },
 	/*  87 */	{ "FETCH_DIM_RW", ALL_USED },
 	/*  88 */	{ "FETCH_OBJ_RW", ALL_USED },
 	/*  89 */	{ "FETCH_IS", ALL_USED },
@@ -132,6 +132,7 @@ static const op_usage opcodes[] = {
 
 inline void srm_dump_zval_null(zvalue_value value)
 {
+	zend_printf ("null");
 }
 
 inline void srm_dump_zval_long(zvalue_value value)
@@ -201,8 +202,8 @@ void srm_dump_znode (znode node)
 		case IS_VAR: /* 4 */
 			zend_printf ("$%d", node.u.var);
 			break;
-		case IS_UNUSED: /* 4 */
-			zend_printf ("_");
+		case SRM_IS_OPLINE:
+			zend_printf ("->%d", node.u.opline_num);
 			break;
 	}
 
@@ -211,26 +212,49 @@ void srm_dump_znode (znode node)
 
 void srm_dump_op (int nr, zend_op op)
 {
+	static uint last_lineno = -1;
 	int print_sep = 0;
-	zend_uchar used = opcodes[op.opcode].used;
+	char *fetch_type = "";
+	zend_uchar flags = opcodes[op.opcode].flags;
 
-	if (used == SPECIAL) {
+	if (flags & OP_FETCH) {
+		if (op.op2.u.fetch_type == ZEND_FETCH_LOCAL) {
+			fetch_type = "local";
+		} else if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
+			fetch_type = "global";
+		} else if (op.op2.u.fetch_type == ZEND_FETCH_STATIC) {
+			fetch_type = "static";
+		}
+	}
+
+	if (op.lineno == last_lineno) {
+		zend_printf("     ");
+	} else {
+		zend_printf("%4d ", op.lineno);
+		last_lineno = op.lineno;
+	}
+
+	zend_printf("%5d  %-20s %-6s     ", nr, opcodes[op.opcode].name, fetch_type);
+
+	if (flags == SPECIAL) {
 		zend_printf("special");
 	}
 
-	zend_printf ("%5d  %-20s", nr, opcodes[op.opcode].name);
-
-	if (used & RES_USED) {
+	if (flags & RES_USED) {
 		srm_dump_znode (op.result);
 		print_sep = 1;
 	}
-	if (used & OP1_USED) {
+	if (flags & OP1_USED) {
 		if (print_sep) zend_printf (", ");
+		if (flags & OP1_OPLINE)
+			op.op1.op_type = SRM_IS_OPLINE;
 		srm_dump_znode (op.op1);
 		print_sep = 1;
 	}
-	if (used & OP2_USED) {
+	if (flags & OP2_USED) {
 		if (print_sep) zend_printf (", ");
+		if (flags & OP2_OPLINE)
+			op.op2.op_type = SRM_IS_OPLINE;
 		srm_dump_znode (op.op2);
 	}
 	zend_printf ("\n");
@@ -244,6 +268,8 @@ void srm_dump_oparray (zend_op_array *opa)
 	zend_printf ("function name:  %s\n", opa->function_name);
 	zend_printf ("number of ops:  %d\n", opa->size);
 
+    zend_printf("line     #  op                   fetch  ext operands\n");
+	zend_printf("-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
 		srm_dump_op (i, opa->opcodes[i]);
 	}

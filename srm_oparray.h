@@ -21,16 +21,24 @@
 
 #include "php.h"
 
-#define OP1_USED  1<<0
-#define OP2_USED  1<<1
-#define RES_USED  1<<2
-#define NONE_USED 0
-#define ALL_USED  0x7
-#define SPECIAL   0xff
+#define OP1_USED   1<<0
+#define OP2_USED   1<<1
+#define RES_USED   1<<2
+
+#define NONE_USED  0
+#define ALL_USED   0x7
+
+#define OP1_OPLINE 1<<3
+#define OP2_OPLINE 1<<4
+#define OP_FETCH   1<<5
+
+#define SPECIAL    0xff
+
+#define SRM_IS_OPLINE 1<<4
 
 typedef struct _op_usage {
 	char *name;
-	zend_uchar used;
+	zend_uchar flags;
 } op_usage;
 
 void srm_dump_oparray (zend_op_array *opa);
