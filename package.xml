@@ -12,7 +12,7 @@
     </maintainer>
   </maintainers>
   <description>
-	The Vulcan Logic Disassembler hooks into the Zend Engine and
+    The Vulcan Logic Disassembler hooks into the Zend Engine and
     dumps all the opcodes (execution units) of a script.
   </description>
   <license>BSD style</license>
