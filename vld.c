@@ -69,7 +69,7 @@ ZEND_DECLARE_MODULE_GLOBALS(vld)
 #endif 
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("vld.active", "1", PHP_INI_SYSTEM, OnUpdateBool, active, zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.active", "0", PHP_INI_SYSTEM, OnUpdateBool, active, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
