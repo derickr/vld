@@ -129,8 +129,10 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
-	srm_optimize_oparray (&op_array);
-	srm_dump_oparray (op_array);
+	if (op_array) {
+		srm_concat_strings (&op_array);
+		srm_dump_oparray (op_array);
+	}
 
 	zend_hash_apply (CG(function_table), (apply_func_t) srm_dump_fe TSRMLS_CC);
 	zend_hash_apply (CG(class_table), (apply_func_t) srm_dump_cle TSRMLS_CC);

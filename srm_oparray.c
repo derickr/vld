@@ -161,7 +161,7 @@ void opt_concat_char (zend_op_array *opa, int dest, int src)
 	zd->value.str.val[zd->value.str.len] = '\0';
 }
 
-void srm_optimize_oparray (zend_op_array **opa)
+void srm_concat_strings (zend_op_array **opa)
 {
 	int i;
 	int last_add_string = -1;
