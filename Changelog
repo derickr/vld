@@ -1,3 +1,11 @@
+Sat Apr 17 16:27:48 CEST 2004 Marcus Börger <helly@php.net>
+vld.c:
+- Added INI option vld.execute which defaults to 1. Setting it to 0 
+  disables execution when vld.active=1. 
+- Added INI options vld.skip_prepend and vld_skip_append which default to
+  0. Setting them to 1 suppresses output and loading of auto_prepend_file
+  and auto_append_file respectively if vld.active=1 and vld.execute=0.
+
 Sat Apr 17 15:14:00 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - Show all zval types even though this may currently not be used.
