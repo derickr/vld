@@ -99,7 +99,7 @@ PHP_MINFO_FUNCTION(vld)
 
 }
 
-static int srm_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
+static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
 		*have_fe = 1;
@@ -108,24 +108,24 @@ static int srm_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 	return 0;
 }
 
-static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
+static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
 		printf("Function %s:\n", fe->function_name);
-		srm_dump_oparray(fe);
+		vld_dump_oparray(fe);
 		printf("End of function %s.\n\n", fe->function_name);
 	}
 
 	return 0;
 }
 
-static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
+static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 {
 	zend_bool have_fe = 0;
-	zend_hash_apply_with_argument(&class_entry->function_table, (apply_func_arg_t) srm_check_fe, (void *)&have_fe TSRMLS_CC);
+	zend_hash_apply_with_argument(&class_entry->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 	if (have_fe) {
 		printf("Class %s:\n", class_entry->name);
-		zend_hash_apply(&class_entry->function_table, (apply_func_t) srm_dump_fe TSRMLS_CC);
+		zend_hash_apply(&class_entry->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
 		printf("End of class %s.\n\n", class_entry->name);
 	} else {
 		printf("Class %s: [no user functions]\n", class_entry->name);
@@ -134,7 +134,7 @@ static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	return 0;
 }
 
-/* {{{ zend_op_array srm_compile_file (file_handle, type)
+/* {{{ zend_op_array vld_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
@@ -143,11 +143,11 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		srm_dump_oparray (op_array);
+		vld_dump_oparray (op_array);
 	}
 
-	zend_hash_apply (CG(function_table), (apply_func_t) srm_dump_fe TSRMLS_CC);
-	zend_hash_apply (CG(class_table), (apply_func_t) srm_dump_cle TSRMLS_CC);
+	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
+	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
 
 	return op_array;
 }

@@ -131,21 +131,21 @@ static const op_usage opcodes[] = {
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED },
 };
 
-inline void srm_dump_zval_null(zvalue_value value)
+inline void vld_dump_zval_null(zvalue_value value)
 {
 	zend_printf ("null");
 }
 
-inline void srm_dump_zval_long(zvalue_value value)
+inline void vld_dump_zval_long(zvalue_value value)
 {
 	zend_printf ("%ld", value.lval);
 }
 
-inline void srm_dump_zval_double(zvalue_value value)
+inline void vld_dump_zval_double(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_string(zvalue_value value)
+inline void vld_dump_zval_string(zvalue_value value)
 {
 	char *new_str;
 	int new_len;
@@ -155,52 +155,52 @@ inline void srm_dump_zval_string(zvalue_value value)
 	efree(new_str);
 }
 
-inline void srm_dump_zval_array(zvalue_value value)
+inline void vld_dump_zval_array(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_object(zvalue_value value)
+inline void vld_dump_zval_object(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_bool(zvalue_value value)
+inline void vld_dump_zval_bool(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_resource(zvalue_value value)
+inline void vld_dump_zval_resource(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_constant(zvalue_value value)
+inline void vld_dump_zval_constant(zvalue_value value)
 {
 }
 
-inline void srm_dump_zval_constant_array(zvalue_value value)
+inline void vld_dump_zval_constant_array(zvalue_value value)
 {
 }
 
 
-void srm_dump_zval (zval val)
+void vld_dump_zval (zval val)
 {
 	switch (val.type) {
-		case IS_NULL:           srm_dump_zval_null (val.value);           break;
-		case IS_LONG:           srm_dump_zval_long (val.value);           break;
-		case IS_DOUBLE:         srm_dump_zval_double (val.value);         break;
-		case IS_STRING:         srm_dump_zval_string (val.value);         break;
-		case IS_ARRAY:          srm_dump_zval_array (val.value);          break;
-		case IS_OBJECT:         srm_dump_zval_object (val.value);         break;
-		case IS_BOOL:           srm_dump_zval_bool (val.value);           break;
-		case IS_RESOURCE:       srm_dump_zval_resource (val.value);       break;
-		case IS_CONSTANT:       srm_dump_zval_constant (val.value);       break;
-		case IS_CONSTANT_ARRAY: srm_dump_zval_constant_array (val.value); break;
+		case IS_NULL:           vld_dump_zval_null (val.value);           break;
+		case IS_LONG:           vld_dump_zval_long (val.value);           break;
+		case IS_DOUBLE:         vld_dump_zval_double (val.value);         break;
+		case IS_STRING:         vld_dump_zval_string (val.value);         break;
+		case IS_ARRAY:          vld_dump_zval_array (val.value);          break;
+		case IS_OBJECT:         vld_dump_zval_object (val.value);         break;
+		case IS_BOOL:           vld_dump_zval_bool (val.value);           break;
+		case IS_RESOURCE:       vld_dump_zval_resource (val.value);       break;
+		case IS_CONSTANT:       vld_dump_zval_constant (val.value);       break;
+		case IS_CONSTANT_ARRAY: vld_dump_zval_constant_array (val.value); break;
 	}
 }
 
-void srm_dump_znode (znode node)
+void vld_dump_znode (znode node)
 {
 	switch (node.op_type) {
 		case IS_CONST: /* 1 */
-			srm_dump_zval (node.u.constant);
+			vld_dump_zval (node.u.constant);
 			break;
 		case IS_TMP_VAR: /* 2 */
 			zend_printf ("~%d", node.u.var);
@@ -208,13 +208,13 @@ void srm_dump_znode (znode node)
 		case IS_VAR: /* 4 */
 			zend_printf ("$%d", node.u.var);
 			break;
-		case SRM_IS_OPLINE:
+		case VLD_IS_OPLINE:
 			zend_printf ("->%d", node.u.opline_num);
 			break;
 	}
 }
 
-static zend_uchar srm_get_special_flags(zend_op *op)
+static zend_uchar vld_get_special_flags(zend_op *op)
 {
 	zend_uchar flags = 0;
 
@@ -237,7 +237,7 @@ static zend_uchar srm_get_special_flags(zend_op *op)
 	return flags;
 }
 
-void srm_dump_op (int nr, zend_op op)
+void vld_dump_op (int nr, zend_op op)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
@@ -248,7 +248,7 @@ void srm_dump_op (int nr, zend_op op)
 		return;
 
 	if (flags == SPECIAL) {
-		flags = srm_get_special_flags(&op);
+		flags = vld_get_special_flags(&op);
 	}
 
 	if (flags & OP_FETCH) {
@@ -276,26 +276,26 @@ void srm_dump_op (int nr, zend_op op)
 
 	if ((flags & RES_USED) &&
 		!(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
-		srm_dump_znode (op.result);
+		vld_dump_znode (op.result);
 		print_sep = 1;
 	}
 	if (flags & OP1_USED) {
 		if (print_sep) zend_printf (", ");
 		if (flags & OP1_OPLINE)
-			op.op1.op_type = SRM_IS_OPLINE;
-		srm_dump_znode (op.op1);
+			op.op1.op_type = VLD_IS_OPLINE;
+		vld_dump_znode (op.op1);
 		print_sep = 1;
 	}
 	if (flags & OP2_USED) {
 		if (print_sep) zend_printf (", ");
 		if (flags & OP2_OPLINE)
-			op.op2.op_type = SRM_IS_OPLINE;
-		srm_dump_znode (op.op2);
+			op.op2.op_type = VLD_IS_OPLINE;
+		vld_dump_znode (op.op2);
 	}
 	zend_printf ("\n");
 }
 
-void srm_dump_oparray (zend_op_array *opa)
+void vld_dump_oparray (zend_op_array *opa)
 {
 	int i;
 
@@ -306,7 +306,7 @@ void srm_dump_oparray (zend_op_array *opa)
     zend_printf("line     #  op                   fetch  ext  operands\n");
 	zend_printf("-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
-		srm_dump_op (i, opa->opcodes[i]);
+		vld_dump_op (i, opa->opcodes[i]);
 	}
 	zend_printf("\n");
 }

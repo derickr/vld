@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef SRM_OPARRAY_H
-#define SRM_OPARRAY_H
+#ifndef VLD_OPARRAY_H
+#define VLD_OPARRAY_H
 
 #include "php.h"
 
@@ -36,14 +36,14 @@
 
 #define SPECIAL    0xff
 
-#define SRM_IS_OPLINE 1<<4
+#define VLD_IS_OPLINE 1<<4
 
 typedef struct _op_usage {
 	char *name;
 	zend_uchar flags;
 } op_usage;
 
-void srm_dump_oparray (zend_op_array *opa);
+void vld_dump_oparray (zend_op_array *opa);
 
 #endif
 
