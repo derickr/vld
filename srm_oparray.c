@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.30 2004-08-29 22:23:05 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.31 2004-08-29 22:52:38 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -50,7 +50,7 @@ static const op_usage opcodes[] = {
 	/*  19 */	{ "IS_SMALLER", ALL_USED },
 	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
 	/*  21 */	{ "CAST", ALL_USED },
-	/*  22 */	{ "QM_ASSIGN", ALL_USED },
+	/*  22 */	{ "QM_ASSIGN", RES_USED | OP1_USED },
 	/*  23 */	{ "ASSIGN_ADD", ALL_USED },
 	/*  24 */	{ "ASSIGN_SUB", ALL_USED },
 	/*  25 */	{ "ASSIGN_MUL", ALL_USED },
