@@ -1,3 +1,9 @@
+Mon Apr 7 22:35:19 CEST 2003 Sterling Hughes <sterling@php.net>
+/vle/srm_oparray.c
+/vle/vld.c:
+- Send all output to standard error, that way script output, and vld 
+  output can be easily separated.
+
 Mon Apr 7 22:25:51 CEST 2003 Sterling Hughes <sterling@php.net>
 /vle/vld.c:
 - Fix class handling properly.  In Zend Engine 2 classes are stored as a 
