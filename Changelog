@@ -1,3 +1,9 @@
+Mon Oct 20 12:08:01 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/php_vld.h
+/vle/srm_oparray.h
+/vle/vld.c:
+- Fixed email addresses
+
 Mon Oct 20 12:07:27 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c:
 - Fixed some opcode displays
