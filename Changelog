@@ -1,3 +1,7 @@
+Mon Aug 30 00:23:05 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- Fixed JPNZ
+
 Fri Aug 06 10:29:26 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - ZEND_HANDLE_EXCEPTION does not use any opcode info
