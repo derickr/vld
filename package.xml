@@ -18,13 +18,10 @@
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>0.7.0</version>
-    <date>2003-09-17</date>
+    <version>0.8.0</version>
+    <date>2004-01-19</date>
     <notes>
-     This release adds a lot of Zend Engine 2 support, fixes some
-     bugs and changes the way on how VLD is activated. Only if the
-     configure setting "vld.active" is set to "1" it will dump the
-     op arrays. 
+Bring this up-to-date with latest PHP 5.1-dev.
     </notes>
     <filelist>
       <file role="src"  name="srm_oparray.h"/>
