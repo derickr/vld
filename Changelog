@@ -1,3 +1,8 @@
+Thu Sep 09 14:58:02 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c
+vle/srm_oparray.h:
+- Show classes with prefix ':' for ZE2's ZEND_FETCH_CLASS and NEW
+
 Thu Sep 09 13:58:29 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - Fixed JMP_NO_CTOR
