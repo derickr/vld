@@ -1,3 +1,7 @@
+Mon Apr 7 22:46:26 CEST 2003 Andrei Zmievski <andrei@gravitonic.com>
+/vle/vld.c:
+Turn off VLD by default.
+
 Mon Apr 7 22:35:19 CEST 2003 Sterling Hughes <sterling@php.net>
 /vle/srm_oparray.c
 /vle/vld.c:
