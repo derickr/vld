@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<package>
+  <name>vld</name>
+  <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
+  <status>beta</status>
+  <maintainers>
+    <maintainer>
+      <user>derick</user>
+      <name>Derick Rethans</name>
+      <email>derick@xdebug.org</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+  <description>
+	The Vulcan Logic Disassembler hooks into the Zend Engine and
+    dumps all the opcodes (execution units) of a script.
+  </description>
+  <license>BSD style</license>
+  <release>
+    <state>beta</state>
+    <version>0.7.0</version>
+    <date>2003-09-17</date>
+    <notes>
+     This release adds a lot of Zend Engine 2 support, fixes some
+     bugs and changes the way on how VLD is activated. Only if the
+     configure setting "vld.active" is set to "1" it will dump the
+     op arrays. 
+    </notes>
+    <filelist>
+      <file role="src"  name="srm_oparray.h"/>
+      <file role="src"  name="srm_oparray.c"/>
+      <file role="src"  name="php_vld.h"/>
+      <file role="src"  name="vld.c"/>
+
+      <file role="src"  name="Makefile.in"/>
+      <file role="src"  name="config.m4"/>
+
+      <file role="doc"  name="CREDITS"/>
+      <file role="doc"  name="Changelog"/>
+    </filelist>
+  </release>
+</package>
