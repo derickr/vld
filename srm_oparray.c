@@ -12,12 +12,12 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
+   | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-
+/* $Id: srm_oparray.c,v 1.23 2003-10-20 10:07:27 derick Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -75,9 +75,9 @@ static const op_usage opcodes[] = {
 	/*  44 */	{ "JMPNZ", ALL_USED },
 	/*  45 */	{ "JMPZNZ", SPECIAL },
 	/*  46 */	{ "JMPZ_EX", ALL_USED | OP2_OPLINE },
-	/*  47 */	{ "JMPNZ_EX", ALL_USED },
+	/*  47 */	{ "JMPNZ_EX", ALL_USED | OP2_OPLINE },
 	/*  48 */	{ "CASE", ALL_USED },
-	/*  49 */	{ "SWITCH_FREE", ALL_USED },
+	/*  49 */	{ "SWITCH_FREE", RES_USED | OP1_USED },
 	/*  50 */	{ "BRK", ALL_USED },
 	/*  51 */	{ "CONT", ALL_USED },
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
