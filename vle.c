@@ -105,6 +105,12 @@ PHP_MINFO_FUNCTION(vle)
 
 }
 
+static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
+{
+	if (fe->type == ZEND_USER_FUNCTION) {
+		srm_dump_oparray(fe);
+	}
+}
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
@@ -113,10 +119,11 @@ static ZEND_API zend_op_array *vle_compile_file(zend_file_handle *file_handle, i
 	zend_op_array * op_array;
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
+
+//	srm_optimize_oparray (&op_array);
 	srm_dump_oparray (op_array);
 
-	srm_optimize_oparray (&op_array);
-	srm_dump_oparray (op_array);
+	zend_hash_apply (CG(function_table), (apply_func_t) srm_dump_fe TSRMLS_CC);
 
 	return op_array;
 }

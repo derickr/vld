@@ -182,6 +182,5 @@ void srm_optimize_oparray (zend_op_array **opa)
 		} else {
 			last_add_string = -1;
 		}
-		srm_dump_op (i, (*opa)->opcodes[i]);
 	}
 }
