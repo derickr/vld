@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.32 2004-08-31 07:07:25 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.33 2004-09-09 11:58:29 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -97,7 +97,7 @@ static const op_usage opcodes[] = {
 	/*  66 */	{ "SEND_VAR", OP1_USED },
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", RES_USED | OP1_USED },
-	/*  69 */	{ "JMP_NO_CTOR", OP1_USED | OP2_USED | OP2_OPLINE },
+	/*  69 */	{ "JMP_NO_CTOR", SPECIAL },
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
@@ -193,6 +193,7 @@ static const op_usage opcodes[] = {
 	/*  147 */	{ "ZEND_ASSIGN_DIM", ALL_USED },
 	/*  148 */	{ "ZEND_ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", NONE_USED },
+	/*  150 */	{ "JMP_SET", ALL_USED | OP2_OPLINE },
 #endif
 };
 
@@ -307,7 +308,7 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 	return 1;
 }
 
-static zend_uchar vld_get_special_flags(zend_op *op)
+static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 {
 	zend_uchar flags = 0;
 
@@ -340,6 +341,15 @@ static zend_uchar vld_get_special_flags(zend_op *op)
 			op->op1.u.opline_num = op->extended_value;
 			op->op2.op_type = VLD_IS_OPLINE;
 			break;
+
+		case ZEND_JMP_NO_CTOR:
+			flags = OP2_USED;
+			if (op->op1.op_type != IS_UNUSED) {
+				flags |= OP1_USED;
+			}
+			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
+			op->op2.op_type = VLD_IS_OPLINE;
+			break;
 	}
 
 	return flags;
@@ -364,7 +374,7 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 		return;
 
 	if (flags == SPECIAL) {
-		flags = vld_get_special_flags(&op);
+		flags = vld_get_special_flags(&op, base_address);
 	}
 
 	if (flags & OP_FETCH) {
