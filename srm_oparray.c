@@ -82,13 +82,20 @@ void srm_dump_zval (zval val)
 void srm_dump_znode (znode node)
 {
 	switch (node.op_type) {
-		case IS_CONST:
+		case IS_CONST: /* 1 */
 			zend_printf ("'");
 			srm_dump_zval (node.u.constant);
 			zend_printf ("'");
 			break;
-		case IS_TMP_VAR: zend_printf ("%%"); break;
-		case IS_VAR:     zend_printf ("$"); break;
+		case IS_TMP_VAR: /* 2 */
+			zend_printf ("%%%d", node.u.var);
+			break;
+		case IS_VAR: /* 4 */
+			zend_printf ("$%d", node.u.var);
+			break;
+		case IS_UNUSED: /* 4 */
+			zend_printf ("%d", node.u.opline_num);
+			break;
 	}
 
 }
@@ -98,11 +105,13 @@ void srm_dump_op (int nr, zend_op op)
 {
 	zend_printf ("%5d  %-20s", nr, opcodes[op.opcode]);
 	srm_dump_znode (op.result);
-	if (op.op1.op_type != IS_UNUSED) {
+//	if (op.op1.op_type != IS_UNUSED)
+	{
 		zend_printf (", ");
 		srm_dump_znode (op.op1);
 		
-		if (op.op2.op_type != IS_UNUSED) {
+//		if (op.op2.op_type != IS_UNUSED)
+		{
 			zend_printf (", ");
 			srm_dump_znode (op.op2);
 		}
@@ -123,3 +132,56 @@ void srm_dump_oparray (zend_op_array *opa)
 	}
 }
 
+void opt_set_nop (zend_op_array *opa, int nr)
+{
+	opa->opcodes[nr].opcode = NOP;
+}
+
+void opt_concat_string (zend_op_array *opa, int dest, int src)
+{
+	int new_len;
+	zval *zd = &(opa->opcodes[dest].op2.u.constant);
+	zval *zs = &(opa->opcodes[src].op2.u.constant);
+
+	new_len          = zd->value.str.len + zs->value.str.len;
+	zd->value.str.val = erealloc (zd->value.str.val, new_len + 1);
+	zd->value.str.len = new_len;
+	strncat (zd->value.str.val, zs->value.str.val, zs->value.str.len);
+	zd->value.str.val[new_len] = '\0';
+}
+
+void opt_concat_char (zend_op_array *opa, int dest, int src)
+{
+	zval *zd = &(opa->opcodes[dest].op2.u.constant);
+	zval *zs = &(opa->opcodes[src].op2.u.constant);
+
+	zd->value.str.val = erealloc (zd->value.str.val, zd->value.str.len + 2);
+	zd->value.str.len++;
+	zd->value.str.val[zd->value.str.len - 1] = zs->value.lval;
+	zd->value.str.val[zd->value.str.len] = '\0';
+}
+
+void srm_optimize_oparray (zend_op_array **opa)
+{
+	int i;
+	int last_add_string = -1;
+
+	for (i = 0; i < (*opa)->size; i++) {
+		if (((*opa)->opcodes[i].opcode == ADD_STRING) || 
+			((*opa)->opcodes[i].opcode == ADD_CHAR)) {
+			if (last_add_string == -1) {
+				last_add_string = i;
+			} else {
+				if ((*opa)->opcodes[i].opcode == ADD_STRING) {
+					opt_concat_string (*opa, last_add_string, i);
+				} else {
+					opt_concat_char (*opa, last_add_string, i);
+				}
+				opt_set_nop (*opa, i);
+			}
+		} else {
+			last_add_string = -1;
+		}
+		srm_dump_op (i, (*opa)->opcodes[i]);
+	}
+}

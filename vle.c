@@ -113,7 +113,9 @@ static ZEND_API zend_op_array *vle_compile_file(zend_file_handle *file_handle, i
 	zend_op_array * op_array;
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
+	srm_dump_oparray (op_array);
 
+	srm_optimize_oparray (&op_array);
 	srm_dump_oparray (op_array);
 
 	return op_array;
