@@ -56,14 +56,33 @@ zend_module_entry vld_module_entry = {
 ZEND_GET_MODULE(vld)
 #endif
 
+ZEND_BEGIN_MODULE_GLOBALS(vld)
+	int active;
+ZEND_END_MODULE_GLOBALS(vld) 
 
+ZEND_DECLARE_MODULE_GLOBALS(vld)
 
+#ifdef ZTS
+#define VLD_G(v) TSRMG(vld_globals_id, zend_vld_globals *, v)
+#else
+#define VLD_G(v) (vld_globals.v)
+#endif 
+
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("vld.active", "1", PHP_INI_SYSTEM, OnUpdateBool, active, zend_vld_globals, vld_globals)
+PHP_INI_END()
+ 
+static void vld_init_globals(zend_vld_globals *vld_globals)
+{
+	vld_globals->active = 0;
+}
 
 
 PHP_MINIT_FUNCTION(vld)
 {
+	ZEND_INIT_MODULE_GLOBALS(vld, vld_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
 	old_compile_file = zend_compile_file;
-	zend_compile_file = vld_compile_file;
 
 	return SUCCESS;
 }
@@ -80,6 +99,9 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 
 PHP_RINIT_FUNCTION(vld)
 {
+	if (VLD_G(active)) {
+		zend_compile_file = vld_compile_file;
+	}
 	return SUCCESS;
 }
 
@@ -87,6 +109,8 @@ PHP_RINIT_FUNCTION(vld)
 
 PHP_RSHUTDOWN_FUNCTION(vld)
 {
+	zend_compile_file = old_compile_file;
+
 	return SUCCESS;
 }
 

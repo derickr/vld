@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
+   |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
 
@@ -22,6 +23,10 @@
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
 
+/* Input zend_compile.h
+ * And replace [^(...)(#define )([^ \t]+).*$]
+ * BY     [/=*  \1 *=/  { "\3", ALL_USED },] REMEMBER to remove the two '=' signs
+ */
 static const op_usage opcodes[] = {
 	/*  0 */	{ "NOP", NONE_USED },
 	/*  1 */	{ "ADD", ALL_USED },
@@ -130,6 +135,62 @@ static const op_usage opcodes[] = {
 	/*  104 */	{ "EXT_NOP", ALL_USED },
 	/*  105 */	{ "TICKS", ALL_USED },
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED },
+#ifdef ZEND_ENGINE_2
+	/*  107 */	{ "ZEND_CATCH", ALL_USED },
+	/*  108 */	{ "ZEND_THROW", ALL_USED },
+	
+	/*  109 */	{ "ZEND_FETCH_CLASS", ALL_USED },
+	
+	/*  110 */	{ "ZEND_CLONE", ALL_USED },
+	
+	/*  111 */	{ "ZEND_INIT_CTOR_CALL", ALL_USED },
+	/*  112 */	{ "ZEND_INIT_METHOD_CALL", ALL_USED },
+	/*  113 */	{ "ZEND_INIT_STATIC_METHOD_CALL", ALL_USED },
+	
+	/*  114 */	{ "ZEND_ISSET_ISEMPTY_VAR", ALL_USED },
+	/*  115 */	{ "ZEND_ISSET_ISEMPTY_DIM_OBJ", ALL_USED },
+	
+	/*  116 */	{ "ZEND_IMPORT_FUNCTION", ALL_USED },
+	/*  117 */	{ "ZEND_IMPORT_CLASS", ALL_USED },
+	/*  118 */	{ "ZEND_IMPORT_CONST", ALL_USED },
+	
+	/*  119 */	{ "119", ALL_USED },
+	/*  120 */	{ "120", ALL_USED },
+	
+	/*  121 */	{ "ZEND_ASSIGN_ADD_OBJ", ALL_USED },
+	/*  122 */	{ "ZEND_ASSIGN_SUB_OBJ", ALL_USED },
+	/*  123 */	{ "ZEND_ASSIGN_MUL_OBJ", ALL_USED },
+	/*  124 */	{ "ZEND_ASSIGN_DIV_OBJ", ALL_USED },
+	/*  125 */	{ "ZEND_ASSIGN_MOD_OBJ", ALL_USED },
+	/*  126 */	{ "ZEND_ASSIGN_SL_OBJ", ALL_USED },
+	/*  127 */	{ "ZEND_ASSIGN_SR_OBJ", ALL_USED },
+	/*  128 */	{ "ZEND_ASSIGN_CONCAT_OBJ", ALL_USED },
+	/*  129 */	{ "ZEND_ASSIGN_BW_OR_OBJ", ALL_USED },
+	/*  130 */	{ "ZEND_ASSIGN_BW_AND_OBJ", ALL_USED },
+	/*  131 */	{ "ZEND_ASSIGN_BW_XOR_OBJ", ALL_USED },
+
+	/*  132 */	{ "ZEND_PRE_INC_OBJ", ALL_USED },
+	/*  133 */	{ "ZEND_PRE_DEC_OBJ", ALL_USED },
+	/*  134 */	{ "ZEND_POST_INC_OBJ", ALL_USED },
+	/*  135 */	{ "ZEND_POST_DEC_OBJ", ALL_USED },
+
+	/*  136 */	{ "ZEND_ASSIGN_OBJ", ALL_USED },
+	/*  137 */	{ "ZEND_OP_DATA", ALL_USED },
+	
+	/*  138 */	{ "ZEND_INSTANCEOF", ALL_USED },
+	
+	/*  139 */	{ "ZEND_DECLARE_CLASS", ALL_USED },
+	/*  140 */	{ "ZEND_DECLARE_INHERITED_CLASS", ALL_USED },
+	/*  141 */	{ "ZEND_DECLARE_FUNCTION", ALL_USED },
+	
+	/*  142 */	{ "ZEND_RAISE_ABSTRACT_ERROR", ALL_USED },
+	
+	/*  143 */	{ "ZEND_START_NAMESPACE", ALL_USED },
+	
+	/*  144 */	{ "ZEND_ADD_INTERFACE", ALL_USED },
+	/*  145 */	{ "ZEND_VERIFY_INSTANCEOF", ALL_USED },
+	/*  146 */	{ "ZEND_VERIFY_ABSTRACT_CLASS", ALL_USED },
+#endif
 };
 
 inline void vld_dump_zval_null(zvalue_value value)
@@ -197,7 +258,7 @@ void vld_dump_zval (zval val)
 	}
 }
 
-void vld_dump_znode (znode node)
+int vld_dump_znode (znode node)
 {
 	switch (node.op_type) {
 		case IS_CONST: /* 1 */
@@ -209,10 +270,14 @@ void vld_dump_znode (znode node)
 		case IS_VAR: /* 4 */
 			zend_printf ("$%d", node.u.var);
 			break;
+		case IS_UNUSED:
+			zend_printf ("N/A", node.u.var);
+			return 0;
 		case VLD_IS_OPLINE:
 			zend_printf ("->%d", node.u.opline_num);
 			break;
 	}
+	return 1;
 }
 
 static zend_uchar vld_get_special_flags(zend_op *op)
@@ -253,12 +318,20 @@ static zend_uchar vld_get_special_flags(zend_op *op)
 	return flags;
 }
 
+#define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
+
 void vld_dump_op (int nr, zend_op op)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
 	char *fetch_type = "";
-	zend_uchar flags = opcodes[op.opcode].flags;
+	zend_uchar flags;
+	
+	if (op.opcode >= NUM_KNOWN_OPCODES) {
+		flags = ALL_USED;
+	} else {
+		flags = opcodes[op.opcode].flags;
+	}
 
 	if (op.lineno == 0)
 		return;
@@ -268,11 +341,31 @@ void vld_dump_op (int nr, zend_op op)
 	}
 
 	if (flags & OP_FETCH) {
+#ifdef ZEND_ENGINE_2
+		switch (op.op2.u.EA.type) {
+			case ZEND_FETCH_GLOBAL:
+				fetch_type = "global";
+				break;
+			case ZEND_FETCH_LOCAL:
+				fetch_type = "local";
+				break;
+			case ZEND_FETCH_STATIC:
+				fetch_type = "static";
+				break;
+			case ZEND_FETCH_STATIC_MEMBER:
+				fetch_type = "static member";
+				break;
+			default:
+				fetch_type = "unknown";
+				break;
+		}
+#else 
 		if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
 			fetch_type = "global";
 		} else if (op.op2.u.fetch_type == ZEND_FETCH_STATIC) {
 			fetch_type = "static";
 		}
+#endif
 	}
 
 	if (op.lineno == last_lineno) {
@@ -282,7 +375,11 @@ void vld_dump_op (int nr, zend_op op)
 		last_lineno = op.lineno;
 	}
 
-	zend_printf("%5d  %-20s %-6s ", nr, opcodes[op.opcode].name, fetch_type);
+	if (op.opcode >= NUM_KNOWN_OPCODES) {
+		zend_printf("%5d  <%03d>%-23s %-14s ", nr, op.opcode, "", fetch_type);
+	} else {
+		zend_printf("%5d  %-28s %-14s ", nr, opcodes[op.opcode].name, fetch_type);
+	}
 
 	if (flags & EXT_VAL) {
 		zend_printf("%3ld  ", op.extended_value);
@@ -319,7 +416,7 @@ void vld_dump_oparray (zend_op_array *opa)
 	zend_printf ("function name:  %s\n", opa->function_name);
 	zend_printf ("number of ops:  %d\n", opa->last);
 
-    zend_printf("line     #  op                   fetch  ext  operands\n");
+    zend_printf("line     #  op                           fetch          ext  operands\n");
 	zend_printf("-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
 		vld_dump_op (i, opa->opcodes[i]);
