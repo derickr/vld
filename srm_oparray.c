@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.33 2004-09-09 11:58:29 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.34 2004-09-09 12:58:02 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -96,7 +96,7 @@ static const op_usage opcodes[] = {
 	/*  65 */	{ "SEND_VAL", OP1_USED },
 	/*  66 */	{ "SEND_VAR", OP1_USED },
 	/*  67 */	{ "SEND_REF", ALL_USED },
-	/*  68 */	{ "NEW", RES_USED | OP1_USED },
+	/*  68 */	{ "NEW", SPECIAL },
 	/*  69 */	{ "JMP_NO_CTOR", SPECIAL },
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
@@ -139,7 +139,7 @@ static const op_usage opcodes[] = {
 	/*  107 */	{ "ZEND_CATCH", ALL_USED },
 	/*  108 */	{ "ZEND_THROW", ALL_USED },
 	
-	/*  109 */	{ "ZEND_FETCH_CLASS", ALL_USED },
+	/*  109 */	{ "ZEND_FETCH_CLASS", SPECIAL },
 	
 	/*  110 */	{ "ZEND_CLONE", ALL_USED },
 	
@@ -291,6 +291,9 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
 			break;
+		case VLD_IS_CLASS:
+			fprintf (stderr, ":%d", node.u.var / sizeof(temp_variable));
+			break;
 #else
 		case IS_TMP_VAR: /* 2 */
 			fprintf (stderr, "~%d", node.u.var);
@@ -300,6 +303,9 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 			break;
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", node.u.opline_num);
+			break;
+		case VLD_IS_CLASS:
+			fprintf (stderr, ":%d", node.u.var);
 			break;
 #endif
 		default:
@@ -349,6 +355,20 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 			}
 			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
 			op->op2.op_type = VLD_IS_OPLINE;
+			break;
+
+#ifdef ZEND_ENGINE_2
+		case ZEND_FETCH_CLASS:
+			flags = RES_USED|OP2_USED;
+			op->result.op_type = VLD_IS_CLASS;
+			break;
+#endif
+
+		case ZEND_NEW:
+			flags = RES_USED|OP1_USED;
+#ifdef ZEND_ENGINE_2
+			op->op1.op_type = VLD_IS_CLASS;
+#endif
 			break;
 	}
 
