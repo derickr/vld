@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.24 2003-11-04 14:04:56 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.25 2003-12-16 19:42:28 derick Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -425,7 +425,7 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 
 void vld_dump_oparray (zend_op_array *opa)
 {
-	int i;
+	unsigned int i;
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
 	fprintf (stderr, "filename:       %s\n", opa->filename);
