@@ -1,3 +1,7 @@
+Tue Nov 4 15:04:56 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c:
+- Fixed jump line display
+
 Mon Oct 20 12:08:01 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/php_vld.h
 /vle/srm_oparray.h
