@@ -1,3 +1,9 @@
+Thu Nov 21 16:35:01 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
+>
+/vle/srm_oparray.c
+/vle/vld.c:
+Dump class methods info only if it contains some user functions.
+
 Wed Nov 20 23:27:52 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
 >
 /vle/srm_oparray.c
