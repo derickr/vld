@@ -190,6 +190,7 @@ static const op_usage opcodes[] = {
 	/*  144 */	{ "ZEND_ADD_INTERFACE", ALL_USED },
 	/*  145 */	{ "ZEND_VERIFY_INSTANCEOF", ALL_USED },
 	/*  146 */	{ "ZEND_VERIFY_ABSTRACT_CLASS", ALL_USED },
+	/*  147 */	{ "ZEND_ASSIGN_DIM", ALL_USED },
 #endif
 };
 
