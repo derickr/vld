@@ -1,3 +1,7 @@
+Wed Mar 02 16:08:53 CET 2005 Derick Rethans <derick@derickrethans.nl>
+package2.xml:
+- Added package2 xml
+
 Sat Jan 29 23:26:51 CET 2005 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - Now commit correct check for FE_RESET jump
