@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.23 2003-10-20 10:07:27 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.24 2003-11-04 14:04:56 derick Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -259,7 +259,7 @@ void vld_dump_zval (zval val)
 	}
 }
 
-int vld_dump_znode (znode node)
+int vld_dump_znode (znode node, zend_uint base_address)
 {
 	switch (node.op_type) {
 		case IS_CONST: /* 1 */
@@ -272,6 +272,9 @@ int vld_dump_znode (znode node)
 		case IS_VAR: /* 4 */
 			fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
+		case VLD_IS_OPLINE:
+			fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
+			break;
 #else
 		case IS_TMP_VAR: /* 2 */
 			fprintf (stderr, "~%d", node.u.var);
@@ -279,10 +282,10 @@ int vld_dump_znode (znode node)
 		case IS_VAR: /* 4 */
 			fprintf (stderr, "$%d", node.u.var);
 			break;
-#endif
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", node.u.opline_num);
 			break;
+#endif
 		default:
 			return 0;
 	}
@@ -329,7 +332,7 @@ static zend_uchar vld_get_special_flags(zend_op *op)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op (int nr, zend_op op)
+void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
@@ -397,7 +400,7 @@ void vld_dump_op (int nr, zend_op op)
 	}
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
-		if (vld_dump_znode (op.result)) {
+		if (vld_dump_znode (op.result, base_address)) {
 			print_sep = 1;
 		}
 	}
@@ -406,7 +409,7 @@ void vld_dump_op (int nr, zend_op op)
 		if (flags & OP1_OPLINE) {
 			op.op1.op_type = VLD_IS_OPLINE;
 		}
-		if (vld_dump_znode (op.op1)) {
+		if (vld_dump_znode (op.op1, base_address)) {
 			print_sep = 1;
 		}
 	}
@@ -415,7 +418,7 @@ void vld_dump_op (int nr, zend_op op)
 		if (flags & OP2_OPLINE) {
 			op.op2.op_type = VLD_IS_OPLINE;
 		}
-		vld_dump_znode (op.op2);
+		vld_dump_znode (op.op2, base_address);
 	}
 	fprintf (stderr, "\n");
 }
@@ -423,6 +426,7 @@ void vld_dump_op (int nr, zend_op op)
 void vld_dump_oparray (zend_op_array *opa)
 {
 	int i;
+	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
 	fprintf (stderr, "filename:       %s\n", opa->filename);
 	fprintf (stderr, "function name:  %s\n", opa->function_name);
@@ -431,7 +435,7 @@ void vld_dump_oparray (zend_op_array *opa)
     fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
-		vld_dump_op (i, opa->opcodes[i]);
+		vld_dump_op (i, opa->opcodes[i], base_address);
 	}
 	fprintf(stderr, "\n");
 }
