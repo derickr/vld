@@ -57,10 +57,10 @@ static const op_usage opcodes[] = {
 	/*  31 */	{ "ASSIGN_BW_OR", ALL_USED },
 	/*  32 */	{ "ASSIGN_BW_AND", ALL_USED },
 	/*  33 */	{ "ASSIGN_BW_XOR", ALL_USED },
-	/*  34 */	{ "PRE_INC", ALL_USED },
-	/*  35 */	{ "PRE_DEC", ALL_USED },
-	/*  36 */	{ "POST_INC", ALL_USED },
-	/*  37 */	{ "POST_DEC", ALL_USED },
+	/*  34 */	{ "PRE_INC", OP1_USED | RES_USED },
+	/*  35 */	{ "PRE_DEC", OP1_USED | RES_USED },
+	/*  36 */	{ "POST_INC", OP1_USED | RES_USED },
+	/*  37 */	{ "POST_DEC", OP1_USED | RES_USED },
 	/*  38 */	{ "ASSIGN", ALL_USED },
 	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
@@ -68,7 +68,7 @@ static const op_usage opcodes[] = {
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
 	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  44 */	{ "JMPNZ", ALL_USED },
-	/*  45 */	{ "JMPZNZ", ALL_USED },
+	/*  45 */	{ "JMPZNZ", SPECIAL },
 	/*  46 */	{ "JMPZ_EX", ALL_USED | OP2_OPLINE },
 	/*  47 */	{ "JMPNZ_EX", ALL_USED },
 	/*  48 */	{ "CASE", ALL_USED },
@@ -239,6 +239,14 @@ static zend_uchar vld_get_special_flags(zend_op *op)
 			if (op->op1.op_type != IS_UNUSED) {
 				flags |= OP1_USED;
 			}
+			break;
+
+		case ZEND_JMPZNZ:
+			flags = ALL_USED;
+			op->result = op->op1;
+			op->op1.op_type = VLD_IS_OPLINE;
+			op->op1.u.opline_num = op->extended_value;
+			op->op2.op_type = VLD_IS_OPLINE;
 			break;
 	}
 
