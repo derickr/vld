@@ -1,3 +1,8 @@
+Tue Jan 22 00:15:16 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c
+/vle/vle.c:
+- Some function dumping stuff
+
 Tue Jan 22 00:01:41 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c
 /vle/srm_oparray.h
