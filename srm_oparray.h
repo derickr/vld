@@ -16,7 +16,7 @@
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.h,v 1.13 2004-11-04 21:51:36 helly Exp $ */
+/* $Id: srm_oparray.h,v 1.14 2005-01-29 20:41:35 helly Exp $ */
 
 #ifndef VLD_OPARRAY_H
 #define VLD_OPARRAY_H
@@ -32,18 +32,21 @@
 
 #define OP1_OPLINE 1<<3
 #define OP2_OPLINE 1<<4
-#define OP_FETCH   1<<5
-
-#define EXT_VAL    1<<6
+#define OP1_OPNUM  1<<5
+#define OP2_OPNUM  1<<6
+#define OP_FETCH   1<<7
+#define EXT_VAL    1<<8
+#define NOP2_OPNUM 1<<9
 
 #define SPECIAL    0xff
 
-#define VLD_IS_OPLINE 1<<15
-#define VLD_IS_CLASS  1<<16
+#define VLD_IS_OPLINE 1<<13
+#define VLD_IS_OPNUM  1<<14
+#define VLD_IS_CLASS  1<<15
 
 typedef struct _op_usage {
 	char *name;
-	zend_uchar flags;
+	zend_uint flags;
 } op_usage;
 
 void vld_dump_oparray (zend_op_array *opa);

@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.37 2004-11-04 21:51:36 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.38 2005-01-29 20:41:35 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -105,8 +105,8 @@ static const op_usage opcodes[] = {
 	/*  74 */	{ "UNSET_VAR", ALL_USED },
 	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
 	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
-	/*  77 */	{ "FE_RESET", ALL_USED },
-	/*  78 */	{ "FE_FETCH", ALL_USED },
+	/*  77 */	{ "FE_RESET", ALL_USED | NOP2_OPNUM },
+	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
 	/*  79 */	{ "EXIT", ALL_USED },
 	/*  80 */	{ "FETCH_R", RES_USED | OP1_USED | OP_FETCH },
 	/*  81 */	{ "FETCH_DIM_R", ALL_USED },
@@ -292,6 +292,9 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 			fprintf (stderr, "!%d", node.u.var / sizeof(temp_variable));
 			break;
 #endif
+		case VLD_IS_OPNUM:
+			fprintf (stderr, "->%d", node.u.opline_num);
+			break;
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
 			break;
@@ -304,7 +307,8 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 			break;
 		case IS_VAR: /* 4 */
 			fprintf (stderr, "$%d", node.u.var);
-			break;
+			break;           
+		case VLD_IS_OPNUM:
 		case VLD_IS_OPLINE:
 			fprintf (stderr, "->%d", node.u.opline_num);
 			break;
@@ -318,9 +322,9 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 	return 1;
 }
 
-static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
+static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 {
-	zend_uchar flags = 0;
+	zend_uint flags = 0;
 
 	switch (op->opcode) {
 		case ZEND_ASSIGN_REF:
@@ -347,8 +351,7 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 		case ZEND_JMPZNZ:
 			flags = OP1_USED | OP2_USED;
 			op->result = op->op1;
-			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
-			op->op2.op_type = VLD_IS_OPLINE;
+			op->op2.op_type = VLD_IS_OPNUM;
 			break;
 
 		case ZEND_JMP_NO_CTOR:
@@ -356,10 +359,7 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 			if (op->op1.op_type != IS_UNUSED) {
 				flags |= OP1_USED;
 			}
-#ifdef ZEND_ENGINE_2
-			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
-#endif
-			op->op2.op_type = VLD_IS_OPLINE;
+			op->op2.op_type = VLD_IS_OPNUM;
 			break;
 
 #ifdef ZEND_ENGINE_2
@@ -382,12 +382,13 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op (int nr, zend_op op, zend_uint base_address)
+void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
 	char *fetch_type = "";
-	zend_uchar flags;
+	zend_uint flags;
+	zend_op op = *op_ptr;
 	
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		flags = ALL_USED;
@@ -400,6 +401,19 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 
 	if (flags == SPECIAL) {
 		flags = vld_get_special_flags(&op, base_address);
+	} else {
+		if (flags & OP1_OPLINE) {
+			op.op1.op_type = VLD_IS_OPLINE;
+		}
+		if (flags & OP2_OPLINE) {
+			op.op2.op_type = VLD_IS_OPLINE;
+		}
+	}
+	if (flags & OP1_OPNUM) {
+		op.op1.op_type = VLD_IS_OPNUM;
+	}
+	if (flags & OP2_OPNUM) {
+		op.op2.op_type = VLD_IS_OPNUM;
 	}
 
 	if (flags & OP_FETCH) {
@@ -455,16 +469,15 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 		fprintf(stderr, "    ");
 	}
 	if (flags & OP1_USED) {
-		if (flags & OP1_OPLINE) {
-			op.op1.op_type = VLD_IS_OPLINE;
-		}
 		vld_dump_znode (&print_sep, op.op1, base_address);
 	}
 	if (flags & OP2_USED) {
-		if (flags & OP2_OPLINE) {
-			op.op2.op_type = VLD_IS_OPLINE;
-		}
 		vld_dump_znode (&print_sep, op.op2, base_address);
+	}
+	if (flags & NOP2_OPNUM) {
+		zend_op next_op = op_ptr[1];
+		next_op.op2.op_type = VLD_IS_OPNUM;
+		vld_dump_znode (&print_sep, next_op.op2, base_address);
 	}
 	fprintf (stderr, "\n");
 }
@@ -481,7 +494,7 @@ void vld_dump_oparray (zend_op_array *opa)
     fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
-		vld_dump_op (i, opa->opcodes[i], base_address);
+		vld_dump_op (i, opa->opcodes+i, base_address);
 	}
 	fprintf(stderr, "\n");
 }
