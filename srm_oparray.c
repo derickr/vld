@@ -264,18 +264,26 @@ int vld_dump_znode (znode node)
 		case IS_CONST: /* 1 */
 			vld_dump_zval (node.u.constant);
 			break;
+#ifdef ZEND_ENGINE_2
+		case IS_TMP_VAR: /* 2 */
+			zend_printf ("~%d", node.u.var / sizeof(temp_variable));
+			break;
+		case IS_VAR: /* 4 */
+			zend_printf ("$%d", node.u.var / sizeof(temp_variable));
+			break;
+#else
 		case IS_TMP_VAR: /* 2 */
 			zend_printf ("~%d", node.u.var);
 			break;
 		case IS_VAR: /* 4 */
 			zend_printf ("$%d", node.u.var);
 			break;
-		case IS_UNUSED:
-			zend_printf ("N/A", node.u.var);
-			return 0;
+#endif
 		case VLD_IS_OPLINE:
 			zend_printf ("->%d", node.u.opline_num);
 			break;
+		default:
+			return 0;
 	}
 	return 1;
 }
@@ -387,22 +395,25 @@ void vld_dump_op (int nr, zend_op op)
 		zend_printf("     ");
 	}
 
-	if ((flags & RES_USED) &&
-		!(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
-		vld_dump_znode (op.result);
-		print_sep = 1;
+	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
+		if (vld_dump_znode (op.result)) {
+			print_sep = 1;
+		}
 	}
 	if (flags & OP1_USED) {
 		if (print_sep) zend_printf (", ");
-		if (flags & OP1_OPLINE)
+		if (flags & OP1_OPLINE) {
 			op.op1.op_type = VLD_IS_OPLINE;
-		vld_dump_znode (op.op1);
-		print_sep = 1;
+		}
+		if (vld_dump_znode (op.op1)) {
+			print_sep = 1;
+		}
 	}
 	if (flags & OP2_USED) {
 		if (print_sep) zend_printf (", ");
-		if (flags & OP2_OPLINE)
+		if (flags & OP2_OPLINE) {
 			op.op2.op_type = VLD_IS_OPLINE;
+		}
 		vld_dump_znode (op.op2);
 	}
 	zend_printf ("\n");
