@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.39 2005-01-29 22:21:17 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.40 2005-01-29 22:26:51 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -329,7 +329,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 	switch (op->opcode) {
 		case ZEND_FE_RESET:
 			flags = ALL_USED;
-#if (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION >= 11)
+#if (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 11)
 			flags |= NOP2_OPNUM;
 #endif
 			break;
