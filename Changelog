@@ -1,3 +1,7 @@
+Thu Sep 18 17:56:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/vld.c:
+- Make only user defined classes show up (Patch by Marcus Börger)
+
 Mon Apr 7 22:46:26 CEST 2003 Andrei Zmievski <andrei@gravitonic.com>
 /vle/vld.c:
 Turn off VLD by default.
