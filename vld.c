@@ -140,7 +140,7 @@ static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 		fprintf(stderr, "End of function %s.\n\n", fe->function_name);
 	}
 
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 #ifdef ZEND_ENGINE_2
@@ -157,17 +157,19 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 #else
 	ce = class_entry;
 #endif
-	
-	zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
-	if (have_fe) {
-		fprintf(stderr, "Class %s:\n", ce->name);
-		zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
-		fprintf(stderr, "End of class %s.\n\n", ce->name);
-	} else {
-		fprintf(stderr, "Class %s: [no user functions]\n", ce->name);
+
+	if (ce->type != ZEND_INTERNAL_CLASS) {	
+		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
+		if (have_fe) {
+			fprintf(stderr, "Class %s:\n", ce->name);
+			zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
+			fprintf(stderr, "End of class %s.\n\n", ce->name);
+		} else {
+			fprintf(stderr, "Class %s: [no user functions]\n", ce->name);
+		}
 	}
 
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 /* {{{ zend_op_array vld_compile_file (file_handle, type)
