@@ -1,3 +1,10 @@
+Fri Nov 22 17:40:44 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
+>
+/vle/srm_oparray.c:
+* urlencode strings for now
+* update a couple more opcode flags
+* if result of an op is unused don't display it -> looks much cleaner
+
 Thu Nov 21 21:28:57 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
 >
 /vle/srm_oparray.c
