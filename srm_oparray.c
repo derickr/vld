@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.35 2004-09-09 12:59:50 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.36 2004-09-09 13:15:56 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -352,7 +352,9 @@ static zend_uchar vld_get_special_flags(zend_op *op, zend_uint base_address)
 			if (op->op1.op_type != IS_UNUSED) {
 				flags |= OP1_USED;
 			}
+#ifdef ZEND_ENGINE_2
 			op->op2.u.opline_num = (zend_uint)((zend_op*)base_address + op->op2.u.opline_num);
+#endif
 			op->op2.op_type = VLD_IS_OPLINE;
 			break;
 
