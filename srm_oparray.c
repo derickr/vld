@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.29 2004-08-06 08:29:26 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.30 2004-08-29 22:23:05 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -72,7 +72,7 @@ static const op_usage opcodes[] = {
 	/*  41 */	{ "PRINT", RES_USED | OP1_USED },
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
 	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
-	/*  44 */	{ "JMPNZ", ALL_USED },
+	/*  44 */	{ "JMPNZ", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  45 */	{ "JMPZNZ", SPECIAL },
 	/*  46 */	{ "JMPZ_EX", ALL_USED | OP2_OPLINE },
 	/*  47 */	{ "JMPNZ_EX", ALL_USED | OP2_OPLINE },
