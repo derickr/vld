@@ -195,12 +195,12 @@ static const op_usage opcodes[] = {
 
 inline void vld_dump_zval_null(zvalue_value value)
 {
-	zend_printf ("null");
+	fprintf (stderr, "null");
 }
 
 inline void vld_dump_zval_long(zvalue_value value)
 {
-	zend_printf ("%ld", value.lval);
+	fprintf (stderr, "%ld", value.lval);
 }
 
 inline void vld_dump_zval_double(zvalue_value value)
@@ -213,7 +213,7 @@ inline void vld_dump_zval_string(zvalue_value value)
 	int new_len;
 
 	new_str = php_url_encode(value.str.val, value.str.len, &new_len);
-	zend_printf ("'%s'", new_str);
+	fprintf (stderr, "'%s'", new_str);
 	efree(new_str);
 }
 
@@ -266,21 +266,21 @@ int vld_dump_znode (znode node)
 			break;
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
-			zend_printf ("~%d", node.u.var / sizeof(temp_variable));
+			fprintf (stderr, "~%d", node.u.var / sizeof(temp_variable));
 			break;
 		case IS_VAR: /* 4 */
-			zend_printf ("$%d", node.u.var / sizeof(temp_variable));
+			fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
-			zend_printf ("~%d", node.u.var);
+			fprintf (stderr, "~%d", node.u.var);
 			break;
 		case IS_VAR: /* 4 */
-			zend_printf ("$%d", node.u.var);
+			fprintf (stderr, "$%d", node.u.var);
 			break;
 #endif
 		case VLD_IS_OPLINE:
-			zend_printf ("->%d", node.u.opline_num);
+			fprintf (stderr, "->%d", node.u.opline_num);
 			break;
 		default:
 			return 0;
@@ -377,22 +377,22 @@ void vld_dump_op (int nr, zend_op op)
 	}
 
 	if (op.lineno == last_lineno) {
-		zend_printf("     ");
+		fprintf(stderr, "     ");
 	} else {
-		zend_printf("%4d ", op.lineno);
+		fprintf(stderr, "%4d ", op.lineno);
 		last_lineno = op.lineno;
 	}
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
-		zend_printf("%5d  <%03d>%-23s %-14s ", nr, op.opcode, "", fetch_type);
+		fprintf(stderr, "%5d  <%03d>%-23s %-14s ", nr, op.opcode, "", fetch_type);
 	} else {
-		zend_printf("%5d  %-28s %-14s ", nr, opcodes[op.opcode].name, fetch_type);
+		fprintf(stderr, "%5d  %-28s %-14s ", nr, opcodes[op.opcode].name, fetch_type);
 	}
 
 	if (flags & EXT_VAL) {
-		zend_printf("%3ld  ", op.extended_value);
+		fprintf(stderr, "%3ld  ", op.extended_value);
 	} else {
-		zend_printf("     ");
+		fprintf(stderr, "     ");
 	}
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
@@ -401,7 +401,7 @@ void vld_dump_op (int nr, zend_op op)
 		}
 	}
 	if (flags & OP1_USED) {
-		if (print_sep) zend_printf (", ");
+		if (print_sep) fprintf (stderr, ", ");
 		if (flags & OP1_OPLINE) {
 			op.op1.op_type = VLD_IS_OPLINE;
 		}
@@ -410,29 +410,29 @@ void vld_dump_op (int nr, zend_op op)
 		}
 	}
 	if (flags & OP2_USED) {
-		if (print_sep) zend_printf (", ");
+		if (print_sep) fprintf (stderr, ", ");
 		if (flags & OP2_OPLINE) {
 			op.op2.op_type = VLD_IS_OPLINE;
 		}
 		vld_dump_znode (op.op2);
 	}
-	zend_printf ("\n");
+	fprintf (stderr, "\n");
 }
 
 void vld_dump_oparray (zend_op_array *opa)
 {
 	int i;
 
-	zend_printf ("filename:       %s\n", opa->filename);
-	zend_printf ("function name:  %s\n", opa->function_name);
-	zend_printf ("number of ops:  %d\n", opa->last);
+	fprintf (stderr, "filename:       %s\n", opa->filename);
+	fprintf (stderr, "function name:  %s\n", opa->function_name);
+	fprintf (stderr, "number of ops:  %d\n", opa->last);
 
-    zend_printf("line     #  op                           fetch          ext  operands\n");
-	zend_printf("-------------------------------------------------------------------------------\n");
+    fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
+	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
 		vld_dump_op (i, opa->opcodes[i]);
 	}
-	zend_printf("\n");
+	fprintf(stderr, "\n");
 }
 
 void opt_set_nop (zend_op_array *opa, int nr)

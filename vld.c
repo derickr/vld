@@ -135,9 +135,9 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		printf("Function %s:\n", fe->function_name);
+		fprintf(stderr, "Function %s:\n", fe->function_name);
 		vld_dump_oparray(fe);
-		printf("End of function %s.\n\n", fe->function_name);
+		fprintf(stderr, "End of function %s.\n\n", fe->function_name);
 	}
 
 	return 0;
@@ -160,11 +160,11 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	
 	zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 	if (have_fe) {
-		printf("Class %s:\n", ce->name);
+		fprintf(stderr, "Class %s:\n", ce->name);
 		zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
-		printf("End of class %s.\n\n", ce->name);
+		fprintf(stderr, "End of class %s.\n\n", ce->name);
 	} else {
-		printf("Class %s: [no user functions]\n", ce->name);
+		fprintf(stderr, "Class %s: [no user functions]\n", ce->name);
 	}
 
 	return 0;
