@@ -1,3 +1,9 @@
+Sat Mar 15 14:07:55 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c
+/vle/vld.c:
+- Added an ini setting that turns off opcode dumping (Patch by 
+  Marcus Börger <marcus.boerger@t-online.de>)
+
 Sun Feb 23 20:11:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c:
 - Fixed disassembling of JMPZNZ. (patch by Stefan Esser <sesser@php.net>)
