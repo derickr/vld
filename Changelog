@@ -1,3 +1,9 @@
+Tue Jan 22 00:01:41 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c
+/vle/srm_oparray.h
+/vle/vle.c:
+- Some optimizer work
+
 Wed Jan 2 13:53:28 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.h
 /vle/vle.c:
