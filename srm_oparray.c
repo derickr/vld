@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.38 2005-01-29 20:41:35 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.39 2005-01-29 22:21:17 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -105,7 +105,7 @@ static const op_usage opcodes[] = {
 	/*  74 */	{ "UNSET_VAR", ALL_USED },
 	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
 	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
-	/*  77 */	{ "FE_RESET", ALL_USED | NOP2_OPNUM },
+	/*  77 */	{ "FE_RESET", SPECIAL },
 	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
 	/*  79 */	{ "EXIT", ALL_USED },
 	/*  80 */	{ "FETCH_R", RES_USED | OP1_USED | OP_FETCH },
@@ -327,6 +327,13 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 	zend_uint flags = 0;
 
 	switch (op->opcode) {
+		case ZEND_FE_RESET:
+			flags = ALL_USED;
+#if (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION >= 11)
+			flags |= NOP2_OPNUM;
+#endif
+			break;
+
 		case ZEND_ASSIGN_REF:
 			flags = OP1_USED | OP2_USED;
 			if (op->result.op_type != IS_UNUSED) {
