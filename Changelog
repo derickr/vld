@@ -1,3 +1,7 @@
+Sun Jun 06 14:17:24 CEST 2004 Marcus Börger <helly@php.net>
+vld.c:
+- Fix memleak
+
 Sat Apr 17 16:27:48 CEST 2004 Marcus Börger <helly@php.net>
 vld.c:
 - Added INI option vld.execute which defaults to 1. Setting it to 0 
