@@ -1,9 +1,7 @@
-Tue Nov 26 22:07:24 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Tue Nov 26 22:07:24 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c:
 
-Fri Nov 22 23:26:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Fri Nov 22 23:26:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c:
 
 Fri Nov 22 22:55:11 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
@@ -12,54 +10,46 @@ Fri Nov 22 22:55:11 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/vld.c:
 - s/srm/vld/gi
 
-Fri Nov 22 19:10:30 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Fri Nov 22 19:10:30 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/srm_oparray.h:
-Print extended value for function calls (# of args in that case).
+- Print extended value for function calls (# of args in that case).
 
-Fri Nov 22 17:40:44 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Fri Nov 22 17:40:44 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c:
-* urlencode strings for now
-* update a couple more opcode flags
-* if result of an op is unused don't display it -> looks much cleaner
+- urlencode strings for now
+- update a couple more opcode flags
+- if result of an op is unused don't display it -> looks much cleaner
 
-Thu Nov 21 21:28:57 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Thu Nov 21 21:28:57 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/vld.c:
-Don't show empty opcodes at the end.
+- Don't show empty opcodes at the end.
 
-Thu Nov 21 17:41:07 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Thu Nov 21 17:41:07 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c:
 
-Thu Nov 21 16:35:01 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Thu Nov 21 16:35:01 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/vld.c:
-Dump class methods info only if it contains some user functions.
+- Dump class methods info only if it contains some user functions.
 
-Wed Nov 20 23:27:52 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Wed Nov 20 23:27:52 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/srm_oparray.h:
-More work on opcodes.
+- More work on opcodes.
 
-Wed Nov 20 21:23:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Wed Nov 20 21:23:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/srm_oparray.h
 /vle/vld.c:
-Clean up and put in the framework for better opcode display.
+- Clean up and put in the framework for better opcode display.
 
-Wed Nov 13 21:49:56 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
->
+Wed Nov 13 21:49:56 CET 2002 Andrei Zmievski <andrei@gravitonic.com>
 /vle/srm_oparray.c
 /vle/srm_oparray.h
 /vle/vld.c:
-Fix compilation warnings.
+- Fix compilation warnings.
 
 Mon Oct 28 16:41:40 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/srm_oparray.c
@@ -85,8 +75,7 @@ Fri Feb 1 09:54:32 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/vle.c:
 - Fixed hash apply functions
 
-Fri Feb 1 09:48:38 CET 2002 Varun Shoor <plot@ript.net 
->
+Fri Feb 1 09:48:38 CET 2002 Varun Shoor <plot@ript.net>
 /vle/vle.c:
 - Added Hashes
 - Made Class Dump Stuff
