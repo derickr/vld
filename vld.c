@@ -145,15 +145,23 @@ static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 
 static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 {
+#ifndef ZEND_ENGINE_2
 	zend_bool have_fe = 0;
+
 	zend_hash_apply_with_argument(&class_entry->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 	if (have_fe) {
+#else
+	if (class_entry->type == ZEND_USER_CLASS) {
+#endif
 		printf("Class %s:\n", class_entry->name);
 		zend_hash_apply(&class_entry->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
 		printf("End of class %s.\n\n", class_entry->name);
-	} else {
+	}
+#ifndef ZEND_ENGINE_2
+	else {
 		printf("Class %s: [no user functions]\n", class_entry->name);
 	}
+#endif
 
 	return 0;
 }
