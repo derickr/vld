@@ -128,7 +128,6 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		srm_concat_strings (&op_array);
 		srm_dump_oparray (op_array);
 	}
 

@@ -20,114 +20,114 @@
 #include "php.h"
 #include "srm_oparray.h"
 
-static const char* opcodes[] = {
-	"NOP", /*  0 */
-	"ADD", /*  1 */
-	"SUB", /*  2 */
-	"MUL", /*  3 */
-	"DIV", /*  4 */
-	"MOD", /*  5 */
-	"SL", /*  6 */
-	"SR", /*  7 */
-	"CONCAT", /*  8 */
-	"BW_OR", /*  9 */
-	"BW_AND", /*  10 */
-	"BW_XOR", /*  11 */
-	"BW_NOT", /*  12 */
-	"BOOL_NOT", /*  13 */
-	"BOOL_XOR", /*  14 */
-	"IS_IDENTICAL", /*  15 */
-	"IS_NOT_IDENTICAL", /*  16 */
-	"IS_EQUAL", /*  17 */
-	"IS_NOT_EQUAL", /*  18 */
-	"IS_SMALLER", /*  19 */
-	"IS_SMALLER_OR_EQUAL", /*  20 */
-	"CAST", /*  21 */
-	"QM_ASSIGN", /*  22 */
-	"ASSIGN_ADD", /*  23 */
-	"ASSIGN_SUB", /*  24 */
-	"ASSIGN_MUL", /*  25 */
-	"ASSIGN_DIV", /*  26 */
-	"ASSIGN_MOD", /*  27 */
-	"ASSIGN_SL", /*  28 */
-	"ASSIGN_SR", /*  29 */
-	"ASSIGN_CONCAT", /*  30 */
-	"ASSIGN_BW_OR", /*  31 */
-	"ASSIGN_BW_AND", /*  32 */
-	"ASSIGN_BW_XOR", /*  33 */
-	"PRE_INC", /*  34 */
-	"PRE_DEC", /*  35 */
-	"POST_INC", /*  36 */
-	"POST_DEC", /*  37 */
-	"ASSIGN", /*  38 */
-	"ASSIGN_REF", /*  39 */
-	"ECHO", /*  40 */
-	"PRINT", /*  41 */
-	"JMP", /*  42 */
-	"JMPZ", /*  43 */
-	"JMPNZ", /*  44 */
-	"JMPZNZ", /*  45 */
-	"JMPZ_EX", /*  46 */
-	"JMPNZ_EX", /*  47 */
-	"CASE", /*  48 */
-	"SWITCH_FREE", /*  49 */
-	"BRK", /*  50 */
-	"CONT", /*  51 */
-	"BOOL", /*  52 */
-	"INIT_STRING", /*  53 */
-	"ADD_CHAR", /*  54 */
-	"ADD_STRING", /*  55 */
-	"ADD_VAR", /*  56 */
-	"BEGIN_SILENCE", /*  57 */
-	"END_SILENCE", /*  58 */
-	"INIT_FCALL_BY_NAME", /*  59 */
-	"DO_FCALL", /*  60 */
-	"DO_FCALL_BY_NAME", /*  61 */
-	"RETURN", /*  62 */
-	"RECV", /*  63 */
-	"RECV_INIT", /*  64 */
-	"SEND_VAL", /*  65 */
-	"SEND_VAR", /*  66 */
-	"SEND_REF", /*  67 */
-	"NEW", /*  68 */
-	"JMP_NO_CTOR", /*  69 */
-	"FREE", /*  70 */
-	"INIT_ARRAY", /*  71 */
-	"ADD_ARRAY_ELEMENT", /*  72 */
-	"INCLUDE_OR_EVAL", /*  73 */
-	"UNSET_VAR", /*  74 */
-	"UNSET_DIM_OBJ", /*  75 */
-	"ISSET_ISEMPTY", /*  76 */
-	"FE_RESET", /*  77 */
-	"FE_FETCH", /*  78 */
-	"EXIT", /*  79 */
-	"FETCH_R", /*  80 */
-	"FETCH_DIM_R", /*  81 */
-	"FETCH_OBJ_R", /*  82 */
-	"FETCH_W", /*  83 */
-	"FETCH_DIM_W", /*  84 */
-	"FETCH_OBJ_W", /*  85 */
-	"FETCH_RW", /*  86 */
-	"FETCH_DIM_RW", /*  87 */
-	"FETCH_OBJ_RW", /*  88 */
-	"FETCH_IS", /*  89 */
-	"FETCH_DIM_IS", /*  90 */
-	"FETCH_OBJ_IS", /*  91 */
-	"FETCH_FUNC_ARG", /*  92 */
-	"FETCH_DIM_FUNC_ARG", /*  93 */
-	"FETCH_OBJ_FUNC_ARG", /*  94 */
-	"FETCH_UNSET", /*  95 */
-	"FETCH_DIM_UNSET", /*  96 */
-	"FETCH_OBJ_UNSET", /*  97 */
-	"FETCH_DIM_TMP_VAR", /*  98 */
-	"FETCH_CONSTANT", /*  99 */
-	"DECLARE_FUNCTION_OR_CLASS", /*  100 */
-	"EXT_STMT", /*  101 */
-	"EXT_FCALL_BEGIN", /*  102 */
-	"EXT_FCALL_END", /*  103 */
-	"EXT_NOP", /*  104 */
-	"TICKS", /*  105 */
-	"SEND_VAR_NO_REF", /*  106 */
+static const op_usage opcodes[] = {
+	/*  0 */	{ "NOP", NONE_USED },
+	/*  1 */	{ "ADD", ALL_USED },
+	/*  2 */	{ "SUB", ALL_USED },
+	/*  3 */	{ "MUL", ALL_USED },
+	/*  4 */	{ "DIV", ALL_USED },
+	/*  5 */	{ "MOD", ALL_USED },
+	/*  6 */	{ "SL", ALL_USED },
+	/*  7 */	{ "SR", ALL_USED },
+	/*  8 */	{ "CONCAT", ALL_USED },
+	/*  9 */	{ "BW_OR", ALL_USED },
+	/*  10 */	{ "BW_AND", ALL_USED },
+	/*  11 */	{ "BW_XOR", ALL_USED },
+	/*  12 */	{ "BW_NOT", ALL_USED },
+	/*  13 */	{ "BOOL_NOT", ALL_USED },
+	/*  14 */	{ "BOOL_XOR", ALL_USED },
+	/*  15 */	{ "IS_IDENTICAL", ALL_USED },
+	/*  16 */	{ "IS_NOT_IDENTICAL", ALL_USED },
+	/*  17 */	{ "IS_EQUAL", ALL_USED },
+	/*  18 */	{ "IS_NOT_EQUAL", ALL_USED },
+	/*  19 */	{ "IS_SMALLER", ALL_USED },
+	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
+	/*  21 */	{ "CAST", ALL_USED },
+	/*  22 */	{ "QM_ASSIGN", ALL_USED },
+	/*  23 */	{ "ASSIGN_ADD", ALL_USED },
+	/*  24 */	{ "ASSIGN_SUB", ALL_USED },
+	/*  25 */	{ "ASSIGN_MUL", ALL_USED },
+	/*  26 */	{ "ASSIGN_DIV", ALL_USED },
+	/*  27 */	{ "ASSIGN_MOD", ALL_USED },
+	/*  28 */	{ "ASSIGN_SL", ALL_USED },
+	/*  29 */	{ "ASSIGN_SR", ALL_USED },
+	/*  30 */	{ "ASSIGN_CONCAT", ALL_USED },
+	/*  31 */	{ "ASSIGN_BW_OR", ALL_USED },
+	/*  32 */	{ "ASSIGN_BW_AND", ALL_USED },
+	/*  33 */	{ "ASSIGN_BW_XOR", ALL_USED },
+	/*  34 */	{ "PRE_INC", ALL_USED },
+	/*  35 */	{ "PRE_DEC", ALL_USED },
+	/*  36 */	{ "POST_INC", ALL_USED },
+	/*  37 */	{ "POST_DEC", ALL_USED },
+	/*  38 */	{ "ASSIGN", ALL_USED },
+	/*  39 */	{ "ASSIGN_REF", ALL_USED },
+	/*  40 */	{ "ECHO", ALL_USED },
+	/*  41 */	{ "PRINT", ALL_USED },
+	/*  42 */	{ "JMP", ALL_USED },
+	/*  43 */	{ "JMPZ", ALL_USED },
+	/*  44 */	{ "JMPNZ", ALL_USED },
+	/*  45 */	{ "JMPZNZ", ALL_USED },
+	/*  46 */	{ "JMPZ_EX", ALL_USED },
+	/*  47 */	{ "JMPNZ_EX", ALL_USED },
+	/*  48 */	{ "CASE", ALL_USED },
+	/*  49 */	{ "SWITCH_FREE", ALL_USED },
+	/*  50 */	{ "BRK", ALL_USED },
+	/*  51 */	{ "CONT", ALL_USED },
+	/*  52 */	{ "BOOL", ALL_USED },
+	/*  53 */	{ "INIT_STRING", RES_USED },
+	/*  54 */	{ "ADD_CHAR", ALL_USED },
+	/*  55 */	{ "ADD_STRING", ALL_USED },
+	/*  56 */	{ "ADD_VAR", ALL_USED },
+	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
+	/*  58 */	{ "END_SILENCE", ALL_USED },
+	/*  59 */	{ "INIT_FCALL_BY_NAME", ALL_USED },
+	/*  60 */	{ "DO_FCALL", ALL_USED },
+	/*  61 */	{ "DO_FCALL_BY_NAME", ALL_USED },
+	/*  62 */	{ "RETURN", OP1_USED },
+	/*  63 */	{ "RECV", ALL_USED },
+	/*  64 */	{ "RECV_INIT", ALL_USED },
+	/*  65 */	{ "SEND_VAL", ALL_USED },
+	/*  66 */	{ "SEND_VAR", ALL_USED },
+	/*  67 */	{ "SEND_REF", ALL_USED },
+	/*  68 */	{ "NEW", ALL_USED },
+	/*  69 */	{ "JMP_NO_CTOR", ALL_USED },
+	/*  70 */	{ "FREE", ALL_USED },
+	/*  71 */	{ "INIT_ARRAY", ALL_USED },
+	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
+	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED },
+	/*  74 */	{ "UNSET_VAR", ALL_USED },
+	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
+	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
+	/*  77 */	{ "FE_RESET", ALL_USED },
+	/*  78 */	{ "FE_FETCH", ALL_USED },
+	/*  79 */	{ "EXIT", ALL_USED },
+	/*  80 */	{ "FETCH_R", ALL_USED },
+	/*  81 */	{ "FETCH_DIM_R", ALL_USED },
+	/*  82 */	{ "FETCH_OBJ_R", ALL_USED },
+	/*  83 */	{ "FETCH_W", ALL_USED },
+	/*  84 */	{ "FETCH_DIM_W", ALL_USED },
+	/*  85 */	{ "FETCH_OBJ_W", ALL_USED },
+	/*  86 */	{ "FETCH_RW", ALL_USED },
+	/*  87 */	{ "FETCH_DIM_RW", ALL_USED },
+	/*  88 */	{ "FETCH_OBJ_RW", ALL_USED },
+	/*  89 */	{ "FETCH_IS", ALL_USED },
+	/*  90 */	{ "FETCH_DIM_IS", ALL_USED },
+	/*  91 */	{ "FETCH_OBJ_IS", ALL_USED },
+	/*  92 */	{ "FETCH_FUNC_ARG", ALL_USED },
+	/*  93 */	{ "FETCH_DIM_FUNC_ARG", ALL_USED },
+	/*  94 */	{ "FETCH_OBJ_FUNC_ARG", ALL_USED },
+	/*  95 */	{ "FETCH_UNSET", ALL_USED },
+	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
+	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
+	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
+	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
+	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
+	/*  101 */	{ "EXT_STMT", ALL_USED },
+	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
+	/*  103 */	{ "EXT_FCALL_END", ALL_USED },
+	/*  104 */	{ "EXT_NOP", ALL_USED },
+	/*  105 */	{ "TICKS", ALL_USED },
+	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED },
 };
 
 inline void srm_dump_zval_null(zvalue_value value)
@@ -145,7 +145,7 @@ inline void srm_dump_zval_double(zvalue_value value)
 
 inline void srm_dump_zval_string(zvalue_value value)
 {
-	zend_printf ("%s", value.str.val);
+	zend_printf ("'%s'", value.str.val);
 }
 
 inline void srm_dump_zval_array(zvalue_value value)
@@ -193,18 +193,16 @@ void srm_dump_znode (znode node)
 {
 	switch (node.op_type) {
 		case IS_CONST: /* 1 */
-			zend_printf ("'");
 			srm_dump_zval (node.u.constant);
-			zend_printf ("'");
 			break;
 		case IS_TMP_VAR: /* 2 */
-			zend_printf ("%%%d", node.u.var);
+			zend_printf ("~%d", node.u.var);
 			break;
 		case IS_VAR: /* 4 */
 			zend_printf ("$%d", node.u.var);
 			break;
 		case IS_UNUSED: /* 4 */
-			zend_printf ("%d", node.u.opline_num);
+			zend_printf ("_");
 			break;
 	}
 
@@ -213,18 +211,27 @@ void srm_dump_znode (znode node)
 
 void srm_dump_op (int nr, zend_op op)
 {
-	zend_printf ("%5d  %-20s", nr, opcodes[op.opcode]);
-	srm_dump_znode (op.result);
-//	if (op.op1.op_type != IS_UNUSED)
-	{
-		zend_printf (", ");
+	int print_sep = 0;
+	zend_uchar used = opcodes[op.opcode].used;
+
+	if (used == SPECIAL) {
+		zend_printf("special");
+	}
+
+	zend_printf ("%5d  %-20s", nr, opcodes[op.opcode].name);
+
+	if (used & RES_USED) {
+		srm_dump_znode (op.result);
+		print_sep = 1;
+	}
+	if (used & OP1_USED) {
+		if (print_sep) zend_printf (", ");
 		srm_dump_znode (op.op1);
-		
-//		if (op.op2.op_type != IS_UNUSED)
-		{
-			zend_printf (", ");
-			srm_dump_znode (op.op2);
-		}
+		print_sep = 1;
+	}
+	if (used & OP2_USED) {
+		if (print_sep) zend_printf (", ");
+		srm_dump_znode (op.op2);
 	}
 	zend_printf ("\n");
 }
@@ -244,53 +251,5 @@ void srm_dump_oparray (zend_op_array *opa)
 
 void opt_set_nop (zend_op_array *opa, int nr)
 {
-	opa->opcodes[nr].opcode = NOP;
-}
-
-void opt_concat_string (zend_op_array *opa, int dest, int src)
-{
-	int new_len;
-	zval *zd = &(opa->opcodes[dest].op2.u.constant);
-	zval *zs = &(opa->opcodes[src].op2.u.constant);
-
-	new_len          = zd->value.str.len + zs->value.str.len;
-	zd->value.str.val = erealloc (zd->value.str.val, new_len + 1);
-	zd->value.str.len = new_len;
-	strncat (zd->value.str.val, zs->value.str.val, zs->value.str.len);
-	zd->value.str.val[new_len] = '\0';
-}
-
-void opt_concat_char (zend_op_array *opa, int dest, int src)
-{
-	zval *zd = &(opa->opcodes[dest].op2.u.constant);
-	zval *zs = &(opa->opcodes[src].op2.u.constant);
-
-	zd->value.str.val = erealloc (zd->value.str.val, zd->value.str.len + 2);
-	zd->value.str.len++;
-	zd->value.str.val[zd->value.str.len - 1] = zs->value.lval;
-	zd->value.str.val[zd->value.str.len] = '\0';
-}
-
-void srm_concat_strings (zend_op_array **opa)
-{
-	int i;
-	int last_add_string = -1;
-
-	for (i = 0; i < (*opa)->size; i++) {
-		if (((*opa)->opcodes[i].opcode == ADD_STRING) || 
-			((*opa)->opcodes[i].opcode == ADD_CHAR)) {
-			if (last_add_string == -1) {
-				last_add_string = i;
-			} else {
-				if ((*opa)->opcodes[i].opcode == ADD_STRING) {
-					opt_concat_string (*opa, last_add_string, i);
-				} else {
-					opt_concat_char (*opa, last_add_string, i);
-				}
-				opt_set_nop (*opa, i);
-			}
-		} else {
-			last_add_string = -1;
-		}
-	}
+	opa->opcodes[nr].opcode = ZEND_NOP;
 }
