@@ -1,8 +1,8 @@
-# $Id: Makefile.in,v 1.1.1.1 2002-01-02 11:35:33 derick Exp $
+# $Id: Makefile.in,v 1.2 2002-10-23 18:55:10 derick Exp $
 
-LTLIBRARY_NAME        = libvle.la
-LTLIBRARY_SOURCES     = vle.c srm_oparray.c
-LTLIBRARY_SHARED_NAME = vle.la
-LTLIBRARY_SHARED_LIBADD  = $(VLE_SHARED_LIBADD)
+LTLIBRARY_NAME        = libvld.la
+LTLIBRARY_SOURCES     = vld.c srm_oparray.c
+LTLIBRARY_SHARED_NAME = vld.la
+LTLIBRARY_SHARED_LIBADD  = $(VLD_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk

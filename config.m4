@@ -1,10 +1,9 @@
-dnl $Id: config.m4,v 1.1.1.1 2002-01-02 11:35:33 derick Exp $
-dnl config.m4 for extension vle
+dnl $Id: config.m4,v 1.2 2002-10-23 18:55:10 derick Exp $
+dnl config.m4 for extension vld
 
-PHP_ARG_ENABLE(vle, whether to enable vle support,
-Make sure that the comment is aligned:
-[  --enable-vle           Enable vle support])
+PHP_ARG_ENABLE(vld, whether to enable vld support,
+[  --enable-vld           Enable vld support])
 
-if test "$PHP_VLE" != "no"; then
-  PHP_EXTENSION(vle, $ext_shared)
+if test "$PHP_VLD" != "no"; then
+  PHP_EXTENSION(vld, $ext_shared)
 fi

@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
-   |                                                                      |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
@@ -24,58 +23,54 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_vle.h"
+#include "php_vld.h"
 #include "srm_oparray.h"
 
-#ifndef ZTS
-#error VL-Encoder module is only useable in thread-safe mode
-#endif
-
-static int le_vle;
+static int le_vld;
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
-static zend_op_array* vle_compile_file(zend_file_handle*, int TSRMLS_DC);
+static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
 
-function_entry vle_functions[] = {
+function_entry vld_functions[] = {
 	{NULL, NULL, NULL}
 };
 
 
-zend_module_entry vle_module_entry = {
+zend_module_entry vld_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
-	"vle",
-	vle_functions,
-	PHP_MINIT(vle),
-	PHP_MSHUTDOWN(vle),
-	PHP_RINIT(vle),	
-	PHP_RSHUTDOWN(vle),
-	PHP_MINFO(vle),
+	"vld",
+	vld_functions,
+	PHP_MINIT(vld),
+	PHP_MSHUTDOWN(vld),
+	PHP_RINIT(vld),	
+	PHP_RSHUTDOWN(vld),
+	PHP_MINFO(vld),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1",
+	"0.5.0",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
 
 
-#ifdef COMPILE_DL_VLE
-ZEND_GET_MODULE(vle)
+#ifdef COMPILE_DL_VLD
+ZEND_GET_MODULE(vld)
 #endif
 
 
 
 
 
-PHP_MINIT_FUNCTION(vle)
+PHP_MINIT_FUNCTION(vld)
 {
 	old_compile_file = zend_compile_file;
-	zend_compile_file = vle_compile_file;
+	zend_compile_file = vld_compile_file;
 
 	return SUCCESS;
 }
 
 
-PHP_MSHUTDOWN_FUNCTION(vle)
+PHP_MSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
 
@@ -84,23 +79,23 @@ PHP_MSHUTDOWN_FUNCTION(vle)
 
 
 
-PHP_RINIT_FUNCTION(vle)
+PHP_RINIT_FUNCTION(vld)
 {
 	return SUCCESS;
 }
 
 
 
-PHP_RSHUTDOWN_FUNCTION(vle)
+PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	return SUCCESS;
 }
 
 
-PHP_MINFO_FUNCTION(vle)
+PHP_MINFO_FUNCTION(vld)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "vle support", "enabled");
+	php_info_print_table_header(2, "vld support", "enabled");
 	php_info_print_table_end();
 
 }
@@ -127,7 +122,7 @@ static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
-static zend_op_array *vle_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array *op_array;
 	HashTable     *tmp;
