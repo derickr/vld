@@ -85,7 +85,7 @@ static const op_usage opcodes[] = {
 	/*  60 */	{ "DO_FCALL", SPECIAL },
 	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
 	/*  62 */	{ "RETURN", OP1_USED },
-	/*  63 */	{ "RECV", ALL_USED },
+	/*  63 */	{ "RECV", RES_USED | OP1_USED },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
 	/*  65 */	{ "SEND_VAL", OP1_USED },
 	/*  66 */	{ "SEND_VAR", OP1_USED },
@@ -228,7 +228,7 @@ static zend_uchar srm_get_special_flags(zend_op *op)
 
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_FCALL:
-			flags = ALL_USED;
+			flags = ALL_USED | EXT_VAL;
 			op->op2.op_type = IS_CONST;
 			op->op2.u.constant.type = IS_LONG;
 			break;
@@ -266,7 +266,13 @@ void srm_dump_op (int nr, zend_op op)
 		last_lineno = op.lineno;
 	}
 
-	zend_printf("%5d  %-20s %-6s     ", nr, opcodes[op.opcode].name, fetch_type);
+	zend_printf("%5d  %-20s %-6s ", nr, opcodes[op.opcode].name, fetch_type);
+
+	if (flags & EXT_VAL) {
+		zend_printf("%3ld  ", op.extended_value);
+	} else {
+		zend_printf("     ");
+	}
 
 	if ((flags & RES_USED) &&
 		!(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
@@ -297,7 +303,7 @@ void srm_dump_oparray (zend_op_array *opa)
 	zend_printf ("function name:  %s\n", opa->function_name);
 	zend_printf ("number of ops:  %d\n", opa->last);
 
-    zend_printf("line     #  op                   fetch  ext operands\n");
+    zend_printf("line     #  op                   fetch  ext  operands\n");
 	zend_printf("-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
 		srm_dump_op (i, opa->opcodes[i]);

@@ -32,6 +32,8 @@
 #define OP2_OPLINE 1<<4
 #define OP_FETCH   1<<5
 
+#define EXT_VAL    1<<6
+
 #define SPECIAL    0xff
 
 #define SRM_IS_OPLINE 1<<4
