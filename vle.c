@@ -68,8 +68,8 @@ ZEND_GET_MODULE(vle)
 
 PHP_MINIT_FUNCTION(vle)
 {
-    old_compile_file = zend_compile_file;
-    zend_compile_file = vle_compile_file;
+	old_compile_file = zend_compile_file;
+	zend_compile_file = vle_compile_file;
 
 	return SUCCESS;
 }
@@ -77,7 +77,7 @@ PHP_MINIT_FUNCTION(vle)
 
 PHP_MSHUTDOWN_FUNCTION(vle)
 {
-    zend_compile_file = old_compile_file;
+	zend_compile_file = old_compile_file;
 
 	return SUCCESS;
 }
@@ -110,14 +110,12 @@ PHP_MINFO_FUNCTION(vle)
  *    This function provides a hook for the execution of bananas */
 static ZEND_API zend_op_array *vle_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
-    zend_op_array * op_array;
+	zend_op_array * op_array;
 
-    op_array = old_compile_file (file_handle, type TSRMLS_CC);
+	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	srm_dump_oparray (op_array);
 
-    return op_array;
+	return op_array;
 }
 /* }}} */
-
-
