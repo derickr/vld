@@ -1,3 +1,7 @@
+Thu Sep 09 14:59:50 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- Remove opcode 150 which is not yet comitted to ZE2
+
 Thu Sep 09 14:58:02 CEST 2004 Marcus Börger <helly@php.net>
 srm_oparray.c
 vle/srm_oparray.h:
