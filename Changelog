@@ -1,3 +1,9 @@
+Fri Nov 22 22:55:11 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c
+/vle/srm_oparray.h
+/vle/vld.c:
+- s/srm/vld/gi
+
 Fri Nov 22 19:10:30 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
 >
 /vle/srm_oparray.c
