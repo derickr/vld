@@ -1,3 +1,6 @@
+Fri Apr 16 21:45:29 CEST 2004 Marcus Börger <helly@php.net>
+srm_oparray.c:
+The 2nd op is the constant's name in FETCH_CONSTANT's RT mode
 Fri Apr 16 10:01:38 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 CREDITS:
 - Added Marcus to the credits
