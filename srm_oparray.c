@@ -19,6 +19,7 @@
 
 #include "php.h"
 #include "srm_oparray.h"
+#include "ext/standard/url.h"
 
 static const op_usage opcodes[] = {
 	/*  0 */	{ "NOP", NONE_USED },
@@ -81,13 +82,13 @@ static const op_usage opcodes[] = {
 	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
 	/*  58 */	{ "END_SILENCE", ALL_USED },
 	/*  59 */	{ "INIT_FCALL_BY_NAME", OP1_USED | OP2_USED },
-	/*  60 */	{ "DO_FCALL", ALL_USED },
+	/*  60 */	{ "DO_FCALL", SPECIAL },
 	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
 	/*  62 */	{ "RETURN", OP1_USED },
 	/*  63 */	{ "RECV", ALL_USED },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
-	/*  65 */	{ "SEND_VAL", ALL_USED },
-	/*  66 */	{ "SEND_VAR", ALL_USED },
+	/*  65 */	{ "SEND_VAL", OP1_USED },
+	/*  66 */	{ "SEND_VAR", OP1_USED },
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", RES_USED | OP1_USED },
 	/*  69 */	{ "JMP_NO_CTOR", OP1_USED | OP2_USED | OP2_OPLINE },
@@ -146,7 +147,12 @@ inline void srm_dump_zval_double(zvalue_value value)
 
 inline void srm_dump_zval_string(zvalue_value value)
 {
-	zend_printf ("'%s'", value.str.val);
+	char *new_str;
+	int new_len;
+
+	new_str = php_url_encode(value.str.val, value.str.len, &new_len);
+	zend_printf ("'%s'", new_str);
+	efree(new_str);
 }
 
 inline void srm_dump_zval_array(zvalue_value value)
@@ -221,6 +227,7 @@ static zend_uchar srm_get_special_flags(zend_op *op)
 			break;
 
 		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_DO_FCALL:
 			flags = ALL_USED;
 			op->op2.op_type = IS_CONST;
 			op->op2.u.constant.type = IS_LONG;
@@ -261,7 +268,8 @@ void srm_dump_op (int nr, zend_op op)
 
 	zend_printf("%5d  %-20s %-6s     ", nr, opcodes[op.opcode].name, fetch_type);
 
-	if (flags & RES_USED) {
+	if ((flags & RES_USED) &&
+		!(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
 		srm_dump_znode (op.result);
 		print_sep = 1;
 	}
