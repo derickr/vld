@@ -32,8 +32,8 @@
 #endif
 
 static int le_vle;
-static ZEND_API zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
-static ZEND_API zend_op_array* vle_compile_file(zend_file_handle*, int TSRMLS_DC);
+static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
+static zend_op_array* vle_compile_file(zend_file_handle*, int TSRMLS_DC);
 
 function_entry vle_functions[] = {
 	{NULL, NULL, NULL}
@@ -108,13 +108,24 @@ PHP_MINFO_FUNCTION(vle)
 static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
+		printf("Function %s:\n", fe->function_name);
 		srm_dump_oparray(fe);
+		printf("End of Function %s.\n\n", fe->function_name);
 	}
+	return 1;
+}
+
+static int srm_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
+{
+	printf("Class %s:\n", class_entry->name);
+	zend_hash_apply(&class_entry->function_table, (apply_func_t) srm_dump_fe TSRMLS_CC);
+	printf("End of class %s.\n\n", class_entry->name);
+	return 1;
 }
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
-static ZEND_API zend_op_array *vle_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+static zend_op_array *vle_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array * op_array;
 
@@ -124,6 +135,9 @@ static ZEND_API zend_op_array *vle_compile_file(zend_file_handle *file_handle, i
 	srm_dump_oparray (op_array);
 
 	zend_hash_apply (CG(function_table), (apply_func_t) srm_dump_fe TSRMLS_CC);
+	zend_hash_apply (CG(class_table), (apply_func_t) srm_dump_cle TSRMLS_CC);
+	CG(function_table)->pListHead;
+	CG(class_table)->pListHead;
 
 	return op_array;
 }
