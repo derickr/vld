@@ -1,3 +1,8 @@
+Mon Oct 28 16:41:40 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c
+/vle/vld.c:
+- Fixed crash bug on parse errors
+
 Wed Oct 23 20:55:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/php_vld.h
 /vle/vld.c
