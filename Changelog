@@ -1,3 +1,7 @@
+Fri Sep 19 10:44:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c:
+- Added new opcode
+
 Thu Sep 18 20:43:11 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/package.xml:
 - Whitespace
