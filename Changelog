@@ -1,3 +1,8 @@
+Sun Feb 23 20:11:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/vle/srm_oparray.c:
+- Fixed disassembling of JMPZNZ. (patch by Stefan Esser <sesser@php.net>)
+- Fixed disassembling of POST_INC, PRE_INC, POST_DEC and PRE_DEC.
+
 Thu Jan 2 22:13:19 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /vle/CREDITS:
 - Fix CREDITS
