@@ -237,6 +237,9 @@ void srm_dump_op (int nr, zend_op op)
 	char *fetch_type = "";
 	zend_uchar flags = opcodes[op.opcode].flags;
 
+	if (op.lineno == 0)
+		return;
+
 	if (flags == SPECIAL) {
 		flags = srm_get_special_flags(&op);
 	}
@@ -284,7 +287,7 @@ void srm_dump_oparray (zend_op_array *opa)
 
 	zend_printf ("filename:       %s\n", opa->filename);
 	zend_printf ("function name:  %s\n", opa->function_name);
-	zend_printf ("number of ops:  %d\n", opa->size);
+	zend_printf ("number of ops:  %d\n", opa->last);
 
     zend_printf("line     #  op                   fetch  ext operands\n");
 	zend_printf("-------------------------------------------------------------------------------\n");

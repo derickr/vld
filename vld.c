@@ -111,9 +111,9 @@ static int srm_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 static int srm_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		printf("Method %s:\n", fe->function_name);
+		printf("Function %s:\n", fe->function_name);
 		srm_dump_oparray(fe);
-		printf("End of method %s.\n\n", fe->function_name);
+		printf("End of function %s.\n\n", fe->function_name);
 	}
 
 	return 0;
