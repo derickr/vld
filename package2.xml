@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<package packagerversion="1.4.0a2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" 0="xsi:schemaLocation&apos; =&gt; &apos;http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <name>vld</name>
+ <channel>pecl.php.net</channel>
+ <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
+ <description>The Vulcan Logic Disassembler hooks into the Zend Engine and
+dumps all the opcodes (execution units) of a script.
+ </description>
+ <lead>
+  <name>Derick Rethans</name>
+  <user>derick</user>
+  <email>derick@xdebug.org</email>
+  <active>yes</active>
+ </lead>
+ <date>2005-03-02</date>
+ <time>15:04:17</time>
+ <version>
+  <release>0.8.0</release>
+  <api>0.8.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.example.com">BSD style</license>
+ <notes>Bring this up-to-date with latest PHP 5.1-dev.
+    
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="Changelog" role="doc" />
+   <file name="config.m4" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="Makefile.in" role="src" />
+   <file name="php_vld.h" role="src" />
+   <file name="srm_oparray.c" role="src" />
+   <file name="srm_oparray.h" role="src" />
+   <file name="vld.c" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.0.4-dev</min>
+    <max>6.0.0</max>
+   </php>
+   <pearinstaller>
+    <min>1.4.0a2</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>vld</providesextension>
+ <extsrcrelease />
+</package>
