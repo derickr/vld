@@ -1,3 +1,10 @@
+Wed Nov 20 21:23:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
+>
+/vle/srm_oparray.c
+/vle/srm_oparray.h
+/vle/vld.c:
+Clean up and put in the framework for better opcode display.
+
 Wed Nov 13 21:49:56 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
 >
 /vle/srm_oparray.c
