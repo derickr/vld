@@ -60,7 +60,7 @@ static const op_usage opcodes[] = {
 	/*  36 */	{ "POST_INC", ALL_USED },
 	/*  37 */	{ "POST_DEC", ALL_USED },
 	/*  38 */	{ "ASSIGN", ALL_USED },
-	/*  39 */	{ "ASSIGN_REF", ALL_USED },
+	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
 	/*  41 */	{ "PRINT", RES_USED | OP1_USED },
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
@@ -80,17 +80,17 @@ static const op_usage opcodes[] = {
 	/*  56 */	{ "ADD_VAR", ALL_USED },
 	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
 	/*  58 */	{ "END_SILENCE", ALL_USED },
-	/*  59 */	{ "INIT_FCALL_BY_NAME", ALL_USED },
+	/*  59 */	{ "INIT_FCALL_BY_NAME", OP1_USED | OP2_USED },
 	/*  60 */	{ "DO_FCALL", ALL_USED },
-	/*  61 */	{ "DO_FCALL_BY_NAME", ALL_USED },
+	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
 	/*  62 */	{ "RETURN", OP1_USED },
 	/*  63 */	{ "RECV", ALL_USED },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
 	/*  65 */	{ "SEND_VAL", ALL_USED },
 	/*  66 */	{ "SEND_VAR", ALL_USED },
 	/*  67 */	{ "SEND_REF", ALL_USED },
-	/*  68 */	{ "NEW", ALL_USED },
-	/*  69 */	{ "JMP_NO_CTOR", ALL_USED },
+	/*  68 */	{ "NEW", RES_USED | OP1_USED },
+	/*  69 */	{ "JMP_NO_CTOR", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
@@ -206,9 +206,29 @@ void srm_dump_znode (znode node)
 			zend_printf ("->%d", node.u.opline_num);
 			break;
 	}
-
 }
 
+static zend_uchar srm_get_special_flags(zend_op *op)
+{
+	zend_uchar flags = 0;
+
+	switch (op->opcode) {
+		case ZEND_ASSIGN_REF:
+			flags = OP1_USED | OP2_USED;
+			if (op->result.op_type != IS_UNUSED) {
+				flags |= RES_USED;
+			}
+			break;
+
+		case ZEND_DO_FCALL_BY_NAME:
+			flags = ALL_USED;
+			op->op2.op_type = IS_CONST;
+			op->op2.u.constant.type = IS_LONG;
+			break;
+	}
+
+	return flags;
+}
 
 void srm_dump_op (int nr, zend_op op)
 {
@@ -216,6 +236,10 @@ void srm_dump_op (int nr, zend_op op)
 	int print_sep = 0;
 	char *fetch_type = "";
 	zend_uchar flags = opcodes[op.opcode].flags;
+
+	if (flags == SPECIAL) {
+		flags = srm_get_special_flags(&op);
+	}
 
 	if (flags & OP_FETCH) {
 		if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
@@ -233,10 +257,6 @@ void srm_dump_op (int nr, zend_op op)
 	}
 
 	zend_printf("%5d  %-20s %-6s     ", nr, opcodes[op.opcode].name, fetch_type);
-
-	if (flags == SPECIAL) {
-		zend_printf("special");
-	}
 
 	if (flags & RES_USED) {
 		srm_dump_znode (op.result);
