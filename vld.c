@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.15 2003-10-20 10:08:01 derick Exp $ */
+/* $Id: vld.c,v 1.16 2004-04-17 14:27:48 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,6 +29,10 @@
 
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
+
+static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
+static void vld_execute(zend_op_array *op_array TSRMLS_DC);
+
 
 function_entry vld_functions[] = {
 	{NULL, NULL, NULL}
@@ -59,6 +63,9 @@ ZEND_GET_MODULE(vld)
 
 ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int active;
+	int skip_prepend;
+	int skip_append;
+	int execute;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 ZEND_DECLARE_MODULE_GLOBALS(vld)
@@ -70,12 +77,18 @@ ZEND_DECLARE_MODULE_GLOBALS(vld)
 #endif 
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("vld.active", "0", PHP_INI_SYSTEM, OnUpdateBool, active, zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_SYSTEM, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
 {
-	vld_globals->active = 0;
+	vld_globals->active       = 0;
+	vld_globals->skip_prepend = 0;
+	vld_globals->skip_append  = 0;
+	vld_globals->execute      = 1;
 }
 
 
@@ -84,6 +97,7 @@ PHP_MINIT_FUNCTION(vld)
 	ZEND_INIT_MODULE_GLOBALS(vld, vld_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	old_compile_file = zend_compile_file;
+	old_execute = zend_execute;
 
 	return SUCCESS;
 }
@@ -92,6 +106,7 @@ PHP_MINIT_FUNCTION(vld)
 PHP_MSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
+	zend_execute      = old_execute;
 
 	return SUCCESS;
 }
@@ -102,6 +117,9 @@ PHP_RINIT_FUNCTION(vld)
 {
 	if (VLD_G(active)) {
 		zend_compile_file = vld_compile_file;
+		if (!VLD_G(execute)) {
+			zend_execute      = vld_execute;
+		}
 	}
 	return SUCCESS;
 }
@@ -111,6 +129,7 @@ PHP_RINIT_FUNCTION(vld)
 PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
+	zend_execute      = old_execute;
 
 	return SUCCESS;
 }
@@ -174,10 +193,19 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 }
 
 /* {{{ zend_op_array vld_compile_file (file_handle, type)
- *    This function provides a hook for the execution of bananas */
+ *    This function provides a hook for compilation */
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array *op_array;
+
+	if (!VLD_G(execute) &&
+		((VLD_G(skip_prepend) && PG(auto_prepend_file) && PG(auto_prepend_file)[0] && PG(auto_prepend_file) == file_handle->filename) ||
+	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
+	{
+		zval nop;
+		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
+		return compile_string(&nop, "NOP" TSRMLS_CC);;
+	}
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
@@ -189,5 +217,13 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
 
 	return op_array;
+}
+/* }}} */
+
+/* {{{ void vld_execute(zend_op_array *op_array TSRMLS_DC)
+ *    This function provides a hook for execution */
+static void vld_execute(zend_op_array *op_array TSRMLS_DC)
+{
+	// nothing to do
 }
 /* }}} */
