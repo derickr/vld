@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.16 2004-04-17 14:27:48 helly Exp $ */
+/* $Id: vld.c,v 1.17 2004-06-06 12:17:24 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -105,6 +105,8 @@ PHP_MINIT_FUNCTION(vld)
 
 PHP_MSHUTDOWN_FUNCTION(vld)
 {
+	UNREGISTER_INI_ENTRIES();
+
 	zend_compile_file = old_compile_file;
 	zend_execute      = old_execute;
 
