@@ -81,7 +81,7 @@ static const op_usage opcodes[] = {
 	/*  56 */	{ "ADD_VAR", ALL_USED },
 	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
 	/*  58 */	{ "END_SILENCE", ALL_USED },
-	/*  59 */	{ "INIT_FCALL_BY_NAME", OP1_USED | OP2_USED },
+	/*  59 */	{ "INIT_FCALL_BY_NAME", SPECIAL },
 	/*  60 */	{ "DO_FCALL", SPECIAL },
 	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
 	/*  62 */	{ "RETURN", OP1_USED },
@@ -114,14 +114,14 @@ static const op_usage opcodes[] = {
 	/*  89 */	{ "FETCH_IS", ALL_USED },
 	/*  90 */	{ "FETCH_DIM_IS", ALL_USED },
 	/*  91 */	{ "FETCH_OBJ_IS", ALL_USED },
-	/*  92 */	{ "FETCH_FUNC_ARG", ALL_USED },
+	/*  92 */	{ "FETCH_FUNC_ARG", RES_USED | OP1_USED | OP_FETCH },
 	/*  93 */	{ "FETCH_DIM_FUNC_ARG", ALL_USED },
 	/*  94 */	{ "FETCH_OBJ_FUNC_ARG", ALL_USED },
 	/*  95 */	{ "FETCH_UNSET", ALL_USED },
 	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
 	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
-	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
+	/*  99 */	{ "FETCH_CONSTANT", RES_USED | OP1_USED },
 	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
 	/*  101 */	{ "EXT_STMT", ALL_USED },
 	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
@@ -231,6 +231,13 @@ static zend_uchar vld_get_special_flags(zend_op *op)
 			flags = ALL_USED | EXT_VAL;
 			op->op2.op_type = IS_CONST;
 			op->op2.u.constant.type = IS_LONG;
+			break;
+
+		case ZEND_INIT_FCALL_BY_NAME:
+			flags = OP2_USED;
+			if (op->op1.op_type != IS_UNUSED) {
+				flags |= OP1_USED;
+			}
 			break;
 	}
 
