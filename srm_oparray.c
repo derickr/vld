@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.31 2004-08-29 22:52:38 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.32 2004-08-31 07:07:25 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -268,8 +268,14 @@ void vld_dump_zval (zval val)
 	}
 }
 
-int vld_dump_znode (znode node, zend_uint base_address)
+int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 {
+	if (node.op_type != IS_UNUSED && print_sep) {
+		if (*print_sep) {
+			fprintf (stderr, ", ");
+		}
+		*print_sep = 1;
+	}
 	switch (node.op_type) {
 		case IS_CONST: /* 1 */
 			vld_dump_zval (node.u.constant);
@@ -409,25 +415,19 @@ void vld_dump_op (int nr, zend_op op, zend_uint base_address)
 	}
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
-		if (vld_dump_znode (op.result, base_address)) {
-			print_sep = 1;
-		}
+		vld_dump_znode (&print_sep, op.result, base_address);
 	}
 	if (flags & OP1_USED) {
-		if (print_sep) fprintf (stderr, ", ");
 		if (flags & OP1_OPLINE) {
 			op.op1.op_type = VLD_IS_OPLINE;
 		}
-		if (vld_dump_znode (op.op1, base_address)) {
-			print_sep = 1;
-		}
+		vld_dump_znode (&print_sep, op.op1, base_address);
 	}
 	if (flags & OP2_USED) {
-		if (print_sep) fprintf (stderr, ", ");
 		if (flags & OP2_OPLINE) {
 			op.op2.op_type = VLD_IS_OPLINE;
 		}
-		vld_dump_znode (op.op2, base_address);
+		vld_dump_znode (&print_sep, op.op2, base_address);
 	}
 	fprintf (stderr, "\n");
 }
