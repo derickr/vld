@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.28 2004-04-17 13:14:00 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.29 2004-08-06 08:29:26 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -192,7 +192,7 @@ static const op_usage opcodes[] = {
 	/*  146 */	{ "ZEND_VERIFY_ABSTRACT_CLASS", ALL_USED },
 	/*  147 */	{ "ZEND_ASSIGN_DIM", ALL_USED },
 	/*  148 */	{ "ZEND_ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
-	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", ALL_USED },
+	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", NONE_USED },
 #endif
 };
 
