@@ -1,3 +1,9 @@
+Wed Nov 20 23:27:52 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
+>
+/vle/srm_oparray.c
+/vle/srm_oparray.h:
+More work on opcodes.
+
 Wed Nov 20 21:23:55 CET 2002 Andrei Zmievski <andrei@gravitonic.com 
 >
 /vle/srm_oparray.c
