@@ -1,3 +1,7 @@
+Mon Jun 20 02:47:25 CEST 2005 Marcus Börger <helly@php.net>
+srm_oparray.c:
+- Update to PHP 5.1
+
 Wed Mar 02 16:08:53 CET 2005 Derick Rethans <derick@derickrethans.nl>
 package2.xml:
 - Added package2 xml
