@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.40 2005-01-29 22:26:51 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.41 2005-06-20 00:47:25 helly Exp $ */
 
 #include "php.h"
 #include "srm_oparray.h"
@@ -97,7 +97,11 @@ static const op_usage opcodes[] = {
 	/*  66 */	{ "SEND_VAR", OP1_USED },
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", SPECIAL },
+#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
 	/*  69 */	{ "JMP_NO_CTOR", SPECIAL },
+#else
+	/*  69 */   { "UNKNOWN", ALL_USED },
+#endif
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
@@ -329,7 +333,9 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 	switch (op->opcode) {
 		case ZEND_FE_RESET:
 			flags = ALL_USED;
-#if (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 11)
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
+			flags |= OP2_OPNUM;
+#elif (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 11)
 			flags |= NOP2_OPNUM;
 #endif
 			break;
@@ -361,6 +367,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 			op->op2.op_type = VLD_IS_OPNUM;
 			break;
 
+#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
 		case ZEND_JMP_NO_CTOR:
 			flags = OP2_USED;
 			if (op->op1.op_type != IS_UNUSED) {
@@ -368,6 +375,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 			}
 			op->op2.op_type = VLD_IS_OPNUM;
 			break;
+#endif
 
 #ifdef ZEND_ENGINE_2
 		case ZEND_FETCH_CLASS:
@@ -395,7 +403,7 @@ void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
 	int print_sep = 0;
 	char *fetch_type = "";
 	zend_uint flags;
-	zend_op op = *op_ptr;
+	zend_op op = op_ptr[nr];
 	
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		flags = ALL_USED;
@@ -482,7 +490,7 @@ void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
 		vld_dump_znode (&print_sep, op.op2, base_address);
 	}
 	if (flags & NOP2_OPNUM) {
-		zend_op next_op = op_ptr[1];
+		zend_op next_op = op_ptr[nr+1];
 		next_op.op2.op_type = VLD_IS_OPNUM;
 		vld_dump_znode (&print_sep, next_op.op2, base_address);
 	}
@@ -501,7 +509,7 @@ void vld_dump_oparray (zend_op_array *opa)
     fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
-		vld_dump_op (i, opa->opcodes+i, base_address);
+		vld_dump_op (i, opa->opcodes, base_address);
 	}
 	fprintf(stderr, "\n");
 }
