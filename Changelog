@@ -1,3 +1,7 @@
+Thu Aug 31 15:18:57 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Make sure to handle this in RINIT instead so that it works with APC.
+
 Mon Jun 20 02:47:25 CEST 2005 Marcus Börger <helly@php.net>
 srm_oparray.c:
 - Update to PHP 5.1
