@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.18 2005-01-19 14:36:00 derick Exp $ */
+/* $Id: vld.c,v 1.19 2006-08-31 13:18:57 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,6 +26,7 @@
 #include "ext/standard/info.h"
 #include "php_vld.h"
 #include "srm_oparray.h"
+#include "php_globals.h"
 
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
@@ -96,8 +97,6 @@ PHP_MINIT_FUNCTION(vld)
 {
 	ZEND_INIT_MODULE_GLOBALS(vld, vld_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
-	old_compile_file = zend_compile_file;
-	old_execute = zend_execute;
 
 	return SUCCESS;
 }
@@ -117,6 +116,9 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 
 PHP_RINIT_FUNCTION(vld)
 {
+	old_compile_file = zend_compile_file;
+	old_execute = zend_execute;
+
 	if (VLD_G(active)) {
 		zend_compile_file = vld_compile_file;
 		if (!VLD_G(execute)) {
