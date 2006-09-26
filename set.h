@@ -13,44 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
-   |           Andrei Zmievski <andrei@gravitonic.com>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.h,v 1.15 2006-09-26 09:40:26 derick Exp $ */
+/* $Id: set.h,v 1.1 2006-09-26 09:40:26 derick Exp $ */
 
-#ifndef VLD_OPARRAY_H
-#define VLD_OPARRAY_H
+#ifndef __SET_H__
+#define __SET_H__
 
-#include "php.h"
+typedef struct _vld_set {
+	unsigned int size;
+	unsigned char *setinfo;
+} vld_set;
 
-#define OP1_USED   1<<0
-#define OP2_USED   1<<1
-#define RES_USED   1<<2
-
-#define NONE_USED  0
-#define ALL_USED   0x7
-
-#define OP1_OPLINE 1<<3
-#define OP2_OPLINE 1<<4
-#define OP1_OPNUM  1<<5
-#define OP2_OPNUM  1<<6
-#define OP_FETCH   1<<7
-#define EXT_VAL    1<<8
-#define NOP2_OPNUM 1<<9
-
-#define SPECIAL    0xff
-
-#define VLD_IS_OPLINE 1<<13
-#define VLD_IS_OPNUM  1<<14
-#define VLD_IS_CLASS  1<<15
-
-typedef struct _op_usage {
-	char *name;
-	zend_uint flags;
-} op_usage;
-
-void vld_dump_oparray (zend_op_array *opa);
-void vld_mark_dead_code (zend_op_array *opa);
+vld_set *vld_set_create(unsigned int size);
+#ifndef ZEND_ENGINE_2
+# define VLD_DEAD_CODE 107
+#else
+# define VLD_DEAD_CODE 150
+#endif
+void vld_set_add(vld_set *set, unsigned int position);
+void vld_set_remove(vld_set *set, unsigned int position);
+#define vld_set_in(x,y) vld_set_in_ex(x,y,1)
+int vld_set_in_ex(vld_set *set, unsigned int position, int noisy);
+void vld_set_dump(vld_set *set);
 
 #endif
-

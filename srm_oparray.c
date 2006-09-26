@@ -17,11 +17,13 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.41 2005-06-20 00:47:25 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.42 2006-09-26 09:40:26 derick Exp $ */
 
+#include "zend_alloc.h"
 #include "php.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
+#include "set.h"
 
 /* Input zend_compile.h
  * And replace [^(...)(#define )([^ \t]+).*$]
@@ -362,7 +364,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 			break;
 
 		case ZEND_JMPZNZ:
-			flags = OP1_USED | OP2_USED;
+			flags = OP1_USED | OP2_USED | EXT_VAL;
 			op->result = op->op1;
 			op->op2.op_type = VLD_IS_OPNUM;
 			break;
@@ -397,7 +399,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
+void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address, int notdead)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
@@ -467,9 +469,9 @@ void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
 	}
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
-		fprintf(stderr, "%5d  <%03d>%-23s %-14s ", nr, op.opcode, "", fetch_type);
+		fprintf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
 	} else {
-		fprintf(stderr, "%5d  %-28s %-14s ", nr, opcodes[op.opcode].name, fetch_type);
+		fprintf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
 	}
 
 	if (flags & EXT_VAL) {
@@ -497,10 +499,16 @@ void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address)
 	fprintf (stderr, "\n");
 }
 
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set);
+
 void vld_dump_oparray (zend_op_array *opa)
 {
 	unsigned int i;
+	vld_set *set;
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+
+	set = vld_set_create(opa->size);
+	vld_analyse_branch(opa, 0, set); 
 
 	fprintf (stderr, "filename:       %s\n", opa->filename);
 	fprintf (stderr, "function name:  %s\n", opa->function_name);
@@ -509,12 +517,117 @@ void vld_dump_oparray (zend_op_array *opa)
     fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->size; i++) {
-		vld_dump_op (i, opa->opcodes, base_address);
+		vld_dump_op (i, opa->opcodes, base_address, vld_set_in(set, i));
 	}
 	fprintf(stderr, "\n");
+	vld_set_free(set);
 }
 
 void opt_set_nop (zend_op_array *opa, int nr)
 {
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
+
+zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array)
+{
+	int nest_levels;
+	zend_brk_cont_element *jmp_to;
+
+	nest_levels = nest_levels_zval->value.lval;
+
+	do {
+		jmp_to = &op_array->brk_cont_array[array_offset];
+		array_offset = jmp_to->parent;
+	} while (--nest_levels > 0);
+	return jmp_to;
+}
+
+int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1, unsigned int *jmp2)
+{
+	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+
+	zend_op opcode = opa->opcodes[position];
+	if (opcode.opcode == ZEND_JMP) {
+		*jmp1 = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
+		return 1;
+	} else if (
+		opcode.opcode == ZEND_JMPZ ||
+		opcode.opcode == ZEND_JMPNZ ||
+		opcode.opcode == ZEND_JMPZ_EX ||
+		opcode.opcode == ZEND_JMPNZ_EX
+	) {
+		*jmp1 = position + 1;
+		*jmp2 = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
+		return 1;
+	} else if (opcode.opcode == ZEND_JMPZNZ) {
+		*jmp1 = opcode.op2.u.opline_num;
+		*jmp2 = opcode.extended_value;
+		return 1;
+	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
+		zend_brk_cont_element *el;
+
+		if (opcode.op2.op_type == IS_CONST) {
+			el = vld_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
+			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
+			return 1;
+		}
+	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
+		*jmp1 = position + 1;
+		*jmp2 = opcode.op2.u.opline_num;
+		return 1;
+	}
+	return 0;
+}
+
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
+{
+	unsigned int jump_found = 0;
+	int jump_pos1 = -1;
+	int jump_pos2 = -1;
+
+	fprintf(stderr, "Branch analysis from position: %d\n", position);
+	/* First we see if the branch has been visited, if so we bail out. */
+	if (vld_set_in(set, position)) {
+		return;
+	}
+	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
+	fprintf(stderr, "Add %d\n", position);
+	vld_set_add(set, position);
+	while (position < opa->size) {
+
+		/* See if we have a jump instruction */
+		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
+			fprintf(stderr, "Jump found. Position 1 = %d", jump_pos1);
+			if (jump_pos2 != -1) {
+				fprintf(stderr, ", Position 2 = %d\n", jump_pos2);
+			} else {
+				fprintf(stderr, "\n");
+			}
+			vld_analyse_branch(opa, jump_pos1, set);
+			if (jump_pos2 != -1) {
+				vld_analyse_branch(opa, jump_pos2, set);
+			}
+			break;
+		}
+		/* See if we have an exit instruction */
+		if (opa->opcodes[position].opcode == ZEND_EXIT) {
+			fprintf(stderr, "Exit found\n");
+			break;
+		}
+		/* See if we have a return instruction */
+		if (opa->opcodes[position].opcode == ZEND_RETURN) {
+			fprintf(stderr, "Return found\n");
+			break;
+		}
+		/* See if we have a throw instruction */
+		if (opa->opcodes[position].opcode == ZEND_THROW) {
+			fprintf(stderr, "Throw found\n");
+			break;
+		}
+
+		position++;
+		fprintf(stderr, "Add %d\n", position);
+		vld_set_add(set, position);
+	}
+}
+

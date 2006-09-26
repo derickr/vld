@@ -26,6 +26,8 @@ Bring this up-to-date with latest PHP 5.1-dev.
     <filelist>
       <file role="src"  name="srm_oparray.h"/>
       <file role="src"  name="srm_oparray.c"/>
+      <file role="src"  name="set.h"/>
+      <file role="src"  name="set.c"/>
       <file role="src"  name="php_vld.h"/>
       <file role="src"  name="vld.c"/>
 

@@ -13,44 +13,61 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
-   |           Andrei Zmievski <andrei@gravitonic.com>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.h,v 1.15 2006-09-26 09:40:26 derick Exp $ */
+/* $Id: set.c,v 1.1 2006-09-26 09:40:26 derick Exp $ */
 
-#ifndef VLD_OPARRAY_H
-#define VLD_OPARRAY_H
+#include <stdlib.h>
+#include <math.h>
+#include "set.h"
 
-#include "php.h"
+vld_set *vld_set_create(unsigned int size)
+{
+	vld_set *tmp;
 
-#define OP1_USED   1<<0
-#define OP2_USED   1<<1
-#define RES_USED   1<<2
+	tmp = calloc(1, sizeof(vld_set));
+	tmp->size = size;
+	size = ceil((size + 7) / 8);
+	tmp->setinfo = calloc(1, size);
 
-#define NONE_USED  0
-#define ALL_USED   0x7
+	return tmp;
+}
 
-#define OP1_OPLINE 1<<3
-#define OP2_OPLINE 1<<4
-#define OP1_OPNUM  1<<5
-#define OP2_OPNUM  1<<6
-#define OP_FETCH   1<<7
-#define EXT_VAL    1<<8
-#define NOP2_OPNUM 1<<9
+void vld_set_free(vld_set *set)
+{
+	free(set->setinfo);
+	free(set);
+}
 
-#define SPECIAL    0xff
+void vld_set_add(vld_set *set, unsigned int position)
+{
+	char         *byte;
+	unsigned int  bit;
 
-#define VLD_IS_OPLINE 1<<13
-#define VLD_IS_OPNUM  1<<14
-#define VLD_IS_CLASS  1<<15
+	byte = &(set->setinfo[position / 8]);
+	bit  = position % 8;
 
-typedef struct _op_usage {
-	char *name;
-	zend_uint flags;
-} op_usage;
+	*byte = *byte | 1 << bit;
+}
 
-void vld_dump_oparray (zend_op_array *opa);
-void vld_mark_dead_code (zend_op_array *opa);
+void vld_set_remove(vld_set *set, unsigned int position)
+{
+	char         *byte;
+	unsigned int  bit;
 
-#endif
+	byte = &(set->setinfo[position / 8]);
+	bit  = position % 8;
 
+	*byte = *byte & ~(1 << bit);
+}
+
+int vld_set_in_ex(vld_set *set, unsigned int position, int noisy)
+{
+	char         *byte;
+	unsigned int  bit;
+
+	byte = &(set->setinfo[position / 8]);
+	bit  = position % 8;
+
+	return (*byte & (1 << bit));
+}

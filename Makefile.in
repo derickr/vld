@@ -1,7 +1,7 @@
-# $Id: Makefile.in,v 1.2 2002-10-23 18:55:10 derick Exp $
+# $Id: Makefile.in,v 1.3 2006-09-26 09:40:26 derick Exp $
 
 LTLIBRARY_NAME        = libvld.la
-LTLIBRARY_SOURCES     = vld.c srm_oparray.c
+LTLIBRARY_SOURCES     = vld.c srm_oparray.c set.c
 LTLIBRARY_SHARED_NAME = vld.la
 LTLIBRARY_SHARED_LIBADD  = $(VLD_SHARED_LIBADD)
 
