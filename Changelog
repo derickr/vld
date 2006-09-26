@@ -1,3 +1,12 @@
+Tue Sep 26 11:40:26 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+set.c
+vle/set.h
+vle/Makefile.in
+vle/package.xml
+vle/srm_oparray.c
+vle/srm_oparray.h:
+- Added dead code analysis instrumentation.
+
 Thu Aug 31 15:18:57 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - Make sure to handle this in RINIT instead so that it works with APC.
