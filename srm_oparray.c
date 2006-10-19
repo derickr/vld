@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.42 2006-09-26 09:40:26 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.43 2006-10-19 20:39:12 derick Exp $ */
 
 #include "zend_alloc.h"
 #include "php.h"
@@ -593,7 +593,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	fprintf(stderr, "Add %d\n", position);
 	vld_set_add(set, position);
-	while (position < opa->size) {
+	while (position < opa->size - 1) {
 
 		/* See if we have a jump instruction */
 		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
@@ -609,6 +609,24 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 			}
 			break;
 		}
+#ifdef ZEND_ENGINE_2
+		/* See if we have a throw instruction */
+		if (opa->opcodes[position].opcode == ZEND_THROW) {
+			fprintf(stderr, "Throw found at %d\n", position);
+			/* Now we need to go forward to the first
+			 * zend_fetch_class/zend_catch combo */
+			while (position < opa->size - 1) {
+				if (opa->opcodes[position].opcode == ZEND_CATCH) {
+					fprintf(stderr, "Found catch at %d\n", position);
+					position--;
+					break;
+				}
+				position++;
+				fprintf(stderr, "Skipping %d\n", position);
+			}
+			position--;
+		}
+#endif
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			fprintf(stderr, "Exit found\n");
@@ -617,11 +635,6 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 		/* See if we have a return instruction */
 		if (opa->opcodes[position].opcode == ZEND_RETURN) {
 			fprintf(stderr, "Return found\n");
-			break;
-		}
-		/* See if we have a throw instruction */
-		if (opa->opcodes[position].opcode == ZEND_THROW) {
-			fprintf(stderr, "Throw found\n");
 			break;
 		}
 

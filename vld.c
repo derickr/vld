@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.19 2006-08-31 13:18:57 derick Exp $ */
+/* $Id: vld.c,v 1.20 2006-10-19 20:39:12 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
