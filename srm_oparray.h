@@ -16,7 +16,7 @@
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.h,v 1.15 2006-09-26 09:40:26 derick Exp $ */
+/* $Id: srm_oparray.h,v 1.16 2006-10-25 14:44:22 derick Exp $ */
 
 #ifndef VLD_OPARRAY_H
 #define VLD_OPARRAY_H
@@ -43,6 +43,7 @@
 #define VLD_IS_OPLINE 1<<13
 #define VLD_IS_OPNUM  1<<14
 #define VLD_IS_CLASS  1<<15
+#define OP2_INCLUDE   1<<16
 
 typedef struct _op_usage {
 	char *name;

@@ -17,13 +17,16 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.43 2006-10-19 20:39:12 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.44 2006-10-25 14:44:22 derick Exp $ */
 
 #include "zend_alloc.h"
 #include "php.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
 #include "set.h"
+#include "php_vld.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(vld)
 
 /* Input zend_compile.h
  * And replace [^(...)(#define )([^ \t]+).*$]
@@ -107,7 +110,7 @@ static const op_usage opcodes[] = {
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
-	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED },
+	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED | OP2_INCLUDE },
 	/*  74 */	{ "UNSET_VAR", ALL_USED },
 	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
 	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
@@ -274,7 +277,8 @@ void vld_dump_zval (zval val)
 	}
 }
 
-int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
+
+int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC)
 {
 	if (node.op_type != IS_UNUSED && print_sep) {
 		if (*print_sep) {
@@ -283,18 +287,25 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address)
 		*print_sep = 1;
 	}
 	switch (node.op_type) {
+		case IS_UNUSED:
+			VLD_PRINT(3, " IS_UNUSED ");
+			break;
 		case IS_CONST: /* 1 */
+			VLD_PRINT(3, " IS_CONST (%d) ", node.u.var / sizeof(temp_variable));
 			vld_dump_zval (node.u.constant);
 			break;
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
+			VLD_PRINT(3, " IS_TMP_VAR ");
 			fprintf (stderr, "~%d", node.u.var / sizeof(temp_variable));
 			break;
 		case IS_VAR: /* 4 */
+			VLD_PRINT(3, " IS_VAR ");
 			fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
+			VLD_PRINT(3, " IS_CV ");
 			fprintf (stderr, "!%d", node.u.var / sizeof(temp_variable));
 			break;
 #endif
@@ -399,7 +410,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address, int notdead)
+void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead TSRMLS_DC)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0;
@@ -481,27 +492,59 @@ void vld_dump_op (int nr, zend_op * op_ptr, zend_uint base_address, int notdead)
 	}
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
-		vld_dump_znode (&print_sep, op.result, base_address);
+		VLD_PRINT(3, " RES[ ");
+		vld_dump_znode (&print_sep, op.result, base_address TSRMLS_CC);
+		VLD_PRINT(3, " ]");
 	} else {
 		fprintf(stderr, "    ");
 	}
 	if (flags & OP1_USED) {
-		vld_dump_znode (&print_sep, op.op1, base_address);
-	}
+		VLD_PRINT(3, " OP1[ ");
+		vld_dump_znode (&print_sep, op.op1, base_address TSRMLS_CC);
+		VLD_PRINT(3, " ]");
+	}		
 	if (flags & OP2_USED) {
-		vld_dump_znode (&print_sep, op.op2, base_address);
+		VLD_PRINT(3, " OP2[ ");
+		if (flags & OP2_INCLUDE) {
+			if (VLD_G(verbosity) < 3 && print_sep) {
+				fprintf(stderr, ", ");
+			}
+			switch (Z_LVAL(op.op2.u.constant)) {
+				case ZEND_INCLUDE_ONCE:
+					fprintf(stderr, "INCLUDE_ONCE");
+					break;
+				case ZEND_REQUIRE_ONCE:
+					fprintf(stderr, "REQUIRE_ONCE");
+					break;
+				case ZEND_INCLUDE:
+					fprintf(stderr, "INCLUDE");
+					break;
+				case ZEND_REQUIRE:
+					fprintf(stderr, "REQUIRE");
+					break;
+				case ZEND_EVAL:
+					fprintf(stderr, "EVAL");
+					break;
+				default:
+					fprintf(stderr, "!!ERROR!!");
+					break;
+			}
+		} else {
+			vld_dump_znode (&print_sep, op.op2, base_address TSRMLS_CC);
+		}
+		VLD_PRINT(3, " ]");
 	}
 	if (flags & NOP2_OPNUM) {
 		zend_op next_op = op_ptr[nr+1];
 		next_op.op2.op_type = VLD_IS_OPNUM;
-		vld_dump_znode (&print_sep, next_op.op2, base_address);
+		vld_dump_znode (&print_sep, next_op.op2, base_address TSRMLS_CC);
 	}
 	fprintf (stderr, "\n");
 }
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set);
 
-void vld_dump_oparray (zend_op_array *opa)
+void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 {
 	unsigned int i;
 	vld_set *set;
@@ -516,8 +559,8 @@ void vld_dump_oparray (zend_op_array *opa)
 
     fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
-	for (i = 0; i < opa->size; i++) {
-		vld_dump_op (i, opa->opcodes, base_address, vld_set_in(set, i));
+	for (i = 0; i < opa->last; i++) {
+		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
 	}
 	fprintf(stderr, "\n");
 	vld_set_free(set);
@@ -585,23 +628,23 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 	int jump_pos1 = -1;
 	int jump_pos2 = -1;
 
-	fprintf(stderr, "Branch analysis from position: %d\n", position);
+	VLD_PRINT(1, "Branch analysis from position: %d\n", position);
 	/* First we see if the branch has been visited, if so we bail out. */
 	if (vld_set_in(set, position)) {
 		return;
 	}
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
-	fprintf(stderr, "Add %d\n", position);
+	VLD_PRINT(2, "Add %d\n", position);
 	vld_set_add(set, position);
 	while (position < opa->size - 1) {
 
 		/* See if we have a jump instruction */
 		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			fprintf(stderr, "Jump found. Position 1 = %d", jump_pos1);
+			VLD_PRINT(1, "Jump found. Position 1 = %d", jump_pos1);
 			if (jump_pos2 != -1) {
-				fprintf(stderr, ", Position 2 = %d\n", jump_pos2);
+				VLD_PRINT(1, ", Position 2 = %d\n", jump_pos2);
 			} else {
-				fprintf(stderr, "\n");
+				VLD_PRINT(1, "\n");
 			}
 			vld_analyse_branch(opa, jump_pos1, set);
 			if (jump_pos2 != -1) {
@@ -612,34 +655,34 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 #ifdef ZEND_ENGINE_2
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
-			fprintf(stderr, "Throw found at %d\n", position);
+			VLD_PRINT(1, "Throw found at %d\n", position);
 			/* Now we need to go forward to the first
 			 * zend_fetch_class/zend_catch combo */
 			while (position < opa->size - 1) {
 				if (opa->opcodes[position].opcode == ZEND_CATCH) {
-					fprintf(stderr, "Found catch at %d\n", position);
+					VLD_PRINT(1, "Found catch at %d\n", position);
 					position--;
 					break;
 				}
 				position++;
-				fprintf(stderr, "Skipping %d\n", position);
+				VLD_PRINT(2, "Skipping %d\n", position);
 			}
 			position--;
 		}
 #endif
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
-			fprintf(stderr, "Exit found\n");
+			VLD_PRINT(1, "Exit found\n");
 			break;
 		}
 		/* See if we have a return instruction */
 		if (opa->opcodes[position].opcode == ZEND_RETURN) {
-			fprintf(stderr, "Return found\n");
+			VLD_PRINT(1, "Return found\n");
 			break;
 		}
 
 		position++;
-		fprintf(stderr, "Add %d\n", position);
+		VLD_PRINT(2, "Add %d\n", position);
 		vld_set_add(set, position);
 	}
 }

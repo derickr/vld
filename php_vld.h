@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: php_vld.h,v 1.2 2003-10-20 10:08:01 derick Exp $ */
+/* $Id: php_vld.h,v 1.3 2006-10-25 14:44:22 derick Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
@@ -41,7 +41,13 @@ PHP_RINIT_FUNCTION(vld);
 PHP_RSHUTDOWN_FUNCTION(vld);
 PHP_MINFO_FUNCTION(vld);
 
-
+ZEND_BEGIN_MODULE_GLOBALS(vld)
+	int active;
+	int skip_prepend;
+	int skip_append;
+	int execute;
+	int verbosity;
+ZEND_END_MODULE_GLOBALS(vld) 
 
 
 #ifdef ZTS
@@ -49,6 +55,7 @@ PHP_MINFO_FUNCTION(vld);
 #else
 #define VLD_G(v) (vld_globals.v)
 #endif
+#define VLD_PRINT(v,args...) if (VLD_G(verbosity) >= (v)) { fprintf(stderr, args); }
 
 #endif
 

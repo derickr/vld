@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.20 2006-10-19 20:39:12 derick Exp $ */
+/* $Id: vld.c,v 1.21 2006-10-25 14:44:22 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,26 +62,14 @@ zend_module_entry vld_module_entry = {
 ZEND_GET_MODULE(vld)
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(vld)
-	int active;
-	int skip_prepend;
-	int skip_append;
-	int execute;
-ZEND_END_MODULE_GLOBALS(vld) 
-
 ZEND_DECLARE_MODULE_GLOBALS(vld)
-
-#ifdef ZTS
-#define VLD_G(v) TSRMG(vld_globals_id, zend_vld_globals *, v)
-#else
-#define VLD_G(v) (vld_globals.v)
-#endif 
 
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_SYSTEM, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -160,7 +148,7 @@ static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
 		fprintf(stderr, "Function %s:\n", fe->function_name);
-		vld_dump_oparray(fe);
+		vld_dump_oparray(fe TSRMLS_CC);
 		fprintf(stderr, "End of function %s.\n\n", fe->function_name);
 	}
 
@@ -214,7 +202,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		vld_dump_oparray (op_array);
+		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
 	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
