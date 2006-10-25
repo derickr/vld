@@ -1,3 +1,13 @@
+Wed Oct 25 16:44:22 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_vld.h
+vle/srm_oparray.c
+vle/srm_oparray.h
+vle/vld.c:
+- Added multiple verbosity levels for dumping out information of different
+  kinds.
+- Added Ilia's patch to add extra verbosity as level 3.
+- Added Ilia's patch to fix include's OP2 printing.
+
 Thu Oct 19 22:39:12 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c
 vle/vld.c:
