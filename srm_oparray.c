@@ -17,10 +17,10 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.45 2006-11-06 15:00:25 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.46 2006-11-06 17:56:12 derick Exp $ */
 
-#include "zend_alloc.h"
 #include "php.h"
+#include "zend_alloc.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
 #include "set.h"
