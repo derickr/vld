@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.44 2006-10-25 14:44:22 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.45 2006-11-06 15:00:25 derick Exp $ */
 
 #include "zend_alloc.h"
 #include "php.h"
@@ -306,7 +306,7 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
-			fprintf (stderr, "!%d", node.u.var / sizeof(temp_variable));
+			fprintf (stderr, "!%d", node.u.var);
 			break;
 #endif
 		case VLD_IS_OPNUM:
