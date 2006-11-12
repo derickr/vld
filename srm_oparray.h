@@ -16,7 +16,7 @@
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.h,v 1.16 2006-10-25 14:44:22 derick Exp $ */
+/* $Id: srm_oparray.h,v 1.17 2006-11-12 13:45:03 helly Exp $ */
 
 #ifndef VLD_OPARRAY_H
 #define VLD_OPARRAY_H
@@ -50,7 +50,7 @@ typedef struct _op_usage {
 	zend_uint flags;
 } op_usage;
 
-void vld_dump_oparray (zend_op_array *opa);
+void vld_dump_oparray (zend_op_array *opa TSRMLS_DC);
 void vld_mark_dead_code (zend_op_array *opa);
 
 #endif
