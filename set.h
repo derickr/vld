@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: set.h,v 1.1 2006-09-26 09:40:26 derick Exp $ */
+/* $Id: set.h,v 1.2 2006-11-12 13:59:53 helly Exp $ */
 
 #ifndef __SET_H__
 #define __SET_H__
@@ -36,5 +36,6 @@ void vld_set_remove(vld_set *set, unsigned int position);
 #define vld_set_in(x,y) vld_set_in_ex(x,y,1)
 int vld_set_in_ex(vld_set *set, unsigned int position, int noisy);
 void vld_set_dump(vld_set *set);
+void vld_set_free(vld_set *set);
 
 #endif

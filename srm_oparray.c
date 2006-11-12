@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.46 2006-11-06 17:56:12 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.47 2006-11-12 13:59:53 helly Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -542,7 +542,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 	fprintf (stderr, "\n");
 }
 
-void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set);
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC);
 
 void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 {
@@ -551,7 +551,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
 	set = vld_set_create(opa->size);
-	vld_analyse_branch(opa, 0, set); 
+	vld_analyse_branch(opa, 0, set TSRMLS_CC);
 
 	fprintf (stderr, "filename:       %s\n", opa->filename);
 	fprintf (stderr, "function name:  %s\n", opa->function_name);
@@ -622,9 +622,8 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1,
 	return 0;
 }
 
-void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC)
 {
-	unsigned int jump_found = 0;
 	int jump_pos1 = -1;
 	int jump_pos2 = -1;
 
@@ -646,9 +645,9 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set)
 			} else {
 				VLD_PRINT(1, "\n");
 			}
-			vld_analyse_branch(opa, jump_pos1, set);
+			vld_analyse_branch(opa, jump_pos1, set TSRMLS_CC);
 			if (jump_pos2 != -1) {
-				vld_analyse_branch(opa, jump_pos2, set);
+				vld_analyse_branch(opa, jump_pos2, set TSRMLS_CC);
 			}
 			break;
 		}
