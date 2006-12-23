@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.47 2006-11-12 13:59:53 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.48 2006-12-23 20:04:40 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -591,7 +591,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1,
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
+#ifdef ZEND_ENGINE_2
 		*jmp1 = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
+#else
+		*jmp1 = opcode.op1.u.opline_num;
+#endif
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -600,7 +604,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1,
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
+#ifdef ZEND_ENGINE_2
 		*jmp2 = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
+#else
+		*jmp2 = opcode.op1.u.opline_num;
+#endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		*jmp1 = opcode.op2.u.opline_num;
