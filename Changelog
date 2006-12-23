@@ -1,3 +1,7 @@
+Sat Dec 23 21:04:40 CET 2006 Derick Rethans <derick@derickrethans.nl>
+srm_oparray.c:
+- PHP 4.4 compatibility.
+
 Mon Nov 06 18:56:12 CET 2006 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - Make this compile with PHP 4.4 as well.
