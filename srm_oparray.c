@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.48 2006-12-23 20:04:40 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.49 2007-01-17 21:14:11 sarag Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -112,8 +112,13 @@ static const op_usage opcodes[] = {
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
 	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED | OP2_INCLUDE },
 	/*  74 */	{ "UNSET_VAR", ALL_USED },
+#ifdef ZEND_ENGINE_2
+	/*  75 */	{ "UNSET_DIM", ALL_USED },
+	/*  76 */	{ "UNSET_OBJ", ALL_USED },
+#else
 	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
 	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
+#endif
 	/*  77 */	{ "FE_RESET", SPECIAL },
 	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
 	/*  79 */	{ "EXIT", ALL_USED },
@@ -145,8 +150,8 @@ static const op_usage opcodes[] = {
 	/*  105 */	{ "TICKS", ALL_USED },
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED },
 #ifdef ZEND_ENGINE_2
-	/*  107 */	{ "ZEND_CATCH", ALL_USED },
-	/*  108 */	{ "ZEND_THROW", ALL_USED },
+	/*  107 */	{ "ZEND_CATCH", ALL_USED | EXT_VAL },
+	/*  108 */	{ "ZEND_THROW", ALL_USED | EXT_VAL },
 	
 	/*  109 */	{ "ZEND_FETCH_CLASS", SPECIAL },
 	
@@ -156,8 +161,8 @@ static const op_usage opcodes[] = {
 	/*  112 */	{ "ZEND_INIT_METHOD_CALL", ALL_USED },
 	/*  113 */	{ "ZEND_INIT_STATIC_METHOD_CALL", ALL_USED },
 	
-	/*  114 */	{ "ZEND_ISSET_ISEMPTY_VAR", ALL_USED },
-	/*  115 */	{ "ZEND_ISSET_ISEMPTY_DIM_OBJ", ALL_USED },
+	/*  114 */	{ "ZEND_ISSET_ISEMPTY_VAR", ALL_USED | EXT_VAL },
+	/*  115 */	{ "ZEND_ISSET_ISEMPTY_DIM_OBJ", ALL_USED | EXT_VAL },
 	
 	/*  116 */	{ "ZEND_IMPORT_FUNCTION", ALL_USED },
 	/*  117 */	{ "ZEND_IMPORT_CLASS", ALL_USED },
@@ -556,8 +561,14 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	fprintf (stderr, "filename:       %s\n", opa->filename);
 	fprintf (stderr, "function name:  %s\n", opa->function_name);
 	fprintf (stderr, "number of ops:  %d\n", opa->last);
+#ifdef IS_CV /* PHP >= 5.1 */
+	fprintf (stderr, "compiled vars:  ");
+	for (i = 0; i < opa->last_var; i++) {
+		fprintf (stderr, "!%d = $%s%s", i, opa->vars[i].name, ((i + 1) == opa->last_var) ? "\n" : ", ");
+	}
+#endif
 
-    fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
+	fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->last; i++) {
 		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
