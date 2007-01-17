@@ -1,3 +1,6 @@
+Wed Jan 17 22:14:11 CET 2007 Sara Goleman <vld@golemon.com>
+srm_oparray.c:
+PHP5 renamed opcodes, extra info for throw/catch, and display CV names
 Sat Dec 23 21:04:40 CET 2006 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - PHP 4.4 compatibility.
