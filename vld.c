@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.21 2006-10-25 14:44:22 derick Exp $ */
+/* $Id: vld.c,v 1.22 2007-02-22 09:21:37 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -30,6 +30,9 @@
 
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
+
+static zend_op_array* (*old_compile_string)(zval *source_string, char *filename TSRMLS_DC);
+static zend_op_array* vld_compile_string(zval *source_string, char *filename TSRMLS_DC);
 
 static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
@@ -94,8 +97,9 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 {
 	UNREGISTER_INI_ENTRIES();
 
-	zend_compile_file = old_compile_file;
-	zend_execute      = old_execute;
+	zend_compile_file   = old_compile_file;
+	zend_compile_string = old_compile_string;
+	zend_execute        = old_execute;
 
 	return SUCCESS;
 }
@@ -105,12 +109,14 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 PHP_RINIT_FUNCTION(vld)
 {
 	old_compile_file = zend_compile_file;
+	old_compile_string = zend_compile_string;
 	old_execute = zend_execute;
 
 	if (VLD_G(active)) {
 		zend_compile_file = vld_compile_file;
+		zend_compile_string = vld_compile_string;
 		if (!VLD_G(execute)) {
-			zend_execute      = vld_execute;
+			zend_execute = vld_execute;
 		}
 	}
 	return SUCCESS;
@@ -203,6 +209,32 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);
+	}
+
+	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
+	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+
+	return op_array;
+}
+/* }}} */
+
+/* {{{ zend_op_array vld_compile_string (source_string, filename)
+ *    This function provides a hook for compilation */
+static zend_op_array *vld_compile_string(zval *source_string, char *filename TSRMLS_DC)
+{
+	zend_op_array *op_array;
+
+	if (!VLD_G(execute))
+	{
+		zval nop;
+		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
+		return compile_string(&nop, "NOP" TSRMLS_CC);;
+	}
+
+	op_array = old_compile_string (source_string, filename TSRMLS_CC);
+
+	if (op_array) {
+		vld_dump_oparray (op_array);
 	}
 
 	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
