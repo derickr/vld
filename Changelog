@@ -1,3 +1,7 @@
+Thu Feb 22 10:21:37 CET 2007 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Added support for dumping opcodes for eval() as well.
+
 Wed Jan 17 22:14:11 CET 2007 Sara Goleman <vld@golemon.com>
 srm_oparray.c:
 PHP5 renamed opcodes, extra info for throw/catch, and display CV names
