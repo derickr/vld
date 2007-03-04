@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.23 2007-03-04 15:40:19 helly Exp $ */
+/* $Id: vld.c,v 1.24 2007-03-04 16:01:57 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -223,13 +223,6 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 static zend_op_array *vld_compile_string(zval *source_string, char *filename TSRMLS_DC)
 {
 	zend_op_array *op_array;
-
-	if (!VLD_G(execute))
-	{
-		zval nop;
-		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
-		return compile_string(&nop, "NOP" TSRMLS_CC);;
-	}
 
 	op_array = old_compile_string (source_string, filename TSRMLS_CC);
 
