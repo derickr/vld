@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.22 2007-02-22 09:21:37 derick Exp $ */
+/* $Id: vld.c,v 1.23 2007-03-04 15:40:19 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -234,7 +234,7 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 	op_array = old_compile_string (source_string, filename TSRMLS_CC);
 
 	if (op_array) {
-		vld_dump_oparray (op_array);
+		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
 	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
