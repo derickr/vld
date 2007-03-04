@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.49 2007-01-17 21:14:11 sarag Exp $ */
+/* $Id: srm_oparray.c,v 1.50 2007-03-04 23:57:54 helly Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -285,9 +285,11 @@ void vld_dump_zval (zval val)
 
 int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC)
 {
+	int len = 0;
+
 	if (node.op_type != IS_UNUSED && print_sep) {
 		if (*print_sep) {
-			fprintf (stderr, ", ");
+			len += fprintf (stderr, ", ");
 		}
 		*print_sep = 1;
 	}
@@ -302,46 +304,46 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
-			fprintf (stderr, "~%d", node.u.var / sizeof(temp_variable));
+			len += fprintf (stderr, "~%d", node.u.var / sizeof(temp_variable));
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
-			fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
+			len += fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
-			fprintf (stderr, "!%d", node.u.var);
+			len += fprintf (stderr, "!%d", node.u.var);
 			break;
 #endif
 		case VLD_IS_OPNUM:
-			fprintf (stderr, "->%d", node.u.opline_num);
+			len += fprintf (stderr, "->%d", node.u.opline_num);
 			break;
 		case VLD_IS_OPLINE:
-			fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
+			len += fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
 			break;
 		case VLD_IS_CLASS:
-			fprintf (stderr, ":%d", node.u.var / sizeof(temp_variable));
+			len += fprintf (stderr, ":%d", node.u.var / sizeof(temp_variable));
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
-			fprintf (stderr, "~%d", node.u.var);
+			len += fprintf (stderr, "~%d", node.u.var);
 			break;
 		case IS_VAR: /* 4 */
-			fprintf (stderr, "$%d", node.u.var);
+			len += fprintf (stderr, "$%d", node.u.var);
 			break;           
 		case VLD_IS_OPNUM:
 		case VLD_IS_OPLINE:
-			fprintf (stderr, "->%d", node.u.opline_num);
+			len += fprintf (stderr, "->%d", node.u.opline_num);
 			break;
 		case VLD_IS_CLASS:
-			fprintf (stderr, ":%d", node.u.var);
+			len += fprintf (stderr, ":%d", node.u.var);
 			break;
 #endif
 		default:
 			return 0;
 	}
-	return 1;
+	return len;
 }
 
 static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
@@ -418,7 +420,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead TSRMLS_DC)
 {
 	static uint last_lineno = -1;
-	int print_sep = 0;
+	int print_sep = 0, len;
 	char *fetch_type = "";
 	zend_uint flags;
 	zend_op op = op_ptr[nr];
@@ -498,10 +500,12 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
 		VLD_PRINT(3, " RES[ ");
-		vld_dump_znode (&print_sep, op.result, base_address TSRMLS_CC);
+		len = vld_dump_znode (&print_sep, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
+		fprintf(stderr, "%*s", 8-len, " ");
+		print_sep = 0;
 	} else {
-		fprintf(stderr, "    ");
+		fprintf(stderr, "        ");
 	}
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
@@ -566,9 +570,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	for (i = 0; i < opa->last_var; i++) {
 		fprintf (stderr, "!%d = $%s%s", i, opa->vars[i].name, ((i + 1) == opa->last_var) ? "\n" : ", ");
 	}
+	if (!opa->last_var) {
+		fprintf(stderr, "none\n");
+	}
 #endif
 
-	fprintf(stderr, "line     #  op                           fetch          ext  operands\n");
+	fprintf(stderr, "line     #  op                           fetch          ext  return  operands\n");
 	fprintf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->last; i++) {
 		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
