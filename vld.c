@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.24 2007-03-04 16:01:57 helly Exp $ */
+/* $Id: vld.c,v 1.25 2007-03-04 16:09:15 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,6 +27,12 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
+
+#if PHP_VERSION_ID >= 60000
+#define ZSTRCP(str) ((str).s)
+#else
+#define ZSTRCP(str) (str)
+#endif
 
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
@@ -153,9 +159,9 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		fprintf(stderr, "Function %s:\n", fe->function_name);
+		fprintf(stderr, "Function %s:\n", ZSTRCP(fe->function_name));
 		vld_dump_oparray(fe TSRMLS_CC);
-		fprintf(stderr, "End of function %s.\n\n", fe->function_name);
+		fprintf(stderr, "End of function %s.\n\n", ZSTRCP(fe->function_name));
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -179,11 +185,11 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	if (ce->type != ZEND_INTERNAL_CLASS) {	
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
-			fprintf(stderr, "Class %s:\n", ce->name);
+			fprintf(stderr, "Class %s:\n", ZSTRCP(ce->name));
 			zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
-			fprintf(stderr, "End of class %s.\n\n", ce->name);
+			fprintf(stderr, "End of class %s.\n\n", ZSTRCP(ce->name));
 		} else {
-			fprintf(stderr, "Class %s: [no user functions]\n", ce->name);
+			fprintf(stderr, "Class %s: [no user functions]\n", ZSTRCP(ce->name));
 		}
 	}
 
