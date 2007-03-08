@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: php_vld.h,v 1.3 2006-10-25 14:44:22 derick Exp $ */
+/* $Id: php_vld.h,v 1.4 2007-03-08 18:47:14 helly Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
@@ -56,6 +56,12 @@ ZEND_END_MODULE_GLOBALS(vld)
 #define VLD_G(v) (vld_globals.v)
 #endif
 #define VLD_PRINT(v,args...) if (VLD_G(verbosity) >= (v)) { fprintf(stderr, args); }
+
+#if PHP_VERSION_ID >= 60000
+#define ZSTRCP(str) ((str).s)
+#else
+#define ZSTRCP(str) (str)
+#endif
 
 #endif
 

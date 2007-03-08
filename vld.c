@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.25 2007-03-04 16:09:15 helly Exp $ */
+/* $Id: vld.c,v 1.26 2007-03-08 18:47:14 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,12 +27,6 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
-
-#if PHP_VERSION_ID >= 60000
-#define ZSTRCP(str) ((str).s)
-#else
-#define ZSTRCP(str) (str)
-#endif
 
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);

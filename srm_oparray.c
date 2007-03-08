@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.50 2007-03-04 23:57:54 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.51 2007-03-08 18:47:14 helly Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -207,79 +207,90 @@ static const op_usage opcodes[] = {
 	/*  147 */	{ "ZEND_ASSIGN_DIM", ALL_USED },
 	/*  148 */	{ "ZEND_ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", NONE_USED },
+#ifdef ZEND_USER_OPCODE
+	/*  150 */	{ "ZEND_USER_OPCODE", ALL_USED },
+#ifdef ZEND_U_NORMALIZE
+	/*  151 */  { "ZEND_U_NORMALIZE", RES_USED | OP1_USED },
+#ifdef ZEND_JMP_SET
+	/*  152 */	{ "ZEND_JMP_SET", ALL_USED | OP2_OPLINE },
+#endif
+#endif
+#endif
 #endif
 };
 
-inline void vld_dump_zval_null(zvalue_value value)
+inline int vld_dump_zval_null(zvalue_value value)
 {
-	fprintf (stderr, "null");
+	return fprintf (stderr, "null");
 }
 
-inline void vld_dump_zval_long(zvalue_value value)
+inline int vld_dump_zval_long(zvalue_value value)
 {
-	fprintf (stderr, "%ld", value.lval);
+	return fprintf (stderr, "%ld", value.lval);
 }
 
-inline void vld_dump_zval_double(zvalue_value value)
+inline int vld_dump_zval_double(zvalue_value value)
 {
-	fprintf (stderr, "%g", value.dval);
+	return fprintf (stderr, "%g", value.dval);
 }
 
-inline void vld_dump_zval_string(zvalue_value value)
+inline int vld_dump_zval_string(zvalue_value value)
 {
 	char *new_str;
-	int new_len;
+	int new_len, len;
 
 	new_str = php_url_encode(value.str.val, value.str.len, &new_len);
-	fprintf (stderr, "'%s'", new_str);
+	len = fprintf (stderr, "'%s'", new_str);
 	efree(new_str);
+	return len;
 }
 
-inline void vld_dump_zval_array(zvalue_value value)
+inline int vld_dump_zval_array(zvalue_value value)
 {
-	fprintf (stderr, "<array>");
+	return fprintf (stderr, "<array>");
 }
 
-inline void vld_dump_zval_object(zvalue_value value)
+inline int vld_dump_zval_object(zvalue_value value)
 {
-	fprintf (stderr, "<object>");
+	return fprintf (stderr, "<object>");
 }
 
-inline void vld_dump_zval_bool(zvalue_value value)
+inline int vld_dump_zval_bool(zvalue_value value)
 {
-	fprintf (stderr, value.lval ? "true" : "false");
+	return fprintf (stderr, value.lval ? "true" : "false");
 }
 
-inline void vld_dump_zval_resource(zvalue_value value)
+inline int vld_dump_zval_resource(zvalue_value value)
 {
-	fprintf (stderr, "<resource>");
+	return fprintf (stderr, "<resource>");
 }
 
-inline void vld_dump_zval_constant(zvalue_value value)
+inline int vld_dump_zval_constant(zvalue_value value)
 {
-	fprintf (stderr, "<const>");
+	return fprintf (stderr, "<const>");
 }
 
-inline void vld_dump_zval_constant_array(zvalue_value value)
+inline int vld_dump_zval_constant_array(zvalue_value value)
 {
-	fprintf (stderr, "<const array>");
+	return fprintf (stderr, "<const array>");
 }
 
 
-void vld_dump_zval (zval val)
+int vld_dump_zval (zval val)
 {
 	switch (val.type) {
-		case IS_NULL:           vld_dump_zval_null (val.value);           break;
-		case IS_LONG:           vld_dump_zval_long (val.value);           break;
-		case IS_DOUBLE:         vld_dump_zval_double (val.value);         break;
-		case IS_STRING:         vld_dump_zval_string (val.value);         break;
-		case IS_ARRAY:          vld_dump_zval_array (val.value);          break;
-		case IS_OBJECT:         vld_dump_zval_object (val.value);         break;
-		case IS_BOOL:           vld_dump_zval_bool (val.value);           break;
-		case IS_RESOURCE:       vld_dump_zval_resource (val.value);       break;
-		case IS_CONSTANT:       vld_dump_zval_constant (val.value);       break;
-		case IS_CONSTANT_ARRAY: vld_dump_zval_constant_array (val.value); break;
+		case IS_NULL:           return vld_dump_zval_null (val.value);
+		case IS_LONG:           return vld_dump_zval_long (val.value);
+		case IS_DOUBLE:         return vld_dump_zval_double (val.value);
+		case IS_STRING:         return vld_dump_zval_string (val.value);
+		case IS_ARRAY:          return vld_dump_zval_array (val.value);
+		case IS_OBJECT:         return vld_dump_zval_object (val.value);
+		case IS_BOOL:           return vld_dump_zval_bool (val.value);
+		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
+		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
+		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
 	}
+	return fprintf(stderr, "<unknown>");
 }
 
 
@@ -500,10 +511,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
 		VLD_PRINT(3, " RES[ ");
-		len = vld_dump_znode (&print_sep, op.result, base_address TSRMLS_CC);
+		len = vld_dump_znode (NULL, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
 		fprintf(stderr, "%*s", 8-len, " ");
-		print_sep = 0;
 	} else {
 		fprintf(stderr, "        ");
 	}
@@ -563,12 +573,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	vld_analyse_branch(opa, 0, set TSRMLS_CC);
 
 	fprintf (stderr, "filename:       %s\n", opa->filename);
-	fprintf (stderr, "function name:  %s\n", opa->function_name);
+	fprintf (stderr, "function name:  %s\n", ZSTRCP(opa->function_name));
 	fprintf (stderr, "number of ops:  %d\n", opa->last);
 #ifdef IS_CV /* PHP >= 5.1 */
 	fprintf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
-		fprintf (stderr, "!%d = $%s%s", i, opa->vars[i].name, ((i + 1) == opa->last_var) ? "\n" : ", ");
+		fprintf (stderr, "!%d = $%s%s", i, ZSTRCP(opa->vars[i].name), ((i + 1) == opa->last_var) ? "\n" : ", ");
 	}
 	if (!opa->last_var) {
 		fprintf(stderr, "none\n");
