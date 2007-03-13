@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: php_vld.h,v 1.4 2007-03-08 18:47:14 helly Exp $ */
+/* $Id: php_vld.h,v 1.5 2007-03-13 22:21:57 helly Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
@@ -49,18 +49,21 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int verbosity;
 ZEND_END_MODULE_GLOBALS(vld) 
 
+int vld_printf(FILE *stream, const char* fmt, ...);
 
 #ifdef ZTS
 #define VLD_G(v) TSRMG(vld_globals_id, zend_vld_globals *, v)
 #else
 #define VLD_G(v) (vld_globals.v)
 #endif
-#define VLD_PRINT(v,args...) if (VLD_G(verbosity) >= (v)) { fprintf(stderr, args); }
+#define VLD_PRINT(v,args...) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args); }
 
 #if PHP_VERSION_ID >= 60000
-#define ZSTRCP(str) ((str).s)
+#define ZSTRCP(str) ((str).v)
+#define ZSTRFMT     "%v"
 #else
 #define ZSTRCP(str) (str)
+#define ZSTRFMT     "%s"
 #endif
 
 #endif

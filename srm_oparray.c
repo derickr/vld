@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.51 2007-03-08 18:47:14 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.52 2007-03-13 22:21:57 helly Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -221,17 +221,17 @@ static const op_usage opcodes[] = {
 
 inline int vld_dump_zval_null(zvalue_value value)
 {
-	return fprintf (stderr, "null");
+	return vld_printf (stderr, "null");
 }
 
 inline int vld_dump_zval_long(zvalue_value value)
 {
-	return fprintf (stderr, "%ld", value.lval);
+	return vld_printf (stderr, "%ld", value.lval);
 }
 
 inline int vld_dump_zval_double(zvalue_value value)
 {
-	return fprintf (stderr, "%g", value.dval);
+	return vld_printf (stderr, "%g", value.dval);
 }
 
 inline int vld_dump_zval_string(zvalue_value value)
@@ -240,39 +240,49 @@ inline int vld_dump_zval_string(zvalue_value value)
 	int new_len, len;
 
 	new_str = php_url_encode(value.str.val, value.str.len, &new_len);
-	len = fprintf (stderr, "'%s'", new_str);
+	len = vld_printf (stderr, "'%s'", new_str);
 	efree(new_str);
 	return len;
 }
 
+#if PHP_VERSION_ID >= 60000
+inline int vld_dump_zval_unicode(zvalue_value value)
+{
+	int len;
+	
+	len = vld_printf(stderr, "%R", IS_UNICODE, value.ustr.val);
+	return len;
+}
+#endif
+
 inline int vld_dump_zval_array(zvalue_value value)
 {
-	return fprintf (stderr, "<array>");
+	return vld_printf (stderr, "<array>");
 }
 
 inline int vld_dump_zval_object(zvalue_value value)
 {
-	return fprintf (stderr, "<object>");
+	return vld_printf (stderr, "<object>");
 }
 
 inline int vld_dump_zval_bool(zvalue_value value)
 {
-	return fprintf (stderr, value.lval ? "true" : "false");
+	return vld_printf (stderr, value.lval ? "true" : "false");
 }
 
 inline int vld_dump_zval_resource(zvalue_value value)
 {
-	return fprintf (stderr, "<resource>");
+	return vld_printf (stderr, "<resource>");
 }
 
 inline int vld_dump_zval_constant(zvalue_value value)
 {
-	return fprintf (stderr, "<const>");
+	return vld_printf (stderr, "<const>");
 }
 
 inline int vld_dump_zval_constant_array(zvalue_value value)
 {
-	return fprintf (stderr, "<const array>");
+	return vld_printf (stderr, "<const array>");
 }
 
 
@@ -289,8 +299,11 @@ int vld_dump_zval (zval val)
 		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
 		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
 		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
+#if PHP_VERSION_ID >= 60000
+		case IS_UNICODE:        return vld_dump_zval_unicode (val.value);
+#endif
 	}
-	return fprintf(stderr, "<unknown>");
+	return vld_printf(stderr, "<unknown>");
 }
 
 
@@ -300,7 +313,7 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC
 
 	if (node.op_type != IS_UNUSED && print_sep) {
 		if (*print_sep) {
-			len += fprintf (stderr, ", ");
+			len += vld_printf (stderr, ", ");
 		}
 		*print_sep = 1;
 	}
@@ -315,40 +328,40 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
-			len += fprintf (stderr, "~%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, "~%d", node.u.var / sizeof(temp_variable));
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
-			len += fprintf (stderr, "$%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, "$%d", node.u.var / sizeof(temp_variable));
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
-			len += fprintf (stderr, "!%d", node.u.var);
+			len += vld_printf (stderr, "!%d", node.u.var);
 			break;
 #endif
 		case VLD_IS_OPNUM:
-			len += fprintf (stderr, "->%d", node.u.opline_num);
+			len += vld_printf (stderr, "->%d", node.u.opline_num);
 			break;
 		case VLD_IS_OPLINE:
-			len += fprintf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
+			len += vld_printf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
 			break;
 		case VLD_IS_CLASS:
-			len += fprintf (stderr, ":%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, ":%d", node.u.var / sizeof(temp_variable));
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
-			len += fprintf (stderr, "~%d", node.u.var);
+			len += vld_printf (stderr, "~%d", node.u.var);
 			break;
 		case IS_VAR: /* 4 */
-			len += fprintf (stderr, "$%d", node.u.var);
+			len += vld_printf (stderr, "$%d", node.u.var);
 			break;           
 		case VLD_IS_OPNUM:
 		case VLD_IS_OPLINE:
-			len += fprintf (stderr, "->%d", node.u.opline_num);
+			len += vld_printf (stderr, "->%d", node.u.opline_num);
 			break;
 		case VLD_IS_CLASS:
-			len += fprintf (stderr, ":%d", node.u.var);
+			len += vld_printf (stderr, ":%d", node.u.var);
 			break;
 #endif
 		default:
@@ -380,9 +393,10 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_FCALL:
-			flags = ALL_USED | EXT_VAL;
+			flags = OP1_USED | EXT_VAL;
+			/*flags = ALL_USED | EXT_VAL;
 			op->op2.op_type = IS_CONST;
-			op->op2.u.constant.type = IS_LONG;
+			op->op2.u.constant.type = IS_LONG;*/
 			break;
 
 		case ZEND_INIT_FCALL_BY_NAME:
@@ -477,6 +491,16 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 			case ZEND_FETCH_STATIC_MEMBER:
 				fetch_type = "static member";
 				break;
+#ifdef ZEND_FETCH_GLOBAL_LOCK
+			case ZEND_FETCH_GLOBAL_LOCK:
+				fetch_type = "global lock";
+				break;
+#endif
+#ifdef ZEND_FETCH_AUTO_GLOBAL
+			case ZEND_FETCH_AUTO_GLOBAL:
+				fetch_type = "auto global";
+				break;
+#endif
 			default:
 				fetch_type = "unknown";
 				break;
@@ -491,31 +515,31 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 	}
 
 	if (op.lineno == last_lineno) {
-		fprintf(stderr, "     ");
+		vld_printf(stderr, "     ");
 	} else {
-		fprintf(stderr, "%4d ", op.lineno);
+		vld_printf(stderr, "%4d ", op.lineno);
 		last_lineno = op.lineno;
 	}
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
-		fprintf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
+		vld_printf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
 	} else {
-		fprintf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
+		vld_printf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
 	}
 
 	if (flags & EXT_VAL) {
-		fprintf(stderr, "%3ld  ", op.extended_value);
+		vld_printf(stderr, "%3ld  ", op.extended_value);
 	} else {
-		fprintf(stderr, "     ");
+		vld_printf(stderr, "     ");
 	}
 
 	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
 		VLD_PRINT(3, " RES[ ");
 		len = vld_dump_znode (NULL, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
-		fprintf(stderr, "%*s", 8-len, " ");
+		vld_printf(stderr, "%*s", 8-len, " ");
 	} else {
-		fprintf(stderr, "        ");
+		vld_printf(stderr, "        ");
 	}
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
@@ -526,26 +550,26 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 		VLD_PRINT(3, " OP2[ ");
 		if (flags & OP2_INCLUDE) {
 			if (VLD_G(verbosity) < 3 && print_sep) {
-				fprintf(stderr, ", ");
+				vld_printf(stderr, ", ");
 			}
 			switch (Z_LVAL(op.op2.u.constant)) {
 				case ZEND_INCLUDE_ONCE:
-					fprintf(stderr, "INCLUDE_ONCE");
+					vld_printf(stderr, "INCLUDE_ONCE");
 					break;
 				case ZEND_REQUIRE_ONCE:
-					fprintf(stderr, "REQUIRE_ONCE");
+					vld_printf(stderr, "REQUIRE_ONCE");
 					break;
 				case ZEND_INCLUDE:
-					fprintf(stderr, "INCLUDE");
+					vld_printf(stderr, "INCLUDE");
 					break;
 				case ZEND_REQUIRE:
-					fprintf(stderr, "REQUIRE");
+					vld_printf(stderr, "REQUIRE");
 					break;
 				case ZEND_EVAL:
-					fprintf(stderr, "EVAL");
+					vld_printf(stderr, "EVAL");
 					break;
 				default:
-					fprintf(stderr, "!!ERROR!!");
+					vld_printf(stderr, "!!ERROR!!");
 					break;
 			}
 		} else {
@@ -558,7 +582,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 		next_op.op2.op_type = VLD_IS_OPNUM;
 		vld_dump_znode (&print_sep, next_op.op2, base_address TSRMLS_CC);
 	}
-	fprintf (stderr, "\n");
+	vld_printf (stderr, "\n");
 }
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC);
@@ -572,25 +596,25 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	set = vld_set_create(opa->size);
 	vld_analyse_branch(opa, 0, set TSRMLS_CC);
 
-	fprintf (stderr, "filename:       %s\n", opa->filename);
-	fprintf (stderr, "function name:  %s\n", ZSTRCP(opa->function_name));
-	fprintf (stderr, "number of ops:  %d\n", opa->last);
+	vld_printf (stderr, "filename:       %s\n", opa->filename);
+	vld_printf (stderr, "function name:  " ZSTRFMT "\n", ZSTRCP(opa->function_name));
+	vld_printf (stderr, "number of ops:  %d\n", opa->last);
 #ifdef IS_CV /* PHP >= 5.1 */
-	fprintf (stderr, "compiled vars:  ");
+	vld_printf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
-		fprintf (stderr, "!%d = $%s%s", i, ZSTRCP(opa->vars[i].name), ((i + 1) == opa->last_var) ? "\n" : ", ");
+		vld_printf (stderr, "!%d = $" ZSTRFMT "%s", i, ZSTRCP(opa->vars[i].name), ((i + 1) == opa->last_var) ? "\n" : ", ");
 	}
 	if (!opa->last_var) {
-		fprintf(stderr, "none\n");
+		vld_printf(stderr, "none\n");
 	}
 #endif
 
-	fprintf(stderr, "line     #  op                           fetch          ext  return  operands\n");
-	fprintf(stderr, "-------------------------------------------------------------------------------\n");
+	vld_printf(stderr, "line     #  op                           fetch          ext  return  operands\n");
+	vld_printf(stderr, "-------------------------------------------------------------------------------\n");
 	for (i = 0; i < opa->last; i++) {
 		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
 	}
-	fprintf(stderr, "\n");
+	vld_printf(stderr, "\n");
 	vld_set_free(set);
 }
 

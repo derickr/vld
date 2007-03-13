@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.26 2007-03-08 18:47:14 helly Exp $ */
+/* $Id: vld.c,v 1.27 2007-03-13 22:21:57 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -141,6 +141,22 @@ PHP_MINFO_FUNCTION(vld)
 
 }
 
+int vld_printf(FILE *stream, const char* fmt, ...)
+{
+	char *message;
+	int len;
+	va_list args;
+	
+	va_start(args, fmt);
+	len = vspprintf(&message, 0, fmt, args);
+	va_end(args);
+
+	fprintf(stream, "%s", message);
+	efree(message);
+	
+	return len;
+}
+
 static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
@@ -153,9 +169,9 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		fprintf(stderr, "Function %s:\n", ZSTRCP(fe->function_name));
+		vld_printf(stderr, "Function " ZSTRFMT ":\n", ZSTRCP(fe->function_name));
 		vld_dump_oparray(fe TSRMLS_CC);
-		fprintf(stderr, "End of function %s.\n\n", ZSTRCP(fe->function_name));
+		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", ZSTRCP(fe->function_name));
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -179,11 +195,11 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	if (ce->type != ZEND_INTERNAL_CLASS) {	
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
-			fprintf(stderr, "Class %s:\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "Class " ZSTRFMT ":\n", ZSTRCP(ce->name));
 			zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
-			fprintf(stderr, "End of class %s.\n\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "End of class " ZSTRFMT ".\n\n", ZSTRCP(ce->name));
 		} else {
-			fprintf(stderr, "Class %s: [no user functions]\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "Class " ZSTRFMT ": [no user functions]\n", ZSTRCP(ce->name));
 		}
 	}
 
