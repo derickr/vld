@@ -1,3 +1,7 @@
+Sun May 06 15:16:29 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Added showing of INI entries in phpinfo() output.
+
 Thu Feb 22 10:21:37 CET 2007 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - Added support for dumping opcodes for eval() as well.
