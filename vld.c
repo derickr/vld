@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.27 2007-03-13 22:21:57 helly Exp $ */
+/* $Id: vld.c,v 1.28 2007-05-06 13:16:29 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -138,6 +138,8 @@ PHP_MINFO_FUNCTION(vld)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "vld support", "enabled");
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 
 }
 
