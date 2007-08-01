@@ -1,3 +1,7 @@
+Wed Aug 01 09:12:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- zend_compile_string is only in PHP 5.2 and higher. (Patch by Gopal)
+
 Sun May 06 15:16:29 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - Added showing of INI entries in phpinfo() output.
