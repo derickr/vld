@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.28 2007-05-06 13:16:29 derick Exp $ */
+/* $Id: vld.c,v 1.29 2007-08-01 07:12:20 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,7 +98,9 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 	UNREGISTER_INI_ENTRIES();
 
 	zend_compile_file   = old_compile_file;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
 	zend_compile_string = old_compile_string;
+#endif
 	zend_execute        = old_execute;
 
 	return SUCCESS;
@@ -109,12 +111,16 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 PHP_RINIT_FUNCTION(vld)
 {
 	old_compile_file = zend_compile_file;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
 	old_compile_string = zend_compile_string;
+#endif
 	old_execute = zend_execute;
 
 	if (VLD_G(active)) {
 		zend_compile_file = vld_compile_file;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
 		zend_compile_string = vld_compile_string;
+#endif
 		if (!VLD_G(execute)) {
 			zend_execute = vld_execute;
 		}
