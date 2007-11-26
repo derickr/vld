@@ -1,3 +1,7 @@
+Mon Nov 26 10:01:28 CET 2007 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Fix for when functions are conditionally defined. (Patch by Damjan Cvetko).
+
 Wed Aug 01 09:12:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - zend_compile_string is only in PHP 5.2 and higher. (Patch by Gopal)
