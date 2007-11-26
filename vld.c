@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.29 2007-08-01 07:12:20 derick Exp $ */
+/* $Id: vld.c,v 1.30 2007-11-26 09:01:28 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -174,12 +174,17 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 	return 0;
 }
 
-static int vld_dump_fe (zend_op_array *fe TSRMLS_DC)
+static int vld_dump_fe (zend_op_array *fe, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
 {
 	if (fe->type == ZEND_USER_FUNCTION) {
-		vld_printf(stderr, "Function " ZSTRFMT ":\n", ZSTRCP(fe->function_name));
+		char *new_str;
+		int new_len;
+
+		new_str = php_url_encode(hash_key->arKey, hash_key->nKeyLength, &new_len);
+		vld_printf(stderr, "Function " ZSTRFMT ":\n", new_str);
 		vld_dump_oparray(fe TSRMLS_CC);
-		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", ZSTRCP(fe->function_name));
+		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", ZSTRCP(new_str));
+		efree(new_str);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -204,7 +209,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
 			vld_printf(stderr, "Class " ZSTRFMT ":\n", ZSTRCP(ce->name));
-			zend_hash_apply(&ce->function_table, (apply_func_t) vld_dump_fe TSRMLS_CC);
+			zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) vld_dump_fe, 0 TSRMLS_CC);
 			vld_printf(stderr, "End of class " ZSTRFMT ".\n\n", ZSTRCP(ce->name));
 		} else {
 			vld_printf(stderr, "Class " ZSTRFMT ": [no user functions]\n", ZSTRCP(ce->name));
@@ -235,7 +240,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
-	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
+	zend_hash_apply_with_arguments (CG(function_table), (apply_func_args_t) vld_dump_fe, 0 TSRMLS_CC);
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
 
 	return op_array;
