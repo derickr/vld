@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.52 2007-03-13 22:21:57 helly Exp $ */
+/* $Id: srm_oparray.c,v 1.53 2007-11-29 13:12:32 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -637,14 +637,14 @@ zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offse
 	return jmp_to;
 }
 
-int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1, unsigned int *jmp2)
+int vld_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp2)
 {
-	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+	zend_op *base_address = &(opa->opcodes[0]);
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 #ifdef ZEND_ENGINE_2
-		*jmp1 = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
+		*jmp1 = (opcode.op1.u.jmp_addr - base_address) / sizeof(zend_op);
 #else
 		*jmp1 = opcode.op1.u.opline_num;
 #endif
@@ -657,7 +657,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1,
 	) {
 		*jmp1 = position + 1;
 #ifdef ZEND_ENGINE_2
-		*jmp2 = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
+		*jmp2 = (opcode.op2.u.jmp_addr - base_address) / sizeof(zend_op);
 #else
 		*jmp2 = opcode.op1.u.opline_num;
 #endif
@@ -669,7 +669,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1,
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
 		zend_brk_cont_element *el;
 
-		if (opcode.op2.op_type == IS_CONST) {
+		if (opcode.op2.op_type == IS_CONST && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF) {
 			el = vld_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
