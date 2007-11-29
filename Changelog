@@ -1,3 +1,8 @@
+Thu Nov 29 14:13:44 CET 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+vle/package2.xml:
+- Updated package files for new release.
+
 Thu Nov 29 14:12:32 CET 2007 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - Some tweaks.
