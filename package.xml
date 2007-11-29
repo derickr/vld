@@ -18,10 +18,10 @@
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>0.8.0</version>
-    <date>2004-01-19</date>
+    <version>0.9.0</version>
+    <date>2007-11-29</date>
     <notes>
-Bring this up-to-date with latest PHP 5.1-dev.
+Lots of fixes and improvements.
     </notes>
     <filelist>
       <file role="src"  name="srm_oparray.h"/>
