@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.30 2007-11-26 09:01:28 derick Exp $ */
+/* $Id: vld.c,v 1.31 2008-01-06 16:44:06 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/url.h"
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
@@ -180,10 +181,10 @@ static int vld_dump_fe (zend_op_array *fe, int num_args, va_list args, zend_hash
 		char *new_str;
 		int new_len;
 
-		new_str = php_url_encode(hash_key->arKey, hash_key->nKeyLength, &new_len);
+		new_str = php_url_encode(ZSTRKEY(hash_key->arKey), hash_key->nKeyLength, &new_len);
 		vld_printf(stderr, "Function " ZSTRFMT ":\n", new_str);
 		vld_dump_oparray(fe TSRMLS_CC);
-		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", ZSTRCP(new_str));
+		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", new_str);
 		efree(new_str);
 	}
 
