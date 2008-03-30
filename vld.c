@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.31 2008-01-06 16:44:06 helly Exp $ */
+/* $Id: vld.c,v 1.32 2008-03-30 13:01:44 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,7 +56,7 @@ zend_module_entry vld_module_entry = {
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.8.0",
+	"0.9.0",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -181,7 +181,7 @@ static int vld_dump_fe (zend_op_array *fe, int num_args, va_list args, zend_hash
 		char *new_str;
 		int new_len;
 
-		new_str = php_url_encode(ZSTRKEY(hash_key->arKey), hash_key->nKeyLength, &new_len);
+		new_str = php_url_encode(ZSTRKEY(hash_key->arKey), hash_key->nKeyLength - 1, &new_len);
 		vld_printf(stderr, "Function " ZSTRFMT ":\n", new_str);
 		vld_dump_oparray(fe TSRMLS_CC);
 		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", new_str);

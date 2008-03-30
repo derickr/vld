@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.53 2007-11-29 13:12:32 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.54 2008-03-30 13:01:44 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -637,14 +637,14 @@ zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offse
 	return jmp_to;
 }
 
-int vld_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp2)
+int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
 	zend_op *base_address = &(opa->opcodes[0]);
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 #ifdef ZEND_ENGINE_2
-		*jmp1 = (opcode.op1.u.jmp_addr - base_address) / sizeof(zend_op);
+		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp1 = opcode.op1.u.opline_num;
 #endif
@@ -657,7 +657,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp
 	) {
 		*jmp1 = position + 1;
 #ifdef ZEND_ENGINE_2
-		*jmp2 = (opcode.op2.u.jmp_addr - base_address) / sizeof(zend_op);
+		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp2 = opcode.op1.u.opline_num;
 #endif
@@ -684,8 +684,8 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC)
 {
-	int jump_pos1 = -1;
-	int jump_pos2 = -1;
+	long jump_pos1 = -1;
+	long jump_pos2 = -1;
 
 	VLD_PRINT(1, "Branch analysis from position: %d\n", position);
 	/* First we see if the branch has been visited, if so we bail out. */
@@ -695,7 +695,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	VLD_PRINT(2, "Add %d\n", position);
 	vld_set_add(set, position);
-	while (position < opa->size - 1) {
+	while (position < opa->size) {
 
 		/* See if we have a jump instruction */
 		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
@@ -717,7 +717,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 			VLD_PRINT(1, "Throw found at %d\n", position);
 			/* Now we need to go forward to the first
 			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->size - 1) {
+			while (position < opa->size) {
 				if (opa->opcodes[position].opcode == ZEND_CATCH) {
 					VLD_PRINT(1, "Found catch at %d\n", position);
 					position--;
