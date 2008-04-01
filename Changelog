@@ -1,3 +1,9 @@
+Tue Apr 01 20:00:54 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+package.xml
+vle/package2.xml
+vle/vld.c:
+- Prepare for 0.9.1.
+
 Sun Mar 30 15:01:44 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c
 vle/vld.c:
