@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.32 2008-03-30 13:01:44 derick Exp $ */
+/* $Id: vld.c,v 1.33 2008-04-01 18:00:54 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,7 +56,7 @@ zend_module_entry vld_module_entry = {
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.9.0",
+	"0.9.1",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
