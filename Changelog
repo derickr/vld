@@ -1,3 +1,7 @@
+Sat Jul 12 15:19:07 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+srm_oparray.c:
+- SEND_VAR_NO_REF needs to use extended value (Patch by Graham K.)
+
 Tue Apr 01 20:00:54 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 package.xml
 vle/package2.xml
