@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.54 2008-03-30 13:01:44 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.55 2008-07-12 13:19:07 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -148,7 +148,7 @@ static const op_usage opcodes[] = {
 	/*  103 */	{ "EXT_FCALL_END", ALL_USED },
 	/*  104 */	{ "EXT_NOP", ALL_USED },
 	/*  105 */	{ "TICKS", ALL_USED },
-	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED },
+	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED | EXT_VAL },
 #ifdef ZEND_ENGINE_2
 	/*  107 */	{ "ZEND_CATCH", ALL_USED | EXT_VAL },
 	/*  108 */	{ "ZEND_THROW", ALL_USED | EXT_VAL },
