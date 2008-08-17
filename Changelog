@@ -1,3 +1,8 @@
+Sun Aug 17 11:29:20 CEST 2008 Marcus Börger <helly@php.net>
+vld.c:
+- Fix build with 5.3+
+
+
 Sat Jul 12 15:19:07 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - SEND_VAR_NO_REF needs to use extended value (Patch by Graham K.)
