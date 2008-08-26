@@ -1,3 +1,8 @@
+Tue Aug 26 19:40:56 CEST 2008 Marcus Börger <helly@php.net>
+config.w32:
+- Add config.w32
+
+
 Sun Aug 17 11:29:20 CEST 2008 Marcus Börger <helly@php.net>
 vld.c:
 - Fix build with 5.3+
