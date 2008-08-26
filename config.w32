@@ -1,0 +1,9 @@
+// $Id: config.w32,v 1.1 2008-08-26 17:40:56 helly Exp $
+// vim:ft=javascript 
+
+ARG_ENABLE("vld", Enable Vulcan Opcode decoder" , "no");
+
+if (PHP_VLD != "no") {
+    EXTENSION("vld", "vld.c set.c srm_oparray.c");
+}
+
