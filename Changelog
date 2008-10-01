@@ -1,3 +1,7 @@
+Wed Oct 01 18:31:37 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_vld.h:
+- Fixed compilation with Windows.
+
 Tue Aug 26 19:40:56 CEST 2008 Marcus Börger <helly@php.net>
 config.w32:
 - Add config.w32
