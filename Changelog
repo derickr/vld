@@ -1,3 +1,8 @@
+Thu Oct 02 10:25:54 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+package.xml
+vle/vld.c:
+- Add the config.w32 to the package XML file.
+
 Wed Oct 01 18:31:37 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 php_vld.h:
 - Fixed compilation with Windows.
