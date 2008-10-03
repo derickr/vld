@@ -1,3 +1,7 @@
+Fri Oct 03 16:42:47 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Resolved conflicts.
+
 Thu Oct 02 10:25:54 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 package.xml
 vle/vld.c:
