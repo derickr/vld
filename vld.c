@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.35 2008-10-02 08:25:53 derick Exp $ */
+/* $Id: vld.c,v 1.36 2008-10-03 14:42:47 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -218,11 +218,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
 			vld_printf(stderr, "Class " ZSTRFMT ":\n", ZSTRCP(ce->name));
-<<<<<<< vld.c
-			zend_hash_apply(&ce->function_table, (apply_func_args_t) vld_dump_fe TSRMLS_CC);
-=======
 			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
->>>>>>> 1.34
 			vld_printf(stderr, "End of class " ZSTRFMT ".\n\n", ZSTRCP(ce->name));
 		} else {
 			vld_printf(stderr, "Class " ZSTRFMT ": [no user functions]\n", ZSTRCP(ce->name));
@@ -253,11 +249,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
-<<<<<<< vld.c
-	zend_hash_apply (CG(function_table), (apply_func_args_t) vld_dump_fe TSRMLS_CC);
-=======
 	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
->>>>>>> 1.34
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
 
 	return op_array;
