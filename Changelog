@@ -1,3 +1,9 @@
+Wed Oct 22 10:40:07 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_vld.h
+vle/srm_oparray.c
+vle/vld.c:
+- Added Zoë's patch for CVS style formatting.
+
 Fri Oct 03 16:42:47 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - Resolved conflicts.
