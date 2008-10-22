@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.36 2008-10-03 14:42:47 derick Exp $ */
+/* $Id: vld.c,v 1.37 2008-10-22 08:40:06 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,6 +82,8 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.format",       "0", PHP_INI_SYSTEM, OnUpdateBool, format,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.col_sep",      "\t", PHP_INI_SYSTEM, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -90,6 +92,8 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->skip_prepend = 0;
 	vld_globals->skip_append  = 0;
 	vld_globals->execute      = 1;
+	vld_globals->format       = 0;
+	vld_globals->col_sep	  = "\t";
 }
 
 
@@ -163,12 +167,29 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 	char *message;
 	int len;
 	va_list args;
+	int i = 0, j = 0;
+	char *ptr;
+
+	const char EOL='\n';
 	
 	va_start(args, fmt);
 	len = vspprintf(&message, 0, fmt, args);
 	va_end(args);
+	if (VLD_G(format)) {
+		ptr = message;
+		while (j < strlen(ptr)) {
+			if (!isspace(ptr[j]) || ptr[j] == EOL) {
+				ptr[i++] = ptr[j];
+			}
+			j++;
+		}
+		ptr[i] = 0;
 
-	fprintf(stream, "%s", message);
+		fprintf(stream, "%s%s", VLD_G(col_sep), ptr);
+	} else {
+		fprintf(stream, "%s", message);
+	}
+
 	efree(message);
 	
 	return len;

@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: php_vld.h,v 1.7 2008-10-01 16:31:37 derick Exp $ */
+/* $Id: php_vld.h,v 1.8 2008-10-22 08:40:06 derick Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
@@ -47,6 +47,8 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int skip_append;
 	int execute;
 	int verbosity;
+	int format;
+	char *col_sep;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

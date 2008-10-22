@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.55 2008-07-12 13:19:07 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.56 2008-10-22 08:40:06 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -522,9 +522,17 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 	}
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
-		vld_printf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
+		if (VLD_G(format)) {
+			vld_printf(stderr, "%5d %s %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
+		} else {
+			vld_printf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
+		}
 	} else {
-		vld_printf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
+		if (VLD_G(format)) {
+			vld_printf(stderr, "%5d %s %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*',VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
+		} else {
+			vld_printf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
+		}
 	}
 
 	if (flags & EXT_VAL) {
@@ -537,10 +545,17 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 		VLD_PRINT(3, " RES[ ");
 		len = vld_dump_znode (NULL, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
-		vld_printf(stderr, "%*s", 8-len, " ");
+		if VLD_G(format)) {
+			if len==0) {
+				vld_printf(stderr, " ");
+			}
+		} else {
+			vld_printf(stderr, "%*s", 8-len, " ");
+		}
 	} else {
 		vld_printf(stderr, "        ");
 	}
+
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
 		vld_dump_znode (&print_sep, op.op1, base_address TSRMLS_CC);
@@ -595,10 +610,15 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	set = vld_set_create(opa->size);
 	vld_analyse_branch(opa, 0, set TSRMLS_CC);
-
-	vld_printf (stderr, "filename:       %s\n", opa->filename);
-	vld_printf (stderr, "function name:  " ZSTRFMT "\n", ZSTRCP(opa->function_name));
-	vld_printf (stderr, "number of ops:  %d\n", opa->last);
+	if VLD_G(format)) {
+		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
+		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
+		vld_printf (stderr, "number of ops:%s%d\n", VLD_G(col_sep), opa->last);
+	} else {
+		vld_printf (stderr, "filename:       %s\n", opa->filename);
+		vld_printf (stderr, "function name:  " ZSTRFMT "\n", ZSTRCP(opa->function_name));
+		vld_printf (stderr, "number of ops:  %d\n", opa->last);
+	}
 #ifdef IS_CV /* PHP >= 5.1 */
 	vld_printf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
@@ -608,9 +628,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf(stderr, "none\n");
 	}
 #endif
-
-	vld_printf(stderr, "line     #  op                           fetch          ext  return  operands\n");
-	vld_printf(stderr, "-------------------------------------------------------------------------------\n");
+	if (VLD_G(format)) {
+		vld_printf(stderr, "line%s#%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
+	} else {
+		vld_printf(stderr, "line     #  op                           fetch          ext  return  operands\n");
+		vld_printf(stderr, "-------------------------------------------------------------------------------\n");
+	}
 	for (i = 0; i < opa->last; i++) {
 		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
 	}
@@ -687,7 +710,12 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 	long jump_pos1 = -1;
 	long jump_pos2 = -1;
 
-	VLD_PRINT(1, "Branch analysis from position: %d\n", position);
+	if (VLD_G(format)) {
+		VLD_PRINT(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
+	} else {
+		VLD_PRINT(1, "Branch analysis from position: %d\n", position);
+	}
+
 	/* First we see if the branch has been visited, if so we bail out. */
 	if (vld_set_in(set, position)) {
 		return;
