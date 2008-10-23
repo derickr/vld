@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.56 2008-10-22 08:40:06 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.57 2008-10-23 11:05:07 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -545,8 +545,8 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 		VLD_PRINT(3, " RES[ ");
 		len = vld_dump_znode (NULL, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
-		if VLD_G(format)) {
-			if len==0) {
+		if (VLD_G(format)) {
+			if (len==0) {
 				vld_printf(stderr, " ");
 			}
 		} else {
@@ -610,7 +610,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	set = vld_set_create(opa->size);
 	vld_analyse_branch(opa, 0, set TSRMLS_CC);
-	if VLD_G(format)) {
+	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
 		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
 		vld_printf (stderr, "number of ops:%s%d\n", VLD_G(col_sep), opa->last);
