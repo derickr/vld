@@ -1,3 +1,7 @@
+Tue Nov 04 17:02:45 CET 2008 Marcus Börger <helly@php.net>
+vld.c:
+- Fix TSRM build
+
 Thu Oct 23 13:05:07 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - Fixed syntax errors.
