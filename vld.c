@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.37 2008-10-22 08:40:06 derick Exp $ */
+/* $Id: vld.c,v 1.38 2008-11-04 16:02:44 helly Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -169,8 +169,8 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 	va_list args;
 	int i = 0, j = 0;
 	char *ptr;
-
 	const char EOL='\n';
+	TSRMLS_FETCH();
 	
 	va_start(args, fmt);
 	len = vspprintf(&message, 0, fmt, args);
