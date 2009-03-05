@@ -1,3 +1,7 @@
+Thu Mar 05 16:42:32 CET 2009 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- Fixed typo.
+
 Tue Nov 04 17:02:45 CET 2008 Marcus Börger <helly@php.net>
 vld.c:
 - Fix TSRM build
