@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.38 2008-11-04 16:02:44 helly Exp $ */
+/* $Id: vld.c,v 1.39 2009-03-05 15:42:32 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +33,7 @@
 # define APPLY_TSRMLS_CC TSRMLS_CC
 # define APPLY_TSRMLS_DC TSRMLS_DC
 #else
-# define APPLY_TSRMLS_DC
+# define APPLY_TSRMLS_CC
 # define APPLY_TSRMLS_DC
 #endif
 
