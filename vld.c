@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.39 2009-03-05 15:42:32 derick Exp $ */
+/* $Id: vld.c,v 1.40 2009-03-30 18:36:55 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -206,6 +206,9 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 
 static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+#if PHP_VERSION_ID < 53000
+	TSRMLS_FETCH()
+#endif
 	if (fe->type == ZEND_USER_FUNCTION) {
 		char *new_str;
 		int new_len;
