@@ -1,3 +1,7 @@
+Mon Mar 30 20:36:55 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+vld.c:
+- This ought to fix compiling on PHP < 5.3 with ZTS enabled.
+
 Mon Mar 30 20:22:15 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_vld.h
 vle/srm_oparray.c:
