@@ -1,3 +1,8 @@
+Mon Mar 30 20:22:15 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_vld.h
+vle/srm_oparray.c:
+- Fixing some issues with va_args.
+
 Thu Mar 05 16:42:32 CET 2009 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - Fixed typo.
