@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: php_vld.h,v 1.8 2008-10-22 08:40:06 derick Exp $ */
+/* $Id: php_vld.h,v 1.9 2009-03-30 18:22:15 derick Exp $ */
 
 #ifndef PHP_VLD_H
 #define PHP_VLD_H
@@ -58,7 +58,9 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 #else
 #define VLD_G(v) (vld_globals.v)
 #endif
-#define VLD_PRINT(v,args,...) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args); }
+#define VLD_PRINT(v,args) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args); }
+#define VLD_PRINT1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x)); }
+#define VLD_PRINT2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y)); }
 
 #if PHP_VERSION_ID >= 60000
 #define ZSTRCP(str)  ((str).v)
