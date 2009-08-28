@@ -1,3 +1,7 @@
+Fri Aug 28 13:09:00 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+config.w32:
+- Fixed config.w32 file.
+
 Mon Mar 30 20:36:55 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 vld.c:
 - This ought to fix compiling on PHP < 5.3 with ZTS enabled.
