@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.58 2009-03-30 18:22:15 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.59 2009-10-13 15:41:18 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -56,17 +56,17 @@ static const op_usage opcodes[] = {
 	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
 	/*  21 */	{ "CAST", ALL_USED },
 	/*  22 */	{ "QM_ASSIGN", RES_USED | OP1_USED },
-	/*  23 */	{ "ASSIGN_ADD", ALL_USED },
-	/*  24 */	{ "ASSIGN_SUB", ALL_USED },
-	/*  25 */	{ "ASSIGN_MUL", ALL_USED },
-	/*  26 */	{ "ASSIGN_DIV", ALL_USED },
-	/*  27 */	{ "ASSIGN_MOD", ALL_USED },
-	/*  28 */	{ "ASSIGN_SL", ALL_USED },
-	/*  29 */	{ "ASSIGN_SR", ALL_USED },
-	/*  30 */	{ "ASSIGN_CONCAT", ALL_USED },
-	/*  31 */	{ "ASSIGN_BW_OR", ALL_USED },
-	/*  32 */	{ "ASSIGN_BW_AND", ALL_USED },
-	/*  33 */	{ "ASSIGN_BW_XOR", ALL_USED },
+	/*  23 */	{ "ASSIGN_ADD", ALL_USED | EXT_VAL },
+	/*  24 */	{ "ASSIGN_SUB", ALL_USED | EXT_VAL },
+	/*  25 */	{ "ASSIGN_MUL", ALL_USED | EXT_VAL },
+	/*  26 */	{ "ASSIGN_DIV", ALL_USED | EXT_VAL },
+	/*  27 */	{ "ASSIGN_MOD", ALL_USED | EXT_VAL },
+	/*  28 */	{ "ASSIGN_SL", ALL_USED | EXT_VAL },
+	/*  29 */	{ "ASSIGN_SR", ALL_USED | EXT_VAL },
+	/*  30 */	{ "ASSIGN_CONCAT", ALL_USED | EXT_VAL },
+	/*  31 */	{ "ASSIGN_BW_OR", ALL_USED | EXT_VAL },
+	/*  32 */	{ "ASSIGN_BW_AND", ALL_USED | EXT_VAL },
+	/*  33 */	{ "ASSIGN_BW_XOR", ALL_USED | EXT_VAL },
 	/*  34 */	{ "PRE_INC", OP1_USED | RES_USED },
 	/*  35 */	{ "PRE_DEC", OP1_USED | RES_USED },
 	/*  36 */	{ "POST_INC", OP1_USED | RES_USED },
