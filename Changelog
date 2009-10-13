@@ -1,3 +1,8 @@
+Tue Oct 13 17:41:18 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+srm_oparray.c:
+- The extended value is also used here, in cases assign_* is used with an
+  object or array.
+
 Fri Aug 28 13:09:00 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 config.w32:
 - Fixed config.w32 file.
