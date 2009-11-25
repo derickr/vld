@@ -1,3 +1,7 @@
+Wed Nov 25 13:55:40 CET 2009 Derick Rethans <derick@derickrethans.nl>
+srm_oparray.c:
+- PHP 5.3 fixes.
+
 Tue Oct 13 17:41:18 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c:
 - The extended value is also used here, in cases assign_* is used with an
