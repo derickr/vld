@@ -17,7 +17,7 @@
    |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
-/* $Id: srm_oparray.c,v 1.59 2009-10-13 15:41:18 derick Exp $ */
+/* $Id: srm_oparray.c,v 1.60 2009-11-25 12:55:40 derick Exp $ */
 
 #include "php.h"
 #include "zend_alloc.h"
@@ -105,7 +105,11 @@ static const op_usage opcodes[] = {
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
 	/*  69 */	{ "JMP_NO_CTOR", SPECIAL },
 #else
-	/*  69 */   { "UNKNOWN", ALL_USED },
+# if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+	/*  69 */	{ "INIT_NS_FCALL_BY_NAME", SPECIAL },
+# else
+	/*  69 */	{ "UNKNOWN", ALL_USED },
+# endif
 #endif
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
@@ -142,7 +146,11 @@ static const op_usage opcodes[] = {
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
 	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
 	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
+#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
 	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
+#else
+	/*  100 */	{ "GOTO", ALL_USED | OP1_OPLINE },
+#endif
 	/*  101 */	{ "EXT_STMT", ALL_USED },
 	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
 	/*  103 */	{ "EXT_FCALL_END", ALL_USED },
@@ -156,8 +164,12 @@ static const op_usage opcodes[] = {
 	/*  109 */	{ "ZEND_FETCH_CLASS", SPECIAL },
 	
 	/*  110 */	{ "ZEND_CLONE", ALL_USED },
-	
+
+#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 2)
 	/*  111 */	{ "ZEND_INIT_CTOR_CALL", ALL_USED },
+#else
+	/*  111 */	{ "UNKNOWN", ALL_USED },
+#endif
 	/*  112 */	{ "ZEND_INIT_METHOD_CALL", ALL_USED },
 	/*  113 */	{ "ZEND_INIT_STATIC_METHOD_CALL", ALL_USED },
 	
@@ -600,6 +612,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 	vld_printf (stderr, "\n");
 }
 
+void vld_analyse_oparray(zend_op_array *opa, vld_set *set TSRMLS_DC);
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC);
 
 void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
@@ -609,7 +622,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
 	set = vld_set_create(opa->size);
-	vld_analyse_branch(opa, 0, set TSRMLS_CC);
+	vld_analyse_oparray(opa, set TSRMLS_CC);
 	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
 		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
@@ -703,8 +716,33 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		*jmp1 = position + 1;
 		*jmp2 = opcode.op2.u.opline_num;
 		return 1;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+	} else if (opcode.opcode == ZEND_GOTO) {
+		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+		return 1;
+#endif
 	}
 	return 0;
+}
+
+void vld_analyse_oparray(zend_op_array *opa, vld_set *set TSRMLS_DC)
+{
+	unsigned int position = 0;
+
+	VLD_PRINT(1, "Finding entry points\n");
+	while (position < opa->last) {
+		if (position == 0) {
+			vld_analyse_branch(opa, position, set TSRMLS_CC);
+		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
+			if (VLD_G(format)) {
+				VLD_PRINT2(1, "Found catch point at position:%s%d\n", VLD_G(col_sep),position);
+			} else {
+				VLD_PRINT1(1, "Found catch point at position: %d\n", position);
+			}
+			vld_analyse_branch(opa, position, set TSRMLS_CC);
+		}
+		position++;
+	}
 }
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC)
@@ -747,18 +785,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			VLD_PRINT1(1, "Throw found at %d\n", position);
-			/* Now we need to go forward to the first
-			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->size) {
-				if (opa->opcodes[position].opcode == ZEND_CATCH) {
-					VLD_PRINT1(1, "Found catch at %d\n", position);
-					position--;
-					break;
-				}
-				position++;
-				VLD_PRINT1(2, "Skipping %d\n", position);
-			}
-			position--;
+			break;
 		}
 #endif
 		/* See if we have an exit instruction */
