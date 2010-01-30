@@ -219,15 +219,10 @@ static const op_usage opcodes[] = {
 	/*  147 */	{ "ZEND_ASSIGN_DIM", ALL_USED },
 	/*  148 */	{ "ZEND_ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", NONE_USED },
-#ifdef ZEND_USER_OPCODE
 	/*  150 */	{ "ZEND_USER_OPCODE", ALL_USED },
-#ifdef ZEND_U_NORMALIZE
 	/*  151 */  { "ZEND_U_NORMALIZE", RES_USED | OP1_USED },
-#ifdef ZEND_JMP_SET
 	/*  152 */	{ "ZEND_JMP_SET", ALL_USED | OP2_OPLINE },
-#endif
-#endif
-#endif
+	/*  153 */	{ "ZEND_DECLARE_LAMBDA_FUNCTION", OP1_USED },
 #endif
 };
 
