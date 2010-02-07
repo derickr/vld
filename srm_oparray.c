@@ -83,7 +83,7 @@ static const op_usage opcodes[] = {
 	/*  47 */	{ "JMPNZ_EX", ALL_USED | OP2_OPLINE },
 	/*  48 */	{ "CASE", ALL_USED },
 	/*  49 */	{ "SWITCH_FREE", RES_USED | OP1_USED },
-	/*  50 */	{ "BRK", ALL_USED },
+	/*  50 */	{ "BRK", SPECIAL },
 	/*  51 */	{ "CONT", ALL_USED },
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
 	/*  53 */	{ "INIT_STRING", RES_USED },
@@ -225,6 +225,8 @@ static const op_usage opcodes[] = {
 	/*  153 */	{ "ZEND_DECLARE_LAMBDA_FUNCTION", OP1_USED },
 #endif
 };
+
+zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array);
 
 inline int vld_dump_zval_null(zvalue_value value)
 {
@@ -442,6 +444,12 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 			op->op1.op_type = VLD_IS_CLASS;
 #endif
 			break;
+
+		case ZEND_BRK:
+		case ZEND_CONT:
+			flags = OP2_USED|OP2_BRK_CONT;
+			break;
+
 	}
 
 	return flags;
@@ -449,7 +457,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0, len;
@@ -599,6 +607,16 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead T
 		}
 		VLD_PRINT(3, " ]");
 	}
+	if (flags & OP2_BRK_CONT) {
+		long jmp;
+		zend_brk_cont_element *el;
+
+		VLD_PRINT(3, " BRK_CONT[ ");
+		el = vld_find_brk_cont(&op.op2.u.constant, op.op1.u.opline_num, opa);
+		jmp = op.opcode == ZEND_BRK ? el->brk : el->cont;
+		vld_printf (stderr, ", ->%d", jmp);
+		VLD_PRINT(3, " ]");
+	}
 	if (flags & NOP2_OPNUM) {
 		zend_op next_op = op_ptr[nr+1];
 		next_op.op2.op_type = VLD_IS_OPNUM;
@@ -643,7 +661,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf(stderr, "-------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
-		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i) TSRMLS_CC);
+		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), opa TSRMLS_CC);
 	}
 	vld_printf(stderr, "\n");
 	vld_set_free(set);

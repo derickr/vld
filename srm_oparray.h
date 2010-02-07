@@ -30,13 +30,14 @@
 #define NONE_USED  0
 #define ALL_USED   0x7
 
-#define OP1_OPLINE 1<<3
-#define OP2_OPLINE 1<<4
-#define OP1_OPNUM  1<<5
-#define OP2_OPNUM  1<<6
-#define OP_FETCH   1<<7
-#define EXT_VAL    1<<8
-#define NOP2_OPNUM 1<<9
+#define OP1_OPLINE   1<<3
+#define OP2_OPLINE   1<<4
+#define OP1_OPNUM    1<<5
+#define OP2_OPNUM    1<<6
+#define OP_FETCH     1<<7
+#define EXT_VAL      1<<8
+#define NOP2_OPNUM   1<<9
+#define OP2_BRK_CONT 1<<10
 
 #define SPECIAL    0xff
 
