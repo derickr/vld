@@ -84,6 +84,9 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.format",       "0", PHP_INI_SYSTEM, OnUpdateBool, format,       zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.col_sep",      "\t", PHP_INI_SYSTEM, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -138,6 +141,20 @@ PHP_RINIT_FUNCTION(vld)
 			zend_execute = vld_execute;
 		}
 	}
+
+	if (VLD_G(save_paths)) {
+		char *filename;
+
+		filename = malloc(strlen("paths.dot") + strlen(VLD_G(save_dir)) + 2);
+		sprintf(filename, "%s/%s", VLD_G(save_dir), "paths.dot");
+
+		VLD_G(path_dump_file) = fopen(filename, "w");
+		free(filename);
+
+		if (VLD_G(path_dump_file)) {
+			fprintf(VLD_G(path_dump_file), "digraph {\n");
+		}
+	}
 	return SUCCESS;
 }
 
@@ -147,6 +164,11 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute      = old_execute;
+
+	if (VLD_G(path_dump_file)) {
+		fprintf(VLD_G(path_dump_file), "}\n");
+		fclose(VLD_G(path_dump_file));
+	}
 
 	return SUCCESS;
 }
@@ -239,6 +261,10 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 #endif
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {	
+		if (VLD_G(path_dump_file)) {
+			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_" ZSTRFMT " { label=\"class " ZSTRFMT "\";\n", ZSTRCP(ce->name), ZSTRCP(ce->name));
+		}
+
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
 			vld_printf(stderr, "Class " ZSTRFMT ":\n", ZSTRCP(ce->name));
@@ -246,6 +272,10 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 			vld_printf(stderr, "End of class " ZSTRFMT ".\n\n", ZSTRCP(ce->name));
 		} else {
 			vld_printf(stderr, "Class " ZSTRFMT ": [no user functions]\n", ZSTRCP(ce->name));
+		}
+
+		if (VLD_G(path_dump_file)) {
+			fprintf(VLD_G(path_dump_file), "}\n");
 		}
 	}
 
@@ -269,12 +299,19 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
+	if (VLD_G(path_dump_file)) {
+		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%08x { label=\"file %s\";\n", op_array, op_array->filename ? op_array->filename : "__main");
+	}
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
 	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+
+	if (VLD_G(path_dump_file)) {
+		fprintf(VLD_G(path_dump_file), "}\n");
+	}
 
 	return op_array;
 }

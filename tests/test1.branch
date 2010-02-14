@@ -1,0 +1,12 @@
+branch: #  0; line:   124; sop:     0; eop:     3; out1:   4; out2:  49
+branch: #  4; line:   126; sop:     4; eop:     4; out1:   5; out2:  49
+branch: #  5; line:   126; sop:     5; eop:    11; out1:  12; out2:  36
+branch: # 12; line:   131; sop:    12; eop:    18; out1:  19; out2:  30
+branch: # 19; line:   133; sop:    19; eop:    28
+branch: # 30; line:   135; sop:    30; eop:    34; out1:  48
+branch: # 36; line:   137; sop:    36; eop:    37; out1:  47
+branch: # 38; line:   138; sop:    38; eop:    45
+branch: # 47; line:   139; sop:    47; eop:    47; out1:  38
+branch: # 48; line:   140; sop:    48; eop:    48; out1:   4
+branch: # 49; line:   140; sop:    49; eop:    51
+

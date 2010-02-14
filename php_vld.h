@@ -49,6 +49,10 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int verbosity;
 	int format;
 	char *col_sep;
+	int save_paths;
+	char *save_dir;
+	FILE *path_dump_file;
+	int dump_paths;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

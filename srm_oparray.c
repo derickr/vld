@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "zend_alloc.h"
+#include "branchinfo.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
 #include "set.h"
@@ -457,7 +458,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, zend_op_array *opa TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = -1;
 	int print_sep = 0, len;
@@ -538,15 +539,15 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		if (VLD_G(format)) {
-			vld_printf(stderr, "%5d %s %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
+			vld_printf(stderr, "%5d %s %c %c %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
 		} else {
-			vld_printf(stderr, "%5d%c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', op.opcode, "", fetch_type);
+			vld_printf(stderr, "%5d%c %c %c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', op.opcode, "", fetch_type);
 		}
 	} else {
 		if (VLD_G(format)) {
-			vld_printf(stderr, "%5d %s %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*',VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
+			vld_printf(stderr, "%5d %s %c %c %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
 		} else {
-			vld_printf(stderr, "%5d%c %-28s %-14s ", nr, notdead ? ' ' : '*', opcodes[op.opcode].name, fetch_type);
+			vld_printf(stderr, "%5d%c %c %c %-28s %-14s ", nr, notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', opcodes[op.opcode].name, fetch_type);
 		}
 	}
 
@@ -625,17 +626,20 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 	vld_printf (stderr, "\n");
 }
 
-void vld_analyse_oparray(zend_op_array *opa, vld_set *set TSRMLS_DC);
-void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC);
+void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info TSRMLS_DC);
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC);
 
 void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 {
 	unsigned int i;
 	vld_set *set;
+	vld_branch_info *branch_info;
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
 	set = vld_set_create(opa->size);
-	vld_analyse_oparray(opa, set TSRMLS_CC);
+	branch_info = vld_branch_info_create(opa->size);
+
+	vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
 	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
 		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
@@ -655,16 +659,24 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	}
 #endif
 	if (VLD_G(format)) {
-		vld_printf(stderr, "line%s#%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
+		vld_printf(stderr, "line%s# *%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
 	} else {
-		vld_printf(stderr, "line     #  op                           fetch          ext  return  operands\n");
-		vld_printf(stderr, "-------------------------------------------------------------------------------\n");
+		vld_printf(stderr, "line     # *  op                           fetch          ext  return  operands\n");
+		vld_printf(stderr, "---------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
-		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), opa TSRMLS_CC);
+		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), opa TSRMLS_CC);
 	}
 	vld_printf(stderr, "\n");
+
+	if (VLD_G(dump_paths)) {
+		vld_branch_post_process(branch_info);
+		vld_branch_find_paths(branch_info);
+		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
+	}
+
 	vld_set_free(set);
+	vld_branch_info_free(branch_info);
 }
 
 void opt_set_nop (zend_op_array *opa, int nr)
@@ -738,36 +750,42 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	return 0;
 }
 
-void vld_analyse_oparray(zend_op_array *opa, vld_set *set TSRMLS_DC)
+void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
 	unsigned int position = 0;
 
 	VLD_PRINT(1, "Finding entry points\n");
 	while (position < opa->last) {
 		if (position == 0) {
-			vld_analyse_branch(opa, position, set TSRMLS_CC);
+			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			if (VLD_G(format)) {
 				VLD_PRINT2(1, "Found catch point at position:%s%d\n", VLD_G(col_sep),position);
 			} else {
 				VLD_PRINT1(1, "Found catch point at position: %d\n", position);
 			}
-			vld_analyse_branch(opa, position, set TSRMLS_CC);
+			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
 		}
 		position++;
 	}
+	vld_set_add(branch_info->ends, opa->last-1);
+	branch_info->branches[opa->last-1].start_lineno = opa->opcodes[opa->last-1].lineno;
 }
 
-void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set TSRMLS_DC)
+void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
 	long jump_pos1 = -1;
 	long jump_pos2 = -1;
+	unsigned int branchnr;
 
 	if (VLD_G(format)) {
 		VLD_PRINT2(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
 	} else {
 		VLD_PRINT1(1, "Branch analysis from position: %d\n", position);
 	}
+
+	vld_set_add(branch_info->starts, position);
+	branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 
 	/* First we see if the branch has been visited, if so we bail out. */
 	if (vld_set_in(set, position)) {
@@ -788,9 +806,11 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 			} else {
 				VLD_PRINT(1, "\n");
 			}
-			vld_analyse_branch(opa, jump_pos1, set TSRMLS_CC);
+			vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+			vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
 			if (jump_pos2 != -1) {
-				vld_analyse_branch(opa, jump_pos2, set TSRMLS_CC);
+				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
+				vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
 			}
 			break;
 		}
@@ -798,17 +818,23 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set 
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			VLD_PRINT1(1, "Throw found at %d\n", position);
+			vld_set_add(branch_info->ends, position);
+			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
 #endif
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			VLD_PRINT(1, "Exit found\n");
+			vld_set_add(branch_info->ends, position);
+			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
 		/* See if we have a return instruction */
 		if (opa->opcodes[position].opcode == ZEND_RETURN) {
 			VLD_PRINT(1, "Return found\n");
+			vld_set_add(branch_info->ends, position);
+			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
 
