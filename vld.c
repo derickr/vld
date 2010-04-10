@@ -47,7 +47,7 @@ static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
 
 
-function_entry vld_functions[] = {
+zend_function_entry vld_functions[] = {
 	{NULL, NULL, NULL}
 };
 
@@ -228,7 +228,7 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 
 static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-#if PHP_VERSION_ID < 53000
+#if PHP_VERSION_ID < 50300
 	TSRMLS_FETCH()
 #endif
 	if (fe->type == ZEND_USER_FUNCTION) {
