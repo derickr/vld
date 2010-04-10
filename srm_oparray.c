@@ -229,22 +229,22 @@ static const op_usage opcodes[] = {
 
 zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array);
 
-inline int vld_dump_zval_null(zvalue_value value)
+static inline int vld_dump_zval_null(zvalue_value value)
 {
 	return vld_printf (stderr, "null");
 }
 
-inline int vld_dump_zval_long(zvalue_value value)
+static inline int vld_dump_zval_long(zvalue_value value)
 {
 	return vld_printf (stderr, "%ld", value.lval);
 }
 
-inline int vld_dump_zval_double(zvalue_value value)
+static inline int vld_dump_zval_double(zvalue_value value)
 {
 	return vld_printf (stderr, "%g", value.dval);
 }
 
-inline int vld_dump_zval_string(zvalue_value value)
+static inline int vld_dump_zval_string(zvalue_value value)
 {
 	char *new_str;
 	int new_len, len;
@@ -256,7 +256,7 @@ inline int vld_dump_zval_string(zvalue_value value)
 }
 
 #if PHP_VERSION_ID >= 60000
-inline int vld_dump_zval_unicode(zvalue_value value)
+static inline int vld_dump_zval_unicode(zvalue_value value)
 {
 	int len;
 	
@@ -265,32 +265,32 @@ inline int vld_dump_zval_unicode(zvalue_value value)
 }
 #endif
 
-inline int vld_dump_zval_array(zvalue_value value)
+static inline int vld_dump_zval_array(zvalue_value value)
 {
 	return vld_printf (stderr, "<array>");
 }
 
-inline int vld_dump_zval_object(zvalue_value value)
+static inline int vld_dump_zval_object(zvalue_value value)
 {
 	return vld_printf (stderr, "<object>");
 }
 
-inline int vld_dump_zval_bool(zvalue_value value)
+static inline int vld_dump_zval_bool(zvalue_value value)
 {
 	return vld_printf (stderr, value.lval ? "true" : "false");
 }
 
-inline int vld_dump_zval_resource(zvalue_value value)
+static inline int vld_dump_zval_resource(zvalue_value value)
 {
 	return vld_printf (stderr, "<resource>");
 }
 
-inline int vld_dump_zval_constant(zvalue_value value)
+static inline int vld_dump_zval_constant(zvalue_value value)
 {
 	return vld_printf (stderr, "<const>");
 }
 
-inline int vld_dump_zval_constant_array(zvalue_value value)
+static inline int vld_dump_zval_constant_array(zvalue_value value)
 {
 	return vld_printf (stderr, "<const array>");
 }
@@ -460,7 +460,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
-	static uint last_lineno = -1;
+	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
 	char *fetch_type = "";
 	zend_uint flags;
@@ -731,7 +731,9 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		zend_brk_cont_element *el;
 
 		if (opcode.op2.op_type == IS_CONST
+#if PHP_MAJOR_VERSION >= 5
 		    && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF
+#endif
 		) {
 			el = vld_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
@@ -758,6 +760,7 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 	while (position < opa->last) {
 		if (position == 0) {
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+#if PHP_MAJOR_VERSION >= 5
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			if (VLD_G(format)) {
 				VLD_PRINT2(1, "Found catch point at position:%s%d\n", VLD_G(col_sep),position);
@@ -765,6 +768,7 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 				VLD_PRINT1(1, "Found catch point at position: %d\n", position);
 			}
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+#endif
 		}
 		position++;
 	}

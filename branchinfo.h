@@ -53,7 +53,7 @@ void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsi
 void vld_branch_post_process(vld_branch_info *branch_info);
 void vld_branch_find_paths(vld_branch_info *branch_info);
 
-void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info);
+void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC);
 void vld_branch_info_free(vld_branch_info *branch_info);
 
 #endif

@@ -41,8 +41,8 @@ void vld_set_free(vld_set *set)
 
 void vld_set_add(vld_set *set, unsigned int position)
 {
-	char         *byte;
-	unsigned int  bit;
+	unsigned char *byte;
+	unsigned int   bit;
 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;
@@ -52,8 +52,8 @@ void vld_set_add(vld_set *set, unsigned int position)
 
 void vld_set_remove(vld_set *set, unsigned int position)
 {
-	char         *byte;
-	unsigned int  bit;
+	unsigned char *byte;
+	unsigned int   bit;
 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;
@@ -63,8 +63,8 @@ void vld_set_remove(vld_set *set, unsigned int position)
 
 int vld_set_in_ex(vld_set *set, unsigned int position, int noisy)
 {
-	char         *byte;
-	unsigned int  bit;
+	unsigned char *byte;
+	unsigned int   bit;
 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;

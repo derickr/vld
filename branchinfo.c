@@ -79,7 +79,7 @@ void vld_branch_post_process(vld_branch_info *branch_info)
 	}
 }
 
-static vld_path_add(vld_path *path, unsigned int nr)
+static void vld_path_add(vld_path *path, unsigned int nr)
 {
 	if (path->elements_count == path->elements_size) {
 		path->elements_size += 32;
@@ -89,7 +89,7 @@ static vld_path_add(vld_path *path, unsigned int nr)
 	path->elements_count++;
 }
 
-static vld_branch_info_add_path(vld_branch_info *branch_info, vld_path *path)
+static void vld_branch_info_add_path(vld_branch_info *branch_info, vld_path *path)
 {
 	if (branch_info->paths_count == branch_info->paths_size) {
 		branch_info->paths_size += 32;
