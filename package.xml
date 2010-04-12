@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <package>
   <name>vld</name>
   <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
@@ -18,11 +18,18 @@
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>0.9.1</version>
-    <date>2008-04-01</date>
+    <version>0.10.0</version>
+    <date>2010-04-12</date>
     <notes>
-- Fixed a few segfaults in branch analyzation.
-- Fixed HEAD compilation.
+- SEND_VAR_NO_REF needs to use extended value (Patch by Graham K.)
+- Fix build with 5.3 and trunk.
+- Added Zoë's patch for CVS style formatting.
+- Added the closures opcode
+- Added a path finding algorithm.
+- Added an option (vld.dump_paths) that dumps branch and paths when turned on.
+- Added two options (vld.save_dir and vld.save_paths) that allows you to 
+  dump path information has a graphviz .dot file.
+- TSRM fixes (by Wojciech Meler &lt;wmeler@wp-sa.pl&gt;).
     </notes>
     <filelist>
       <file role="src"  name="srm_oparray.h"/>
