@@ -18,8 +18,8 @@
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>0.10.0</version>
-    <date>2010-04-12</date>
+    <version>0.10.1</version>
+    <date>2010-04-13</date>
     <notes>
 - SEND_VAR_NO_REF needs to use extended value (Patch by Graham K.)
 - Fix build with 5.3 and trunk.
@@ -32,6 +32,8 @@
 - TSRM fixes (by Wojciech Meler &lt;wmeler@wp-sa.pl&gt;).
     </notes>
     <filelist>
+      <file role="src"  name="branchinfo.h"/>
+      <file role="src"  name="branchinfo.c"/>
       <file role="src"  name="srm_oparray.h"/>
       <file role="src"  name="srm_oparray.c"/>
       <file role="src"  name="set.h"/>

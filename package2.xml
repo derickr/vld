@@ -15,11 +15,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2010-04-12</date>
- <time>21:10:00</time>
+ <date>2010-04-13</date>
+ <time>10:46:13</time>
  <version>
-  <release>0.10.0</release>
-  <api>0.10.0</api>
+  <release>0.10.1</release>
+  <api>0.10.1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -39,6 +39,8 @@ dumps all the opcodes (execution units) of a script.
  </notes>
  <contents>
   <dir name="/">
+   <file name="branchinfo.c" role="src" />
+   <file name="branchinfo.h" role="src" />
    <file name="Changelog" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
