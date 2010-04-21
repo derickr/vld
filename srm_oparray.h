@@ -23,6 +23,8 @@
 
 #include "php.h"
 
+
+// flags used in the op array list
 #define OP1_USED   1<<0
 #define OP2_USED   1<<1
 #define RES_USED   1<<2
@@ -38,9 +40,12 @@
 #define EXT_VAL      1<<8
 #define NOP2_OPNUM   1<<9
 #define OP2_BRK_CONT 1<<10
+#define OP1_CLASS    1<<11
+#define RES_CLASS    1<<12
 
 #define SPECIAL    0xff
 
+// special op-type flags
 #define VLD_IS_OPLINE 1<<13
 #define VLD_IS_OPNUM  1<<14
 #define VLD_IS_CLASS  1<<15

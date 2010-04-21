@@ -227,7 +227,19 @@ static const op_usage opcodes[] = {
 #endif
 };
 
-zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array);
+#if PHP_VERSION_ID >= 50399
+# define VLD_ZNODE znode_op
+# define VLD_ZNODE_ELEM(node,var) node.var
+# define VLD_TYPE(t) t##_type
+# define VLD_EXTENDED_VALUE(o) extended_value
+#else
+# define VLD_ZNODE znode
+# define VLD_ZNODE_ELEM(node,var) node.u.var
+# define VLD_TYPE(t) t.op_type
+# define VLD_EXTENDED_VALUE(o) o.u.EA.type
+#endif
+
+zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array);
 
 static inline int vld_dump_zval_null(zvalue_value value)
 {
@@ -317,47 +329,51 @@ int vld_dump_zval (zval val)
 }
 
 
-int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC)
+int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend_uint base_address TSRMLS_DC)
 {
 	int len = 0;
 
-	if (node.op_type != IS_UNUSED && print_sep) {
+	if (node_type != IS_UNUSED && print_sep) {
 		if (*print_sep) {
 			len += vld_printf (stderr, ", ");
 		}
 		*print_sep = 1;
 	}
-	switch (node.op_type) {
+	switch (node_type) {
 		case IS_UNUSED:
 			VLD_PRINT(3, " IS_UNUSED ");
 			break;
 		case IS_CONST: /* 1 */
-			VLD_PRINT1(3, " IS_CONST (%d) ", node.u.var / sizeof(temp_variable));
-			vld_dump_zval (node.u.constant);
+			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
+#if PHP_VERSION_ID >= 50399
+			vld_dump_zval(*node.zv);
+#else
+			vld_dump_zval(node.u.constant);
+#endif
 			break;
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
-			len += vld_printf (stderr, "~%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, "~%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
-			len += vld_printf (stderr, "$%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, "$%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
-			len += vld_printf (stderr, "!%d", node.u.var);
+			len += vld_printf (stderr, "!%d", VLD_ZNODE_ELEM(node, var));
 			break;
 #endif
 		case VLD_IS_OPNUM:
-			len += vld_printf (stderr, "->%d", node.u.opline_num);
+			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
 			break;
 		case VLD_IS_OPLINE:
-			len += vld_printf (stderr, "->%d", (node.u.opline_num - base_address) / sizeof(zend_op));
+			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
 			break;
 		case VLD_IS_CLASS:
-			len += vld_printf (stderr, ":%d", node.u.var / sizeof(temp_variable));
+			len += vld_printf (stderr, ":%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
@@ -380,7 +396,7 @@ int vld_dump_znode (int *print_sep, znode node, zend_uint base_address TSRMLS_DC
 	return len;
 }
 
-static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
+static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address)
 {
 	zend_uint flags = 0;
 
@@ -396,7 +412,7 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 		case ZEND_ASSIGN_REF:
 			flags = OP1_USED | OP2_USED;
-			if (op->result.op_type != IS_UNUSED) {
+			if (op->VLD_TYPE(result) != IS_UNUSED) {
 				flags |= RES_USED;
 			}
 			break;
@@ -411,38 +427,35 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 
 		case ZEND_INIT_FCALL_BY_NAME:
 			flags = OP2_USED;
-			if (op->op1.op_type != IS_UNUSED) {
+			if (op->VLD_TYPE(op1) != IS_UNUSED) {
 				flags |= OP1_USED;
 			}
 			break;
 
 		case ZEND_JMPZNZ:
-			flags = OP1_USED | OP2_USED | EXT_VAL;
-			op->result = op->op1;
-			op->op2.op_type = VLD_IS_OPNUM;
+			flags = OP1_USED | OP2_USED | EXT_VAL | OP2_OPNUM;
+//			op->result = op->op1;
 			break;
 
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
 		case ZEND_JMP_NO_CTOR:
-			flags = OP2_USED;
-			if (op->op1.op_type != IS_UNUSED) {
+			flags = OP2_USED | OP2_OPNUM;
+			if (op->VLD_TYPE(op1) != IS_UNUSED) {
 				flags |= OP1_USED;
 			}
-			op->op2.op_type = VLD_IS_OPNUM;
 			break;
 #endif
 
 #ifdef ZEND_ENGINE_2
 		case ZEND_FETCH_CLASS:
-			flags = RES_USED|OP2_USED;
-			op->result.op_type = VLD_IS_CLASS;
+			flags = RES_USED|OP2_USED|RES_CLASS;
 			break;
 #endif
 
 		case ZEND_NEW:
 			flags = RES_USED|OP1_USED;
 #ifdef ZEND_ENGINE_2
-			op->op1.op_type = VLD_IS_CLASS;
+			flags |= OP1_CLASS;
 #endif
 			break;
 
@@ -452,7 +465,6 @@ static zend_uint vld_get_special_flags(zend_op *op, zend_uint base_address)
 			break;
 
 	}
-
 	return flags;
 }
 
@@ -463,38 +475,49 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
 	char *fetch_type = "";
-	zend_uint flags;
-	zend_op op = op_ptr[nr];
+	unsigned int flags, op1_type, op2_type, res_type;
+	const zend_op op = op_ptr[nr];
 	
+	if (op.lineno == 0) {
+		return;
+	}
+
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		flags = ALL_USED;
 	} else {
 		flags = opcodes[op.opcode].flags;
 	}
 
-	if (op.lineno == 0)
-		return;
+	op1_type = op.VLD_TYPE(op1);
+	op2_type = op.VLD_TYPE(op2);
+	res_type = op.VLD_TYPE(result);
 
 	if (flags == SPECIAL) {
 		flags = vld_get_special_flags(&op, base_address);
 	} else {
 		if (flags & OP1_OPLINE) {
-			op.op1.op_type = VLD_IS_OPLINE;
+			op1_type = VLD_IS_OPLINE;
 		}
 		if (flags & OP2_OPLINE) {
-			op.op2.op_type = VLD_IS_OPLINE;
+			op2_type = VLD_IS_OPLINE;
 		}
 	}
 	if (flags & OP1_OPNUM) {
-		op.op1.op_type = VLD_IS_OPNUM;
+		op1_type = VLD_IS_OPNUM;
 	}
 	if (flags & OP2_OPNUM) {
-		op.op2.op_type = VLD_IS_OPNUM;
+		op2_type = VLD_IS_OPNUM;
+	}
+	if (flags & OP1_CLASS) {
+		op1_type = VLD_IS_CLASS;
+	}
+	if (flags & RES_CLASS) {
+		res_type = VLD_IS_CLASS;
 	}
 
 	if (flags & OP_FETCH) {
 #ifdef ZEND_ENGINE_2
-		switch (op.op2.u.EA.type) {
+		switch (op.VLD_EXTENDED_VALUE(op2)) {
 			case ZEND_FETCH_GLOBAL:
 				fetch_type = "global";
 				break;
@@ -552,14 +575,14 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 	}
 
 	if (flags & EXT_VAL) {
-		vld_printf(stderr, "%3ld  ", op.extended_value);
+		vld_printf(stderr, "%3X  ", op.extended_value);
 	} else {
 		vld_printf(stderr, "     ");
 	}
 
-	if ((flags & RES_USED) && !(op.result.u.EA.type & EXT_TYPE_UNUSED)) {
+	if ((flags & RES_USED) && !(op.VLD_EXTENDED_VALUE(result) & EXT_TYPE_UNUSED)) {
 		VLD_PRINT(3, " RES[ ");
-		len = vld_dump_znode (NULL, op.result, base_address TSRMLS_CC);
+		len = vld_dump_znode (NULL, res_type, op.result, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
 		if (VLD_G(format)) {
 			if (len==0) {
@@ -574,7 +597,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
-		vld_dump_znode (&print_sep, op.op1, base_address TSRMLS_CC);
+		vld_dump_znode (&print_sep, op1_type, op.op1, base_address TSRMLS_CC);
 		VLD_PRINT(3, " ]");
 	}		
 	if (flags & OP2_USED) {
@@ -583,7 +606,11 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 			if (VLD_G(verbosity) < 3 && print_sep) {
 				vld_printf(stderr, ", ");
 			}
+#if PHP_VERSION_ID >= 50399
+			switch (Z_LVAL_P(op.op2.zv)) {
+#else
 			switch (Z_LVAL(op.op2.u.constant)) {
+#endif
 				case ZEND_INCLUDE_ONCE:
 					vld_printf(stderr, "INCLUDE_ONCE");
 					break;
@@ -604,7 +631,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 					break;
 			}
 		} else {
-			vld_dump_znode (&print_sep, op.op2, base_address TSRMLS_CC);
+			vld_dump_znode (&print_sep, op2_type, op.op2, base_address TSRMLS_CC);
 		}
 		VLD_PRINT(3, " ]");
 	}
@@ -613,15 +640,18 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 		zend_brk_cont_element *el;
 
 		VLD_PRINT(3, " BRK_CONT[ ");
-		el = vld_find_brk_cont(&op.op2.u.constant, op.op1.u.opline_num, opa);
+#if PHP_VERSION_ID >= 50399
+		el = vld_find_brk_cont(op.op2.constant, op.op1.opline_num, opa);
+#else
+		el = vld_find_brk_cont(op.op2.u.constant.value.lval, op.op1.u.opline_num, opa);
+#endif
 		jmp = op.opcode == ZEND_BRK ? el->brk : el->cont;
 		vld_printf (stderr, ", ->%d", jmp);
 		VLD_PRINT(3, " ]");
 	}
 	if (flags & NOP2_OPNUM) {
 		zend_op next_op = op_ptr[nr+1];
-		next_op.op2.op_type = VLD_IS_OPNUM;
-		vld_dump_znode (&print_sep, next_op.op2, base_address TSRMLS_CC);
+		vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address TSRMLS_CC);
 	}
 	vld_printf (stderr, "\n");
 }
@@ -684,12 +714,9 @@ void opt_set_nop (zend_op_array *opa, int nr)
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
 
-zend_brk_cont_element* vld_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array)
+zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array)
 {
-	int nest_levels;
 	zend_brk_cont_element *jmp_to;
-
-	nest_levels = nest_levels_zval->value.lval;
 
 	do {
 		jmp_to = &op_array->brk_cont_array[array_offset];
@@ -705,7 +732,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 #ifdef ZEND_ENGINE_2
-		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp1 = opcode.op1.u.opline_num;
 #endif
@@ -718,34 +745,38 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	) {
 		*jmp1 = position + 1;
 #ifdef ZEND_ENGINE_2
-		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+		*jmp2 = ((long) VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp2 = opcode.op1.u.opline_num;
 #endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-		*jmp1 = opcode.op2.u.opline_num;
+		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
 		*jmp2 = opcode.extended_value;
 		return 1;
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
 		zend_brk_cont_element *el;
 
-		if (opcode.op2.op_type == IS_CONST
+		if (VLD_TYPE(opcode.op2) == IS_CONST
 #if PHP_MAJOR_VERSION >= 5
-		    && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF
+		    && VLD_ZNODE_ELEM(opcode.op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
 #endif
 		) {
-			el = vld_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
+#if PHP_VERSION_ID >= 50399
+			el = vld_find_brk_cont(opcode.op2.constant, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
+#else
+			el = vld_find_brk_cont(opcode.op2.u.constant.value.lval, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
+#endif
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
 		}
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 		*jmp1 = position + 1;
-		*jmp2 = opcode.op2.u.opline_num;
+		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
 		return 1;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	} else if (opcode.opcode == ZEND_GOTO) {
-		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 		return 1;
 #endif
 	}
