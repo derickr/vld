@@ -607,7 +607,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 				vld_printf(stderr, ", ");
 			}
 #if PHP_VERSION_ID >= 50399
-			switch (Z_LVAL_P(op.op2.zv)) {
+			switch (op.extended_value) {
 #else
 			switch (Z_LVAL(op.op2.u.constant)) {
 #endif
