@@ -224,6 +224,9 @@ static const op_usage opcodes[] = {
 	/*  151 */	{ "UNKNOWN", ALL_USED },
 	/*  152 */	{ "ZEND_JMP_SET", ALL_USED | OP2_OPLINE },
 	/*  153 */	{ "ZEND_DECLARE_LAMBDA_FUNCTION", OP1_USED },
+	/*  154 */	{ "ZEND_ADD_TRAIT", ALL_USED },
+	/*  155 */	{ "ZEND_BIND_TRAITS", OP1_USED },
+	/*  155 */	{ "ZEND_SEPARATE", ALL_USED },
 #endif
 };
 
