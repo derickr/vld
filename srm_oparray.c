@@ -181,8 +181,8 @@ static const op_usage opcodes[] = {
 	/*  117 */	{ "ZEND_IMPORT_CLASS", ALL_USED },
 	/*  118 */	{ "ZEND_IMPORT_CONST", ALL_USED },
 	
-	/*  119 */	{ "119", ALL_USED },
-	/*  120 */	{ "120", ALL_USED },
+	/*  119 */	{ "UNKNOWN", ALL_USED },
+	/*  120 */	{ "UNKNOWN", ALL_USED },
 	
 	/*  121 */	{ "ZEND_ASSIGN_ADD_OBJ", ALL_USED },
 	/*  122 */	{ "ZEND_ASSIGN_SUB_OBJ", ALL_USED },
@@ -221,7 +221,7 @@ static const op_usage opcodes[] = {
 	/*  148 */	{ "ZEND_ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "ZEND_HANDLE_EXCEPTION", NONE_USED },
 	/*  150 */	{ "ZEND_USER_OPCODE", ALL_USED },
-	/*  151 */  { "ZEND_U_NORMALIZE", RES_USED | OP1_USED },
+	/*  151 */	{ "UNKNOWN", ALL_USED },
 	/*  152 */	{ "ZEND_JMP_SET", ALL_USED | OP2_OPLINE },
 	/*  153 */	{ "ZEND_DECLARE_LAMBDA_FUNCTION", OP1_USED },
 #endif
