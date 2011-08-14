@@ -422,7 +422,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_FCALL:
-			flags = OP1_USED | EXT_VAL;
+			flags = OP1_USED | RES_USED | EXT_VAL;
 			/*flags = ALL_USED | EXT_VAL;
 			op->op2.op_type = IS_CONST;
 			op->op2.u.constant.type = IS_LONG;*/
