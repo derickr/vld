@@ -168,8 +168,12 @@ static const op_usage opcodes[] = {
 
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 2)
 	/*  111 */	{ "ZEND_INIT_CTOR_CALL", ALL_USED },
-#else
+#else 
+# if PHP_VERSION_ID >= 50400
+	/*  111 */	{ "RETURN_BY_REF", OP1_USED },
+# else 
 	/*  111 */	{ "UNKNOWN", ALL_USED },
+# endif
 #endif
 	/*  112 */	{ "ZEND_INIT_METHOD_CALL", ALL_USED },
 	/*  113 */	{ "ZEND_INIT_STATIC_METHOD_CALL", ALL_USED },
@@ -451,7 +455,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 
 #ifdef ZEND_ENGINE_2
 		case ZEND_FETCH_CLASS:
-			flags = RES_USED|OP2_USED|RES_CLASS;
+			flags = EXT_VAL|RES_USED|OP2_USED|RES_CLASS;
 			break;
 #endif
 
@@ -869,7 +873,12 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			break;
 		}
 		/* See if we have a return instruction */
-		if (opa->opcodes[position].opcode == ZEND_RETURN) {
+		if (
+			opa->opcodes[position].opcode == ZEND_RETURN
+#if PHP_VERSION_ID >= 50400
+			|| opa->opcodes[position].opcode == ZEND_RETURN_BY_REF
+#endif
+		) {
 			VLD_PRINT(1, "Return found\n");
 			vld_set_add(branch_info->ends, position);
 			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
