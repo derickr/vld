@@ -1,52 +1,61 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<package>
-  <name>vld</name>
-  <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
-  <status>beta</status>
-  <maintainers>
-    <maintainer>
-      <user>derick</user>
-      <name>Derick Rethans</name>
-      <email>derick@xdebug.org</email>
-      <role>lead</role>
-    </maintainer>
-  </maintainers>
-  <description>
-    The Vulcan Logic Disassembler hooks into the Zend Engine and
-    dumps all the opcodes (execution units) of a script.
-  </description>
-  <license>BSD style</license>
-  <release>
-    <state>beta</state>
-    <version>0.10.1</version>
-    <date>2010-04-13</date>
-    <notes>
-- SEND_VAR_NO_REF needs to use extended value (Patch by Graham K.)
-- Fix build with 5.3 and trunk.
-- Added Zoë's patch for CVS style formatting.
-- Added the closures opcode
-- Added a path finding algorithm.
-- Added an option (vld.dump_paths) that dumps branch and paths when turned on.
-- Added two options (vld.save_dir and vld.save_paths) that allows you to 
-  dump path information has a graphviz .dot file.
-- TSRM fixes (by Wojciech Meler &lt;wmeler@wp-sa.pl&gt;).
-    </notes>
-    <filelist>
-      <file role="src"  name="branchinfo.h"/>
-      <file role="src"  name="branchinfo.c"/>
-      <file role="src"  name="srm_oparray.h"/>
-      <file role="src"  name="srm_oparray.c"/>
-      <file role="src"  name="set.h"/>
-      <file role="src"  name="set.c"/>
-      <file role="src"  name="php_vld.h"/>
-      <file role="src"  name="vld.c"/>
-
-      <file role="src"  name="Makefile.in"/>
-      <file role="src"  name="config.m4"/>
-      <file role="src"  name="config.w32"/>
-
-      <file role="doc"  name="CREDITS"/>
-      <file role="doc"  name="Changelog"/>
-    </filelist>
-  </release>
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>vld</name>
+ <channel>pecl.php.net</channel>
+ <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
+ <description>The Vulcan Logic Disassembler hooks into the Zend Engine and
+dumps all the opcodes (execution units) of a script.
+ </description>
+ <lead>
+  <name>Derick Rethans</name>
+  <user>derick</user>
+  <email>derick@xdebug.org</email>
+  <active>yes</active>
+ </lead>
+ <date>2012-03-04</date>
+ <time>05:37:32</time>
+ <version>
+  <release>0.11.0</release>
+  <api>0.11.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <notes>
+- PHP 5.4 support
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="branchinfo.c" role="src" />
+   <file name="branchinfo.h" role="src" />
+   <file name="Changelog" role="doc" />
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="Makefile.in" role="src" />
+   <file name="php_vld.h" role="src" />
+   <file name="set.c" role="src" />
+   <file name="set.h" role="src" />
+   <file name="srm_oparray.c" role="src" />
+   <file name="srm_oparray.h" role="src" />
+   <file name="vld.c" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>vld</providesextension>
+ <extsrcrelease />
 </package>
