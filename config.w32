@@ -4,6 +4,6 @@
 ARG_ENABLE("vld", "Enable Vulcan Opcode decoder" , "no");
 
 if (PHP_VLD != "no") {
-    EXTENSION("vld", "vld.c set.c srm_oparray.c");
+    EXTENSION("vld", "vld.c set.c srm_oparray.c branchinfo.c");
 }
 
