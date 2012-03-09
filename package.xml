@@ -15,11 +15,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2012-03-04</date>
- <time>05:37:32</time>
+ <date>2012-03-09</date>
+ <time>23:11:32</time>
  <version>
-  <release>0.11.0</release>
-  <api>0.11.0</api>
+  <release>0.11.1</release>
+  <api>0.11.1</api>
  </version>
  <stability>
   <release>beta</release>
