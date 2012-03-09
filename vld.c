@@ -64,7 +64,7 @@ zend_module_entry vld_module_entry = {
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.11.1",
+	"0.12.0-dev",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
