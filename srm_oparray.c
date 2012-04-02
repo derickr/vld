@@ -306,7 +306,7 @@ static inline int vld_dump_zval_resource(zvalue_value value)
 
 static inline int vld_dump_zval_constant(zvalue_value value)
 {
-	return vld_printf (stderr, "<const>");
+	return vld_printf (stderr, "<const:'%s'>", value.str.val);
 }
 
 static inline int vld_dump_zval_constant_array(zvalue_value value)
