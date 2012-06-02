@@ -97,6 +97,7 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->execute      = 1;
 	vld_globals->format       = 0;
 	vld_globals->col_sep	  = "\t";
+	vld_globals->path_dump_file = NULL;
 }
 
 
