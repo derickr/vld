@@ -328,10 +328,10 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);
-	}
 
-	zend_hash_apply (CG(function_table), (apply_func_t) vld_dump_fe TSRMLS_CC);
-	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+		zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
+		zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+	}
 
 	return op_array;
 }
