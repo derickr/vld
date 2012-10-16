@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
-http://pear.php.net/dtd/tasks-1.0.xsd
-http://pear.php.net/dtd/package-2.0
-http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.9.4" version="2.0"
+  xmlns="http://pear.php.net/dtd/package-2.0"
+  xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>vld</name>
  <channel>pecl.php.net</channel>
  <summary>Provides functionality to dump the internal representation of PHP scripts</summary>
@@ -15,11 +16,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2012-03-09</date>
- <time>23:11:32</time>
+ <date>2012-10-16</date>
+ <time>10:42:23</time>
  <version>
-  <release>0.11.1</release>
-  <api>0.11.1</api>
+  <release>0.11.2</release>
+  <api>0.11.2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -27,7 +28,8 @@ dumps all the opcodes (execution units) of a script.
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-- PHP 5.4 support
+- Fixed some crash fixes (Felipe Pena)
+- Display the constant value if we know it
  </notes>
  <contents>
   <dir name="/">
