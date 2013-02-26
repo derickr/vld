@@ -673,6 +673,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	vld_branch_info *branch_info;
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
+	if (opa->reserved[VLD_G(reserved_offset)] == (void*) 1) {
+		return;
+	} else {
+		opa->reserved[VLD_G(reserved_offset)] = (void*) 1;
+	}
+
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 

@@ -31,6 +31,11 @@ extern zend_module_entry vld_module_entry;
 #define PHP_VLD_API
 #endif
 
+#define VLD_VERSION "0.13.0-dev"
+#define VLD_AUTHOR  "Derick Rethans"
+#define VLD_URL_FAQ "http://derickrethans.nl/projects.html#vld"
+#define VLD_COPYRIGHT_SHORT "Copyright (c) 2012-2013"
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -53,6 +58,7 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	char *save_dir;
 	FILE *path_dump_file;
 	int dump_paths;
+	int reserved_offset;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

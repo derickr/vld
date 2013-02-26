@@ -28,6 +28,9 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
+#include "zend_extensions.h"
+
+int zend_vld_global_offset = -1;
 
 #if PHP_VERSION_ID >= 50300
 # define APPLY_TSRMLS_CC TSRMLS_CC
@@ -44,7 +47,15 @@ static zend_op_array* (*old_compile_string)(zval *source_string, char *filename 
 static zend_op_array* vld_compile_string(zval *source_string, char *filename TSRMLS_DC);
 
 static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
+static void vld_no_execute(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
+
+
+#ifdef COMPILE_DL_VLD
+ZEND_GET_MODULE(vld)
+#endif
+
+ZEND_DECLARE_MODULE_GLOBALS(vld)
 
 
 zend_function_entry vld_functions[] = {
@@ -64,17 +75,41 @@ zend_module_entry vld_module_entry = {
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.12.0-dev",
+	VLD_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
 
+ZEND_DLEXPORT void vld_init_oparray(zend_op_array *op_array)
+{
+	TSRMLS_FETCH();
+	op_array->reserved[VLD_G(reserved_offset)] = 0;
+}
 
-#ifdef COMPILE_DL_VLD
-ZEND_GET_MODULE(vld)
+#ifndef ZEND_EXT_API
+#define ZEND_EXT_API    ZEND_DLEXPORT
 #endif
+ZEND_EXTENSION();
 
-ZEND_DECLARE_MODULE_GLOBALS(vld)
+ZEND_DLEXPORT zend_extension zend_extension_entry = {
+	"Vulcan Logic Dumper",
+	VLD_VERSION,
+	VLD_AUTHOR,
+	VLD_URL_FAQ,
+	VLD_COPYRIGHT_SHORT,
+	NULL,
+	NULL,
+	NULL,           /* activate_func_t */
+	NULL,           /* deactivate_func_t */
+	NULL,           /* message_handler_func_t */
+	NULL,           /* op_array_handler_func_t */
+	NULL,           /* statement_handler_func_t */
+	NULL,           /* fcall_begin_handler_func_t */
+	NULL,           /* fcall_end_handler_func_t */
+	vld_init_oparray, /* op_array_ctor_func_t */
+	NULL,           /* op_array_dtor_func_t */
+	STANDARD_ZEND_EXTENSION_PROPERTIES
+};
 
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
@@ -98,13 +133,19 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->format       = 0;
 	vld_globals->col_sep	  = "\t";
 	vld_globals->path_dump_file = NULL;
+	vld_globals->reserved_offset = zend_vld_global_offset;
 }
 
 
 PHP_MINIT_FUNCTION(vld)
 {
+	zend_extension dummy_ext;
+
 	ZEND_INIT_MODULE_GLOBALS(vld, vld_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
+
+	/* Get reserved offset */
+	zend_vld_global_offset = zend_get_resource_handle(&dummy_ext);
 
 	return SUCCESS;
 }
@@ -139,6 +180,8 @@ PHP_RINIT_FUNCTION(vld)
 		zend_compile_string = vld_compile_string;
 #endif
 		if (!VLD_G(execute)) {
+			zend_execute = vld_no_execute;
+		} else {
 			zend_execute = vld_execute;
 		}
 	}
@@ -337,10 +380,19 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 }
 /* }}} */
 
+/* {{{ void vld_no_execute(zend_op_array *op_array TSRMLS_DC)
+ *    This function provides a hook to prevent code execution */
+static void vld_no_execute(zend_op_array *op_array TSRMLS_DC)
+{
+	// nothing to do
+}
+/* }}} */
+
 /* {{{ void vld_execute(zend_op_array *op_array TSRMLS_DC)
  *    This function provides a hook for execution */
 static void vld_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	// nothing to do
+	vld_dump_oparray (op_array TSRMLS_CC);
+	old_execute (op_array TSRMLS_CC);
 }
 /* }}} */

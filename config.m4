@@ -5,5 +5,5 @@ PHP_ARG_ENABLE(vld, whether to enable vld support,
 [  --enable-vld           Enable vld support])
 
 if test "$PHP_VLD" != "no"; then
-  PHP_EXTENSION(vld, $ext_shared)
+  PHP_NEW_EXTENSION(vld, vld.c branchinfo.c set.c srm_oparray.c, $ext_shared,,,,yes)
 fi
