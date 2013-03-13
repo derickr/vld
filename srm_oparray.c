@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
-   |           Marcus B�rger <marcus.boerger@t-online.de>                 |
+   |           Marcus Börger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
 /* $Id: srm_oparray.c,v 1.60 2009-11-25 12:55:40 derick Exp $ */
