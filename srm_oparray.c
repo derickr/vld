@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    |           Andrei Zmievski <andrei@gravitonic.com>                    |
-   |           Marcus Börger <marcus.boerger@t-online.de>                 |
+   |           Marcus Bï¿½rger <marcus.boerger@t-online.de>                 |
    +----------------------------------------------------------------------+
  */
 /* $Id: srm_oparray.c,v 1.60 2009-11-25 12:55:40 derick Exp $ */
@@ -216,7 +216,7 @@ static const op_usage opcodes[] = {
 	
 	/*  142 */	{ "ZEND_RAISE_ABSTRACT_ERROR", ALL_USED },
 	
-	/*  143 */	{ "ZEND_START_NAMESPACE", ALL_USED },
+	/*  143 */	{ "ZEND_DECLARE_CONST", OP1_USED | OP2_USED },
 	
 	/*  144 */	{ "ZEND_ADD_INTERFACE", ALL_USED },
 	/*  145 */	{ "ZEND_VERIFY_INSTANCEOF", ALL_USED },
@@ -230,7 +230,14 @@ static const op_usage opcodes[] = {
 	/*  153 */	{ "ZEND_DECLARE_LAMBDA_FUNCTION", OP1_USED },
 	/*  154 */	{ "ZEND_ADD_TRAIT", ALL_USED },
 	/*  155 */	{ "ZEND_BIND_TRAITS", OP1_USED },
-	/*  155 */	{ "ZEND_SEPARATE", ALL_USED },
+	/*  156 */	{ "ZEND_SEPARATE", OP1_USED | RES_USED },
+	/*  157 */	{ "ZEND_QM_ASSIGN_VAR", OP1_USED | RES_USED },
+	/*  158 */	{ "ZEND_JMP_SET_VAR", OP1_USED | RES_USED },
+	/*  159 */	{ "ZEND_DISCARD_EXCEPTION", NONE_USED },
+	/*  160 */	{ "ZEND_YIELD", ALL_USED },
+	/*  161 */	{ "ZEND_GENERATOR_RETURN", NONE_USED },
+	/*  162 */	{ "ZEND_FAST_CALL", OP1_USED },
+	/*  163 */	{ "ZEND_FAST_RET", NONE_USED },
 #endif
 };
 
