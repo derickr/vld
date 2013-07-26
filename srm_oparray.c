@@ -253,6 +253,12 @@ static const op_usage opcodes[] = {
 # define VLD_EXTENDED_VALUE(o) o.u.EA.type
 #endif
 
+#if PHP_VERSION_ID >= 50500
+# define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
+#else
+# define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
+#endif
+
 zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array);
 
 static inline int vld_dump_zval_null(zvalue_value value)
@@ -368,11 +374,11 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
-			len += vld_printf (stderr, "~%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
+			len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
-			len += vld_printf (stderr, "$%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
+			len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
@@ -387,7 +393,7 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
 			break;
 		case VLD_IS_CLASS:
-			len += vld_printf (stderr, ":%d", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
+			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
