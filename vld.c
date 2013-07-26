@@ -43,8 +43,13 @@ static zend_op_array* vld_compile_file(zend_file_handle*, int TSRMLS_DC);
 static zend_op_array* (*old_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 static zend_op_array* vld_compile_string(zval *source_string, char *filename TSRMLS_DC);
 
+#if PHP_VERSION_ID >= 50500
+static void (*old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
+static void vld_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+#else
 static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
+#endif
 
 
 zend_function_entry vld_functions[] = {
@@ -118,7 +123,11 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
 	zend_compile_string = old_compile_string;
 #endif
+#if PHP_VERSION_ID >= 50500
+	zend_execute_ex     = old_execute_ex;
+#else
 	zend_execute        = old_execute;
+#endif
 
 	return SUCCESS;
 }
@@ -131,7 +140,11 @@ PHP_RINIT_FUNCTION(vld)
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
 	old_compile_string = zend_compile_string;
 #endif
+#if PHP_VERSION_ID >= 50500
+	old_execute_ex = zend_execute_ex;
+#else
 	old_execute = zend_execute;
+#endif
 
 	if (VLD_G(active)) {
 		zend_compile_file = vld_compile_file;
@@ -139,7 +152,11 @@ PHP_RINIT_FUNCTION(vld)
 		zend_compile_string = vld_compile_string;
 #endif
 		if (!VLD_G(execute)) {
+#if PHP_VERSION_ID >= 50500
+			zend_execute_ex = vld_execute_ex;
+#else
 			zend_execute = vld_execute;
+#endif
 		}
 	}
 
@@ -164,7 +181,11 @@ PHP_RINIT_FUNCTION(vld)
 PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
+#if PHP_VERSION_ID >= 50500
+	zend_execute_ex   = old_execute_ex;
+#else
 	zend_execute      = old_execute;
+#endif
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
@@ -337,9 +358,17 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 }
 /* }}} */
 
-/* {{{ void vld_execute(zend_op_array *op_array TSRMLS_DC)
+/* {{{
+ *    PHP >= 5.5.0
+ *        void vld_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+ *    PHP <= 5.4.x
+ *        void vld_execute(zend_op_array *op_array TSRMLS_DC)
  *    This function provides a hook for execution */
+#if PHP_VERSION_ID >= 50500
+static void vld_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+#else
 static void vld_execute(zend_op_array *op_array TSRMLS_DC)
+#endif
 {
 	// nothing to do
 }
