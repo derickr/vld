@@ -595,7 +595,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 	}
 
 	if (flags & EXT_VAL) {
-		vld_printf(stderr, "%3X  ", op.extended_value);
+		vld_printf(stderr, "%3d  ", op.extended_value);
 	} else {
 		vld_printf(stderr, "     ");
 	}
