@@ -828,7 +828,6 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 {
 	long jump_pos1 = -1;
 	long jump_pos2 = -1;
-	unsigned int branchnr;
 
 	if (VLD_G(format)) {
 		VLD_PRINT2(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
