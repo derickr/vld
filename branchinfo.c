@@ -36,9 +36,16 @@ vld_branch_info *vld_branch_info_create(unsigned int size)
 
 void vld_branch_info_free(vld_branch_info *branch_info)
 {
+	unsigned int i;
+
+	for (i = 0; i < branch_info->paths_count; i++) {
+		free(branch_info->paths[i]->elements);
+		free(branch_info->paths[i]);
+	}
+	free(branch_info->paths);
 	free(branch_info->branches);
-	free(branch_info->starts);
-	free(branch_info->ends);
+	vld_set_free(branch_info->starts);
+	vld_set_free(branch_info->ends);
 	free(branch_info);
 }
 
@@ -51,7 +58,8 @@ void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsi
 
 void vld_branch_post_process(vld_branch_info *branch_info)
 {
-	int i, in_branch = 0, last_start = -1;
+	unsigned int i;
+	int in_branch = 0, last_start = -1;
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (vld_set_in(branch_info->starts, i)) {
@@ -123,7 +131,7 @@ static unsigned int vld_branch_find_last_element(vld_path *path)
 
 static int vld_path_exists(vld_path *path, unsigned int elem1, unsigned int elem2)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < path->elements_count - 1; i++) {
 		if (path->elements[i] == elem1 && path->elements[i + 1] == elem2) {
@@ -172,7 +180,7 @@ void vld_branch_find_paths(vld_branch_info *branch_info)
 
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC)
 {
-	int i, j;
+	unsigned int i, j;
 	char *fname = opa->function_name ? opa->function_name : "__main";
 
 	if (VLD_G(path_dump_file)) {
