@@ -182,8 +182,9 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRML
 			if (vld_set_in(branch_info->starts, i)) {
 				fprintf(
 					VLD_G(path_dump_file), 
-					"\t\"%s_%d\" [ label = \"{ op #%d | line %d-%d }\" ];\n", 
+					"\t\"%s_%d\" [ label = \"{ op #%d-%d | line %d-%d }\" ];\n", 
 					fname, i, i, 
+					branch_info->branches[i].end_op,
 					branch_info->branches[i].start_lineno,
 					branch_info->branches[i].end_lineno
 				);
