@@ -782,7 +782,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		) {
 #if PHP_VERSION_ID >= 50399
-			el = vld_find_brk_cont(opcode.op2.constant, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
+			el = vld_find_brk_cont(Z_LVAL_P(opcode.op2.zv), VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
 #else
 			el = vld_find_brk_cont(opcode.op2.u.constant.value.lval, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
 #endif
