@@ -686,7 +686,9 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
-	vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
+	if (VLD_G(dump_paths)) {
+		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
+	}
 	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
 		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
