@@ -319,10 +319,17 @@ static inline int vld_dump_zval_constant(zvalue_value value)
 	return vld_printf (stderr, "<const:'%s'>", value.str.val);
 }
 
+#if PHP_VERSION_ID >= 50600
+static inline int vld_dump_zval_constant_ast(zvalue_value value)
+{
+	return vld_printf (stderr, "<const ast>");
+}
+#else
 static inline int vld_dump_zval_constant_array(zvalue_value value)
 {
 	return vld_printf (stderr, "<const array>");
 }
+#endif
 
 
 int vld_dump_zval (zval val)
@@ -337,7 +344,11 @@ int vld_dump_zval (zval val)
 		case IS_BOOL:           return vld_dump_zval_bool (val.value);
 		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
 		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
+#if PHP_VERSION_ID >= 50600
+		case IS_CONSTANT_AST:   return vld_dump_zval_constant_ast (val.value);
+#else
 		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
+#endif
 #if PHP_VERSION_ID >= 60000
 		case IS_UNICODE:        return vld_dump_zval_unicode (val.value);
 #endif
