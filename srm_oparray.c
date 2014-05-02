@@ -234,7 +234,7 @@ static const op_usage opcodes[] = {
 	/*  163 */	{ "FAST_RET", NONE_USED },
 	/*  164 */	{ "ZEND_RECV_VARIADIC", ALL_USED },
 	/*  165 */	{ "POW", ALL_USED },
-	/*  166 */	{ "POW_ASSIGN", ALL_USED | EXT_VAL },
+	/*  166 */	{ "ASSIGN_POW", ALL_USED | EXT_VAL },
 #endif
 };
 
