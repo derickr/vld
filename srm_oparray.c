@@ -721,8 +721,8 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	if (VLD_G(format)) {
 		vld_printf(stderr, "line%s# *%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
 	} else {
-		vld_printf(stderr, "line     # *  op                           fetch          ext  return  operands\n");
-		vld_printf(stderr, "---------------------------------------------------------------------------------\n");
+		vld_printf(stderr, "line     #* I O op                           fetch          ext  return  operands\n");
+		vld_printf(stderr, "-----------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
 		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), opa TSRMLS_CC);
