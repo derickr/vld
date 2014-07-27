@@ -230,8 +230,8 @@ static const op_usage opcodes[] = {
 	/*  159 */	{ "DISCARD_EXCEPTION", NONE_USED },
 	/*  160 */	{ "YIELD", ALL_USED },
 	/*  161 */	{ "GENERATOR_RETURN", NONE_USED },
-	/*  162 */	{ "FAST_CALL", OP1_USED },
-	/*  163 */	{ "FAST_RET", NONE_USED },
+	/*  162 */	{ "FAST_CALL", SPECIAL },
+	/*  163 */	{ "FAST_RET", SPECIAL },
 	/*  164 */	{ "ZEND_RECV_VARIADIC", ALL_USED },
 	/*  165 */	{ "POW", ALL_USED },
 	/*  166 */	{ "ASSIGN_POW", ALL_USED | EXT_VAL },
@@ -491,6 +491,17 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 		case ZEND_CONT:
 			flags = OP2_USED|OP2_BRK_CONT;
 			break;
+		case ZEND_FAST_CALL:
+			flags = OP1_USED|OP1_OPLINE;
+			if (op->extended_value) {
+				flags |= OP2_USED|OP2_OPNUM|EXT_VAL;
+			}
+			break;
+		case ZEND_FAST_RET:
+			if (op->extended_value) {
+				flags = OP2_USED|OP2_OPNUM|EXT_VAL;
+			}
+			break;
 
 	}
 	return flags;
@@ -522,13 +533,12 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 
 	if (flags == SPECIAL) {
 		flags = vld_get_special_flags(&op, base_address);
-	} else {
-		if (flags & OP1_OPLINE) {
-			op1_type = VLD_IS_OPLINE;
-		}
-		if (flags & OP2_OPLINE) {
-			op2_type = VLD_IS_OPLINE;
-		}
+	} 
+	if (flags & OP1_OPLINE) {
+		op1_type = VLD_IS_OPLINE;
+	}
+	if (flags & OP2_OPLINE) {
+		op2_type = VLD_IS_OPLINE;
 	}
 	if (flags & OP1_OPNUM) {
 		op1_type = VLD_IS_OPNUM;
@@ -692,7 +702,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	unsigned int i;
 	vld_set *set;
 	vld_branch_info *branch_info;
-	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+	zend_uint base_address = (zend_uint)(zend_intptr_t)&(opa->opcodes[0]);
 
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
