@@ -60,14 +60,28 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 #define VLD_PRINT1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x)); }
 #define VLD_PRINT2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y)); }
 
-#if PHP_VERSION_ID >= 60000
-#define ZSTRCP(str)  ((str).v)
-#define ZSTRKEY(key) ((key).s)
-#define ZSTRFMT      "%v"
+#if PHP_VERSION_ID >= 50700
+# define ZHASHKEYSTR(k) ((k)->key->val)
+# define ZHASHKEYLEN(k) ((k)->key->len)
+# define PHP_URLENCODE_NEW_LEN(v)
+
+# define ZVAL_VALUE_TYPE                zend_value
+# define ZVAL_VALUE_STRING_TYPE         zend_string
+# define ZVAL_STRING_VALUE(s)           (s.str)->val
+# define ZVAL_STRING_LEN(s)             (s.str)
+# define ZSTRING_VALUE(s)               (s)->val
+# define OPARRAY_VAR_NAME(v)            (v)->val
 #else
-#define ZSTRCP(str)  (str)
-#define ZSTRKEY(key) (key)
-#define ZSTRFMT      "%s"
+# define ZHASHKEYSTR(k) ((k)->arKey)
+# define ZHASHKEYLEN(k) ((k)->nKeyLength)
+# define PHP_URLENCODE_NEW_LEN(v) , &(v)
+
+# define ZVAL_VALUE_TYPE                zvalue_value
+# define ZVAL_VALUE_STRING_TYPE         char
+# define ZVAL_STRING_VALUE(s)           (s.str.val)
+# define ZVAL_STRING_LEN(s)             (s.str.len)
+# define ZSTRING_VALUE(s)               (s)
+# define OPARRAY_VAR_NAME(v)            (v).name
 #endif
 
 #endif

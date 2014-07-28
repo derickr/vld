@@ -147,7 +147,7 @@ static void vld_branch_find_path(unsigned int nr, vld_branch_info *branch_info, 
 	vld_path *new_path;
 	int found = 0;
 
-	if (branch_info->paths_count > 65535) {
+	if (branch_info->paths_count > 255/*65535*/) {
 		return;
 	}
 
@@ -181,7 +181,7 @@ void vld_branch_find_paths(vld_branch_info *branch_info)
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC)
 {
 	unsigned int i, j;
-	char *fname = opa->function_name ? opa->function_name : "__main";
+	char *fname = opa->function_name ? ZSTRING_VALUE(opa->function_name) : "__main";
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "subgraph cluster_%08x {\n\tlabel=\"%s\";\n\tgraph [rankdir=\"LR\"];\n\tnode [shape = record];\n", opa, fname, fname);

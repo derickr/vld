@@ -248,13 +248,13 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 	TSRMLS_FETCH()
 #endif
 	if (fe->type == ZEND_USER_FUNCTION) {
-		char *new_str;
+		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		new_str = php_url_encode(ZSTRKEY(hash_key->arKey), hash_key->nKeyLength - 1, &new_len);
-		vld_printf(stderr, "Function " ZSTRFMT ":\n", new_str);
+		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
+		vld_printf(stderr, "Function %s:\n", ZSTRING_VALUE(new_str));
 		vld_dump_oparray(fe TSRMLS_CC);
-		vld_printf(stderr, "End of function " ZSTRFMT ".\n\n", new_str);
+		vld_printf(stderr, "End of function %s\n\n", ZSTRING_VALUE(new_str));
 		efree(new_str);
 	}
 
@@ -278,16 +278,16 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {	
 		if (VLD_G(path_dump_file)) {
-			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_" ZSTRFMT " { label=\"class " ZSTRFMT "\";\n", ZSTRCP(ce->name), ZSTRCP(ce->name));
+			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_%s { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
 		}
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
-			vld_printf(stderr, "Class " ZSTRFMT ":\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "Class %s:\n", ZSTRING_VALUE(ce->name));
 			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
-			vld_printf(stderr, "End of class " ZSTRFMT ".\n\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
 		} else {
-			vld_printf(stderr, "Class " ZSTRFMT ": [no user functions]\n", ZSTRCP(ce->name));
+			vld_printf(stderr, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
 		}
 
 		if (VLD_G(path_dump_file)) {
@@ -309,14 +309,21 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
 	{
 		zval nop;
+#if PHP_VERSION_ID >= 50700
+		int  ret;
+		ZVAL_STRINGL(&nop, "RETURN ;", 8);
+		ret = compile_string(&nop, "NOP" TSRMLS_CC);
+		zval_dtor(&nop);
+#else
 		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
-		return compile_string(&nop, "NOP" TSRMLS_CC);;
+		return compile_string(&nop, "NOP" TSRMLS_CC);
+#endif
 	}
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	if (VLD_G(path_dump_file)) {
-		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%08x { label=\"file %s\";\n", op_array, op_array->filename ? op_array->filename : "__main");
+		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%08x { label=\"file %s\";\n", op_array, op_array->filename ? ZSTRING_VALUE(op_array->filename) : "__main");
 	}
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);

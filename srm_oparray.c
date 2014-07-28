@@ -238,94 +238,76 @@ static const op_usage opcodes[] = {
 #endif
 };
 
-#if PHP_VERSION_ID >= 50399
-# define VLD_ZNODE znode_op
-# define VLD_ZNODE_ELEM(node,var) node.var
-# define VLD_TYPE(t) t##_type
-# define VLD_EXTENDED_VALUE(o) extended_value
-#else
-# define VLD_ZNODE znode
-# define VLD_ZNODE_ELEM(node,var) node.u.var
-# define VLD_TYPE(t) t.op_type
-# define VLD_EXTENDED_VALUE(o) o.u.EA.type
-#endif
-
-#if PHP_VERSION_ID >= 50500
-# define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
-#else
-# define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
-#endif
-
 zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array);
 
-static inline int vld_dump_zval_null(zvalue_value value)
+static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "null");
 }
 
-static inline int vld_dump_zval_long(zvalue_value value)
+static inline int vld_dump_zval_long(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "%ld", value.lval);
 }
 
-static inline int vld_dump_zval_double(zvalue_value value)
+static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "%g", value.dval);
 }
 
-static inline int vld_dump_zval_string(zvalue_value value)
+static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value)
 {
-	char *new_str;
+	ZVAL_VALUE_STRING_TYPE *new_str;
 	int new_len, len;
 
-	new_str = php_url_encode(value.str.val, value.str.len, &new_len);
-	len = vld_printf (stderr, "'%s'", new_str);
+	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LENGTH(value) PHP_URLENCODE_NEW_LEN(new_len));
+	len = vld_printf (stderr, "'%s'", ZSTRING_VALUE(new_str));
 	efree(new_str);
 	return len;
 }
 
-#if PHP_VERSION_ID >= 60000
-static inline int vld_dump_zval_unicode(zvalue_value value)
-{
-	int len;
-	
-	len = vld_printf(stderr, "%R", IS_UNICODE, value.ustr.val);
-	return len;
-}
-#endif
-
-static inline int vld_dump_zval_array(zvalue_value value)
+static inline int vld_dump_zval_array(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<array>");
 }
 
-static inline int vld_dump_zval_object(zvalue_value value)
+static inline int vld_dump_zval_object(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<object>");
 }
 
-static inline int vld_dump_zval_bool(zvalue_value value)
+static inline int vld_dump_zval_bool(ZVAL_VALUE_TYPE value)
 {
-	return vld_printf (stderr, value.lval ? "true" : "false");
+	return vld_printf (stderr, "<bool>");
 }
 
-static inline int vld_dump_zval_resource(zvalue_value value)
+static inline int vld_dump_zval_true(ZVAL_VALUE_TYPE value)
+{
+	return vld_printf (stderr, "<true>");
+}
+
+static inline int vld_dump_zval_false(ZVAL_VALUE_TYPE value)
+{
+	return vld_printf (stderr, "<false>");
+}
+
+static inline int vld_dump_zval_resource(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<resource>");
 }
 
-static inline int vld_dump_zval_constant(zvalue_value value)
+static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value)
 {
-	return vld_printf (stderr, "<const:'%s'>", value.str.val);
+	return vld_printf (stderr, "<const:'%s'>", ZVAL_STRING_VALUE(value));
 }
 
 #if PHP_VERSION_ID >= 50600
-static inline int vld_dump_zval_constant_ast(zvalue_value value)
+static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<const ast>");
 }
 #else
-static inline int vld_dump_zval_constant_array(zvalue_value value)
+static inline int vld_dump_zval_constant_array(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<const array>");
 }
@@ -334,14 +316,17 @@ static inline int vld_dump_zval_constant_array(zvalue_value value)
 
 int vld_dump_zval (zval val)
 {
+#if PHP_VERSION_ID >= 50700
+	switch (val.u1.v.type) {
+#else
 	switch (val.type) {
+#endif
 		case IS_NULL:           return vld_dump_zval_null (val.value);
 		case IS_LONG:           return vld_dump_zval_long (val.value);
 		case IS_DOUBLE:         return vld_dump_zval_double (val.value);
 		case IS_STRING:         return vld_dump_zval_string (val.value);
 		case IS_ARRAY:          return vld_dump_zval_array (val.value);
 		case IS_OBJECT:         return vld_dump_zval_object (val.value);
-		case IS_BOOL:           return vld_dump_zval_bool (val.value);
 		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
 		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
 #if PHP_VERSION_ID >= 50600
@@ -349,8 +334,17 @@ int vld_dump_zval (zval val)
 #else
 		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
 #endif
-#if PHP_VERSION_ID >= 60000
-		case IS_UNICODE:        return vld_dump_zval_unicode (val.value);
+#if PHP_VERSION_ID >= 50700
+		case IS_UNDEF:          return vld_dump_zval_undef (val.value);
+		case IS_FALSE:          return vld_dump_zval_false (val.value);
+		case IS_TRUE:           return vld_dump_zval_true (val.value);
+		case IS_REFERENCE:      return vld_dump_zval_reference (val.value);
+		case IS_CALLABLE:       return vld_dump_zval_callable (val.value);
+		case IS_INDIRECT:       return vld_dump_zval_indirect (val.value);
+		case IS_STR_OFFSET:     return vld_dump_zval_str_offset (val.value);
+		case IS_PTR:            return vld_dump_zval_ptr (val.value);
+#else
+		case IS_BOOL:           return vld_dump_zval_bool (val.value);
 #endif
 	}
 	return vld_printf(stderr, "<unknown>");
@@ -372,11 +366,19 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 			VLD_PRINT(3, " IS_UNUSED ");
 			break;
 		case IS_CONST: /* 1 */
+#if PHP_VERSION_ID >= 50700
+			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(zval));
+#else
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
-#if PHP_VERSION_ID >= 50399
+#endif
+#if PHP_VERSION_ID >= 50700
 			vld_dump_zval(*node.zv);
 #else
+# if PHP_VERSION_ID >= 50399
+			vld_dump_zval(*node.zv);
+# else
 			vld_dump_zval(node.u.constant);
+# endif
 #endif
 			break;
 #ifdef ZEND_ENGINE_2
@@ -391,14 +393,26 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
+#if PHP_VERSION_ID >= 50700
+			len += vld_printf (stderr, "!%d", (VLD_ZNODE_ELEM(node, var)-sizeof(zend_execute_data)) / sizeof(zval));
+#else
 			len += vld_printf (stderr, "!%d", VLD_ZNODE_ELEM(node, var));
+#endif
 			break;
 #endif
 		case VLD_IS_OPNUM:
+#if PHP_VERSION_ID >= 50700
+			len += vld_printf (stderr, "->%d", ((long) VLD_ZNODE_ELEM(node, jmp_addr) - base_address) / sizeof(zend_op));
+#else
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
+#endif
 			break;
 		case VLD_IS_OPLINE:
+#if PHP_VERSION_ID >= 50700
+			len += vld_printf (stderr, "->%d", ((long) VLD_ZNODE_ELEM(node, jmp_addr) - base_address) / sizeof(zend_op));
+#else
 			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
+#endif
 			break;
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
@@ -445,7 +459,9 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 			}
 			break;
 
+#if PHP_VERSION_ID < 50700
 		case ZEND_DO_FCALL_BY_NAME:
+#endif
 		case ZEND_DO_FCALL:
 			flags = OP1_USED | RES_USED | EXT_VAL;
 			/*flags = ALL_USED | EXT_VAL;
@@ -668,10 +684,14 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 		zend_brk_cont_element *el;
 
 		VLD_PRINT(3, " BRK_CONT[ ");
-#if PHP_VERSION_ID >= 50399
-		el = vld_find_brk_cont(op.op2.constant, op.op1.opline_num, opa);
+#if PHP_VERSION_ID >= 50700
+		el = vld_find_brk_cont(Z_LVAL_P(op.op2.zv), op.op1.opline_num, opa);
 #else
+ #if PHP_VERSION_ID >= 50399
+		el = vld_find_brk_cont(op.op2.constant, op.op1.opline_num, opa);
+ #else
 		el = vld_find_brk_cont(op.op2.u.constant.value.lval, op.op1.u.opline_num, opa);
+ #endif
 #endif
 		jmp = op.opcode == ZEND_BRK ? el->brk : el->cont;
 		vld_printf (stderr, ", ->%d", jmp);
@@ -701,18 +721,18 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
 	}
 	if (VLD_G(format)) {
-		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), opa->filename);
-		vld_printf (stderr, "function name:%s" ZSTRFMT "\n", VLD_G(col_sep), ZSTRCP(opa->function_name));
+		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->filename));
+		vld_printf (stderr, "function name:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->function_name));
 		vld_printf (stderr, "number of ops:%s%d\n", VLD_G(col_sep), opa->last);
 	} else {
-		vld_printf (stderr, "filename:       %s\n", opa->filename);
-		vld_printf (stderr, "function name:  " ZSTRFMT "\n", ZSTRCP(opa->function_name));
+		vld_printf (stderr, "filename:       %s\n", ZSTRING_VALUE(opa->filename));
+		vld_printf (stderr, "function name:  %s\n", ZSTRING_VALUE(opa->function_name));
 		vld_printf (stderr, "number of ops:  %d\n", opa->last);
 	}
 #ifdef IS_CV /* PHP >= 5.1 */
 	vld_printf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
-		vld_printf (stderr, "!%d = $" ZSTRFMT "%s", i, ZSTRCP(opa->vars[i].name), ((i + 1) == opa->last_var) ? "\n" : ", ");
+		vld_printf (stderr, "!%d = $%s%s", i, OPARRAY_VAR_NAME(opa->vars[i]), ((i + 1) == opa->last_var) ? "\n" : ", ");
 	}
 	if (!opa->last_var) {
 		vld_printf(stderr, "none\n");
@@ -781,7 +801,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
+#if PHP_VERSION_ID >= 50700
+		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - base_address;
+#else
 		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
+#endif
 		*jmp2 = opcode.extended_value;
 		return 1;
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
@@ -802,7 +826,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		}
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 		*jmp1 = position + 1;
+#if PHP_VERSION_ID >= 50700
+		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - base_address;
+#else
 		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
+#endif
 		return 1;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	} else if (opcode.opcode == ZEND_GOTO) {
