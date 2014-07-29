@@ -242,8 +242,14 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 	return 0;
 }
 
+#if PHP_VERSION_ID >= 50700
+static int vld_dump_fe (zval *el APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zend_op_array *fe = (zend_op_array *)Z_PTR_P(el);
+#else
 static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+#endif
 #if PHP_VERSION_ID < 50300
 	TSRMLS_FETCH()
 #endif
