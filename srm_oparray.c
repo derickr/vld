@@ -401,18 +401,10 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 			break;
 #endif
 		case VLD_IS_OPNUM:
-#if PHP_VERSION_ID >= 50700
-			len += vld_printf (stderr, "->%d", ((long) VLD_ZNODE_ELEM(node, jmp_addr) - base_address) / sizeof(zend_op));
-#else
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
-#endif
 			break;
 		case VLD_IS_OPLINE:
-#if PHP_VERSION_ID >= 50700
-			len += vld_printf (stderr, "->%d", ((long) VLD_ZNODE_ELEM(node, jmp_addr) - base_address) / sizeof(zend_op));
-#else
 			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
-#endif
 			break;
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
@@ -792,7 +784,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 #ifdef ZEND_ENGINE_2
-		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
+		*jmp1 = (long)(VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - base_address);
 #else
 		*jmp1 = opcode.op1.u.opline_num;
 #endif
@@ -805,7 +797,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	) {
 		*jmp1 = position + 1;
 #ifdef ZEND_ENGINE_2
-		*jmp2 = ((long) VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - (long) base_address) / sizeof(zend_op);
+		*jmp2 = (long)(VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - base_address);
 #else
 		*jmp2 = opcode.op1.u.opline_num;
 #endif
@@ -844,7 +836,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		return 1;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	} else if (opcode.opcode == ZEND_GOTO) {
-		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
+		*jmp1 = (long)(VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - base_address);
 		return 1;
 #endif
 	}
