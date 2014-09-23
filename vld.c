@@ -309,7 +309,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
 	{
 		zval nop;
-#if PHP_VERSION_ID >= 50700
+#if PHP_VERSION_ID >= 70000
 		int  ret;
 		ZVAL_STRINGL(&nop, "RETURN ;", 8);
 		ret = compile_string(&nop, "NOP" TSRMLS_CC);
