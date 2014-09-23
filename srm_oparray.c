@@ -694,14 +694,10 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 		zend_brk_cont_element *el;
 
 		VLD_PRINT(3, " BRK_CONT[ ");
-#if PHP_VERSION_ID >= 70000
-		el = vld_find_brk_cont(Z_LVAL_P(op.op2.zv), op.op1.opline_num, opa);
+#if PHP_VERSION_ID >= 50399
+		el = vld_find_brk_cont(Z_LVAL_P(op.op2.zv), VLD_ZNODE_ELEM(op.op1, opline_num), opa);
 #else
- #if PHP_VERSION_ID >= 50399
-		el = vld_find_brk_cont(op.op2.constant, op.op1.opline_num, opa);
- #else
-		el = vld_find_brk_cont(op.op2.u.constant.value.lval, op.op1.u.opline_num, opa);
- #endif
+		el = vld_find_brk_cont(op.op2.u.constant.value.lval, VLD_ZNODE_ELEM(op.op1, opline_num), opa);
 #endif
 		jmp = op.opcode == ZEND_BRK ? el->brk : el->cont;
 		vld_printf (stderr, ", ->%d", jmp);
