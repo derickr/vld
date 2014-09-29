@@ -507,6 +507,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 		case ZEND_CONT:
 			flags = OP2_USED|OP2_BRK_CONT;
 			break;
+#if PHP_VERSION_ID >= 50500
 		case ZEND_FAST_CALL:
 			flags = OP1_USED|OP1_OPLINE;
 			if (op->extended_value) {
@@ -518,7 +519,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 				flags = OP2_USED|OP2_OPNUM|EXT_VAL;
 			}
 			break;
-
+#endif
 	}
 	return flags;
 }
