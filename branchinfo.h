@@ -32,6 +32,7 @@ typedef struct _vld_path {
 
 typedef struct _vld_branch_info {
 	unsigned int  size;
+	vld_set      *entry_points;
 	vld_set      *starts;
 	vld_set      *ends;
 	vld_branch   *branches;

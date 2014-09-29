@@ -855,6 +855,7 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 	while (position < opa->last) {
 		if (position == 0) {
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+			vld_set_add(branch_info->entry_points, position);
 #if PHP_MAJOR_VERSION >= 5
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			if (VLD_G(format)) {
@@ -863,6 +864,7 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 				VLD_PRINT1(1, "Found catch point at position: %d\n", position);
 			}
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+			vld_set_add(branch_info->entry_points, position);
 #endif
 		}
 		position++;

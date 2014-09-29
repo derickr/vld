@@ -24,8 +24,9 @@ vld_branch_info *vld_branch_info_create(unsigned int size)
 	tmp = calloc(1, sizeof(vld_branch_info));
 	tmp->size = size;
 	tmp->branches = calloc(size, sizeof(vld_branch));
-	tmp->starts = vld_set_create(size);
-	tmp->ends   = vld_set_create(size);
+	tmp->entry_points = vld_set_create(size);
+	tmp->starts       = vld_set_create(size);
+	tmp->ends         = vld_set_create(size);
 
 	tmp->paths_count = 0;
 	tmp->paths_size  = 0;
@@ -44,6 +45,7 @@ void vld_branch_info_free(vld_branch_info *branch_info)
 	}
 	free(branch_info->paths);
 	free(branch_info->branches);
+	vld_set_free(branch_info->entry_points);
 	vld_set_free(branch_info->starts);
 	vld_set_free(branch_info->ends);
 	free(branch_info);
@@ -175,7 +177,13 @@ static void vld_branch_find_path(unsigned int nr, vld_branch_info *branch_info, 
 
 void vld_branch_find_paths(vld_branch_info *branch_info)
 {
-	vld_branch_find_path(0, branch_info, NULL);
+	unsigned int i;
+
+	for (i = 0; i < branch_info->entry_points->size; i++) {
+		if (vld_set_in(branch_info->entry_points, i)) {
+			vld_branch_find_path(i, branch_info, NULL);
+		}
+	}
 }
 
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC)
