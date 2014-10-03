@@ -526,7 +526,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, int start, int end, zend_op_array *opa TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
@@ -617,15 +617,15 @@ void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, 
 
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		if (VLD_G(format)) {
-			vld_printf(stderr, "%5d %s %c %c %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
+			vld_printf(stderr, "%5d %s %c %c %c %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
 		} else {
-			vld_printf(stderr, "%5d%c %c %c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', op.opcode, "", fetch_type);
+			vld_printf(stderr, "%5d%c %c %c %c <%03d>%-23s %-14s ", nr, notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', op.opcode, "", fetch_type);
 		}
 	} else {
 		if (VLD_G(format)) {
-			vld_printf(stderr, "%5d %s %c %c %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
+			vld_printf(stderr, "%5d %s %c %c %c %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
 		} else {
-			vld_printf(stderr, "%5d%c %c %c %-28s %-14s ", nr, notdead ? ' ' : '*', start ? '>' : ' ', end ? '>' : ' ', opcodes[op.opcode].name, fetch_type);
+			vld_printf(stderr, "%5d%c %c %c %c %-28s %-14s ", nr, notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', opcodes[op.opcode].name, fetch_type);
 		}
 	}
 
@@ -746,18 +746,18 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	}
 #endif
 	if (VLD_G(format)) {
-		vld_printf(stderr, "line%s# *%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
+		vld_printf(stderr, "line%s# *%s%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
 	} else {
-		vld_printf(stderr, "line     #* I O op                           fetch          ext  return  operands\n");
-		vld_printf(stderr, "-----------------------------------------------------------------------------------\n");
+		vld_printf(stderr, "line     #* E I O op                           fetch          ext  return  operands\n");
+		vld_printf(stderr, "-------------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
-		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), opa TSRMLS_CC);
+		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), opa TSRMLS_CC);
 	}
 	vld_printf(stderr, "\n");
 
 	if (VLD_G(dump_paths)) {
-		vld_branch_post_process(branch_info);
+		vld_branch_post_process(opa, branch_info);
 		vld_branch_find_paths(branch_info);
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
 	}
@@ -839,12 +839,31 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
 #endif
 		return 1;
+	} else if (opcode.opcode == ZEND_CATCH) {
+		*jmp1 = position + 1;
+#if PHP_VERSION_ID >= 50400
+        if (!opcode.result.num) {
+#else
+        if (!opcode.op1.u.EA.type) {
+#endif
+            *jmp2 = opcode.extended_value;
+            if (*jmp2 == *jmp1) {
+                *jmp2 = VLD_JMP_NOT_SET;
+            }
+        } else {
+			*jmp2 = VLD_JMP_EXIT;
+		}
+		return 1;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	} else if (opcode.opcode == ZEND_GOTO) {
 		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 		return 1;
 #endif
+	} else if (opcode.opcode == ZEND_EXIT || opcode.opcode == ZEND_THROW || opcode.opcode == ZEND_RETURN) {
+		*jmp1 = VLD_JMP_EXIT;
+		return 1;
 	}
+
 	return 0;
 }
 
@@ -876,8 +895,8 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
-	long jump_pos1 = -1;
-	long jump_pos2 = -1;
+	long jump_pos1 = VLD_JMP_NOT_SET;
+	long jump_pos2 = VLD_JMP_NOT_SET;
 
 	if (VLD_G(format)) {
 		VLD_PRINT2(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
@@ -896,22 +915,28 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 	VLD_PRINT1(2, "Add %d\n", position);
 	vld_set_add(set, position);
 	while (position < opa->last) {
-		jump_pos1 = -1;
-		jump_pos2 = -1;
+		jump_pos1 = VLD_JMP_NOT_SET;
+		jump_pos2 = VLD_JMP_NOT_SET;
 
 		/* See if we have a jump instruction */
 		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
 			VLD_PRINT1(1, "Jump found. Position 1 = %d", jump_pos1);
-			if (jump_pos2 != -1) {
+			if (jump_pos2 != VLD_JMP_NOT_SET) {
 				VLD_PRINT1(1, ", Position 2 = %d\n", jump_pos2);
 			} else {
 				VLD_PRINT(1, "\n");
 			}
-			vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
-			vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
-			if (jump_pos2 != -1) {
+			if (jump_pos1 == VLD_JMP_EXIT || jump_pos1 >= 0) {
+				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+				if (jump_pos1 != VLD_JMP_EXIT) {
+					vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
+				}
+			}
+			if (jump_pos2 == VLD_JMP_EXIT || jump_pos2 >= 0) {
 				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
-				vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+				if (jump_pos2 != VLD_JMP_EXIT) {
+					vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+				}
 			}
 			break;
 		}

@@ -58,10 +58,41 @@ void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsi
 	branch_info->branches[pos].start_lineno = lineno;
 }
 
-void vld_branch_post_process(vld_branch_info *branch_info)
+void vld_only_leave_first_catch(zend_op_array *opa, vld_branch_info *branch_info, int position)
+{
+	unsigned int exit_jmp;
+
+	if (opa->opcodes[position].opcode == ZEND_FETCH_CLASS) {
+		position++;
+	}
+	exit_jmp = opa->opcodes[position].extended_value;
+
+	if (opa->opcodes[position].opcode != ZEND_CATCH) {
+		return;
+	}
+
+	if (opa->opcodes[exit_jmp].opcode == ZEND_FETCH_CLASS) {
+		exit_jmp++;
+	}
+	if (opa->opcodes[exit_jmp].opcode == ZEND_CATCH) {
+		vld_only_leave_first_catch(opa, branch_info, exit_jmp);
+	}
+
+	vld_set_remove(branch_info->entry_points, position);
+}
+
+void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
 {
 	unsigned int i;
-	int in_branch = 0, last_start = -1;
+	int in_branch = 0, last_start = VLD_JMP_NOT_SET;
+
+	/* Figure out which CATCHes are chained, and hence which ones should be
+	 * considered entry points */
+	for (i = 0; i < branch_info->entry_points->size; i++) {
+		if (vld_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
+			vld_only_leave_first_catch(opa, branch_info, opa->opcodes[i].extended_value);
+		}
+	}
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (vld_set_in(branch_info->starts, i)) {
@@ -160,11 +191,11 @@ static void vld_branch_find_path(unsigned int nr, vld_branch_info *branch_info, 
 
 	last = vld_branch_find_last_element(new_path);
 
-	if (out0 != 0 && !vld_path_exists(new_path, last, out0)) {
+	if (out0 != 0 && out0 != VLD_JMP_EXIT && !vld_path_exists(new_path, last, out0)) {
 		vld_branch_find_path(out0, branch_info, new_path);
 		found = 1;
 	}
-	if (out1 != 0 && !vld_path_exists(new_path, last, out1)) {
+	if (out1 != 0 && out1 != VLD_JMP_EXIT && !vld_path_exists(new_path, last, out1)) {
 		vld_branch_find_path(out1, branch_info, new_path);
 		found = 1;
 	}
@@ -204,11 +235,22 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRML
 					branch_info->branches[i].start_lineno,
 					branch_info->branches[i].end_lineno
 				);
+				if (vld_set_in(branch_info->entry_points, i)) {
+					fprintf(VLD_G(path_dump_file), "\t%s_ENTRY -> %s_%d\n", fname, fname, i);
+				}
 				if (branch_info->branches[i].out[0]) {
-					fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_%d;\n", fname, i, fname, branch_info->branches[i].out[0]);
+					if (branch_info->branches[i].out[0] == VLD_JMP_EXIT) {
+						fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_EXIT;\n", fname, i, fname);
+					} else {
+						fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_%d;\n", fname, i, fname, branch_info->branches[i].out[0]);
+					}
 				}
 				if (branch_info->branches[i].out[1]) {
-					fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_%d;\n", fname, i, fname, branch_info->branches[i].out[1]);
+					if (branch_info->branches[i].out[1] == VLD_JMP_EXIT) {
+						fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_EXIT;\n", fname, i, fname);
+					} else {
+						fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_%d;\n", fname, i, fname, branch_info->branches[i].out[1]);
+					}
 				}
 			}
 		}

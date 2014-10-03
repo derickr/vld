@@ -17,6 +17,9 @@
 #include "set.h"
 #include "php_vld.h"
 
+#define VLD_JMP_NOT_SET -1
+#define VLD_JMP_EXIT    -2
+
 typedef struct _vld_branch {
 	unsigned int start_lineno;
 	unsigned int end_lineno;
@@ -45,7 +48,7 @@ typedef struct _vld_branch_info {
 vld_branch_info *vld_branch_info_create(unsigned int size);
 
 void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos);
-void vld_branch_post_process(vld_branch_info *branch_info);
+void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info);
 void vld_branch_find_paths(vld_branch_info *branch_info);
 
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC);
