@@ -310,10 +310,11 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	{
 		zval nop;
 #if PHP_VERSION_ID >= 70000
-		int  ret;
+		zend_op_array *ret;
 		ZVAL_STRINGL(&nop, "RETURN ;", 8);
 		ret = compile_string(&nop, "NOP" TSRMLS_CC);
 		zval_dtor(&nop);
+		return ret;
 #else
 		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
 		return compile_string(&nop, "NOP" TSRMLS_CC);

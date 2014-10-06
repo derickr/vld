@@ -238,7 +238,7 @@ static const op_usage opcodes[] = {
 #endif
 };
 
-zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array);
+zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array);
 
 static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
 {
@@ -341,7 +341,6 @@ int vld_dump_zval (zval val)
 		case IS_REFERENCE:      return vld_dump_zval_reference (val.value);
 		case IS_CALLABLE:       return vld_dump_zval_callable (val.value);
 		case IS_INDIRECT:       return vld_dump_zval_indirect (val.value);
-		case IS_STR_OFFSET:     return vld_dump_zval_str_offset (val.value);
 		case IS_PTR:            return vld_dump_zval_ptr (val.value);
 #else
 		case IS_BOOL:           return vld_dump_zval_bool (val.value);
@@ -351,7 +350,7 @@ int vld_dump_zval (zval val)
 }
 
 
-int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend_uint base_address TSRMLS_DC)
+int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address TSRMLS_DC)
 {
 	int len = 0;
 
@@ -438,9 +437,9 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, zend
 	return len;
 }
 
-static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address)
+static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_address)
 {
-	zend_uint flags = 0;
+	unsigned int flags = 0;
 
 	switch (op->opcode) {
 		case ZEND_FE_RESET:
@@ -526,7 +525,7 @@ static zend_uint vld_get_special_flags(const zend_op *op, zend_uint base_address
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, zend_uint base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
@@ -719,7 +718,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	unsigned int i;
 	vld_set *set;
 	vld_branch_info *branch_info;
-	zend_uint base_address = (zend_uint)(zend_intptr_t)&(opa->opcodes[0]);
+	unsigned int base_address = (unsigned int)(zend_intptr_t)&(opa->opcodes[0]);
 
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
@@ -771,7 +770,7 @@ void opt_set_nop (zend_op_array *opa, int nr)
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
 
-zend_brk_cont_element* vld_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array)
+zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array)
 {
 	zend_brk_cont_element *jmp_to;
 

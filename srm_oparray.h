@@ -69,7 +69,7 @@
 
 typedef struct _op_usage {
 	char *name;
-	zend_uint flags;
+	unsigned int flags;
 } op_usage;
 
 void vld_dump_oparray (zend_op_array *opa TSRMLS_DC);
