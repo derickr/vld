@@ -20,10 +20,10 @@ typedef struct _vld_set {
 } vld_set;
 
 vld_set *vld_set_create(unsigned int size);
-#ifndef ZEND_ENGINE_2
-# define VLD_DEAD_CODE 107
-#else
+#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 # define VLD_DEAD_CODE 150
+#else
+# define VLD_DEAD_CODE 107
 #endif
 void vld_set_add(vld_set *set, unsigned int position);
 void vld_set_remove(vld_set *set, unsigned int position);

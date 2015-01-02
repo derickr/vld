@@ -69,7 +69,7 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 # define ZVAL_VALUE_STRING_TYPE         zend_string
 # define ZVAL_STRING_VALUE(s)           (s.str)->val
 # define ZVAL_STRING_LEN(s)             (s.str)->len
-# define ZSTRING_VALUE(s)               (s)->val
+# define ZSTRING_VALUE(s)               (s ? (s)->val : NULL)
 # define OPARRAY_VAR_NAME(v)            (v)->val
 #else
 # define ZHASHKEYSTR(k) ((k)->arKey)
