@@ -264,7 +264,7 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-#ifdef ZEND_ENGINE_2
+#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 static int vld_dump_cle (zend_class_entry **class_entry TSRMLS_DC)
 #else
 static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
@@ -273,7 +273,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	zend_class_entry *ce;
 	zend_bool have_fe = 0;
 
-#ifdef ZEND_ENGINE_2
+#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 	ce = *class_entry;
 #else
 	ce = class_entry;
