@@ -26,7 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(vld)
 #if ZEND_USE_ABS_JMP_ADDR
 # define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
 #else
-# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)((((node).jmp_offset) / sizeof(zend_op)) + (opline))
+# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
 #endif
 
 /* Input zend_compile.h
@@ -867,7 +867,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 		*jmp1 = position + 1;
 #if PHP_VERSION_ID >= 70000
-		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address) * sizeof(zend_op);
+		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 #else
 		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
 #endif
