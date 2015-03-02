@@ -124,8 +124,13 @@ static const op_usage opcodes[] = {
 	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
 	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
 #endif
+#if defined(ZEND_ENGINE_3)
+	/*  77 */	{ "FE_RESET_R", SPECIAL },
+	/*  78 */	{ "FE_FETCH_R", ALL_USED | OP2_OPNUM },
+#else
 	/*  77 */	{ "FE_RESET", SPECIAL },
 	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
+#endif
 	/*  79 */	{ "EXIT", ALL_USED },
 	/*  80 */	{ "FETCH_R", RES_USED | OP1_USED | OP_FETCH },
 	/*  81 */	{ "FETCH_DIM_R", ALL_USED },
@@ -192,8 +197,13 @@ static const op_usage opcodes[] = {
 	/*  122 */	{ "ASSIGN_SUB_OBJ", ALL_USED },
 	/*  123 */	{ "ASSIGN_MUL_OBJ", ALL_USED },
 	/*  124 */	{ "ASSIGN_DIV_OBJ", ALL_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  125 */	{ "FE_RESET_RW", SPECIAL },
+	/*  126 */	{ "FE_FETCH_RW", SPECIAL },
+#else
 	/*  125 */	{ "ASSIGN_MOD_OBJ", ALL_USED },
 	/*  126 */	{ "ASSIGN_SL_OBJ", ALL_USED },
+#endif
 	/*  127 */	{ "ASSIGN_SR_OBJ", ALL_USED },
 	/*  128 */	{ "ASSIGN_CONCAT_OBJ", ALL_USED },
 	/*  129 */	{ "ASSIGN_BW_OR_OBJ", ALL_USED },
@@ -472,7 +482,12 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 	unsigned int flags = 0;
 
 	switch (op->opcode) {
+#if PHP_VERSION_ID >= 70000
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+#else
 		case ZEND_FE_RESET:
+#endif
 			flags = ALL_USED;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 			flags |= OP2_OPNUM;
@@ -864,7 +879,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
 		}
+#if PHP_VERSION_ID >= 70000
+	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW || opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
+#else
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
+#endif
 		*jmp1 = position + 1;
 #if PHP_VERSION_ID >= 70000
 		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
