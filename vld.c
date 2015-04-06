@@ -245,6 +245,13 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 	return 0;
 }
 
+#if defined(ZEND_ENGINE_3)
+static int vld_check_fe_wrapper (zval *el, zend_bool *have_fe TSRMLS_DC)
+{
+	return vld_check_fe((zend_op_array *) Z_PTR_P(el), have_fe TSRMLS_CC);
+}
+#endif
+
 static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 #if PHP_VERSION_ID < 50300
@@ -254,7 +261,7 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
+		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) PHP_URLENCODE_NEW_LEN(new_len));
 		vld_printf(stderr, "Function %s:\n", ZSTRING_VALUE(new_str));
 		vld_dump_oparray(fe TSRMLS_CC);
 		vld_printf(stderr, "End of function %s\n\n", ZSTRING_VALUE(new_str));
@@ -264,7 +271,14 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
+#if defined(ZEND_ENGINE_3)
+static int vld_dump_fe_wrapper(zval *el APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	return vld_dump_fe((zend_op_array *) Z_PTR_P(el) APPLY_TSRMLS_CC, num_args, args, hash_key);
+}
+#endif
+
+#if defined(ZEND_ENGINE_2)
 static int vld_dump_cle (zend_class_entry **class_entry TSRMLS_DC)
 #else
 static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
@@ -273,7 +287,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 	zend_class_entry *ce;
 	zend_bool have_fe = 0;
 
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
+#if defined(ZEND_ENGINE_2)
 	ce = *class_entry;
 #else
 	ce = class_entry;
@@ -284,10 +298,18 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_%s { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
 		}
 
+#if defined(ZEND_ENGINE_3)
+		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe_wrapper, (void *)&have_fe TSRMLS_CC);
+#else
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
+#endif
 		if (have_fe) {
 			vld_printf(stderr, "Class %s:\n", ZSTRING_VALUE(ce->name));
+#if defined(ZEND_ENGINE_3)
+			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe_wrapper, 0);
+#else
 			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
+#endif
 			vld_printf(stderr, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
 		} else {
 			vld_printf(stderr, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
@@ -300,6 +322,14 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 	return ZEND_HASH_APPLY_KEEP;
 }
+
+#if defined(ZEND_ENGINE_3)
+static int vld_dump_cle_wrapper (zval *el TSRMLS_DC)
+{
+	return vld_dump_cle((zend_class_entry *) Z_PTR_P(el) TSRMLS_CC);
+}
+#endif
+
 
 /* {{{ zend_op_array vld_compile_file (file_handle, type)
  *    This function provides a hook for compilation */
@@ -333,8 +363,13 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
+#if defined(ZEND_ENGINE_3)
+	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe_wrapper, 0);
+	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle_wrapper TSRMLS_CC);
+#else
 	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+#endif
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
@@ -355,8 +390,13 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);
 
+#if defined(ZEND_ENGINE_3)
+		zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe_wrapper, 0);
+		zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle_wrapper TSRMLS_CC);
+#else
 		zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 		zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
+#endif
 	}
 
 	return op_array;

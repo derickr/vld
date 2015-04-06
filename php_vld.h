@@ -73,7 +73,7 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 # define OPARRAY_VAR_NAME(v)            (v)->val
 #else
 # define ZHASHKEYSTR(k) ((k)->arKey)
-# define ZHASHKEYLEN(k) ((k)->nKeyLength)
+# define ZHASHKEYLEN(k) ((k)->nKeyLength - 1)
 # define PHP_URLENCODE_NEW_LEN(v) , &(v)
 
 # define ZVAL_VALUE_TYPE                zvalue_value
