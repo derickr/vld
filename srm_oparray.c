@@ -55,7 +55,7 @@ static const op_usage opcodes[] = {
 	/*  18 */	{ "IS_NOT_EQUAL", ALL_USED },
 	/*  19 */	{ "IS_SMALLER", ALL_USED },
 	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
-	/*  21 */	{ "CAST", ALL_USED },
+	/*  21 */	{ "CAST", ALL_USED | EXT_VAL },
 	/*  22 */	{ "QM_ASSIGN", RES_USED | OP1_USED },
 	/*  23 */	{ "ASSIGN_ADD", ALL_USED | EXT_VAL },
 	/*  24 */	{ "ASSIGN_SUB", ALL_USED | EXT_VAL },
@@ -87,20 +87,35 @@ static const op_usage opcodes[] = {
 	/*  50 */	{ "BRK", SPECIAL },
 	/*  51 */	{ "CONT", ALL_USED },
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  53 */	{ "FAST_CONCAT", ALL_USED },
+	/*  54 */	{ "ROPE_INIT", ALL_USED | EXT_VAL },
+	/*  55 */	{ "ROPE_ADD", ALL_USED | EXT_VAL },
+	/*  56 */	{ "ROPE_END", ALL_USED | EXT_VAL },
+#else
 	/*  53 */	{ "INIT_STRING", RES_USED },
 	/*  54 */	{ "ADD_CHAR", ALL_USED },
 	/*  55 */	{ "ADD_STRING", ALL_USED },
 	/*  56 */	{ "ADD_VAR", ALL_USED },
+#endif
 	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
 	/*  58 */	{ "END_SILENCE", ALL_USED },
 	/*  59 */	{ "INIT_FCALL_BY_NAME", SPECIAL },
 	/*  60 */	{ "DO_FCALL", SPECIAL },
+#if defined(ZEND_ENGINE_3)
+	/*  61 */	{ "INIT_FCALL", ALL_USED },
+#else
 	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
+#endif
 	/*  62 */	{ "RETURN", OP1_USED },
 	/*  63 */	{ "RECV", RES_USED | OP1_USED },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
 	/*  65 */	{ "SEND_VAL", OP1_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  66 */	{ "SEND_VAR_EX", ALL_USED },
+#else
 	/*  66 */	{ "SEND_VAR", OP1_USED },
+#endif
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", SPECIAL },
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
@@ -150,7 +165,11 @@ static const op_usage opcodes[] = {
 	/*  95 */	{ "FETCH_UNSET", ALL_USED },
 	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  98 */	{ "FETCH_LIST", ALL_USED },
+#else
 	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
+#endif
 	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
 	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
@@ -186,29 +205,44 @@ static const op_usage opcodes[] = {
 	/*  114 */	{ "ISSET_ISEMPTY_VAR", ALL_USED | EXT_VAL },
 	/*  115 */	{ "ISSET_ISEMPTY_DIM_OBJ", ALL_USED | EXT_VAL },
 	
+#if defined(ZEND_ENGINE_3)
+	/*  116 */	{ "SEND_VAL_EX", ALL_USED },
+	/*  117 */	{ "SEND_VAR", ALL_USED },
+	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
+#else
 	/*  116 */	{ "IMPORT_FUNCTION", ALL_USED },
 	/*  117 */	{ "IMPORT_CLASS", ALL_USED },
 	/*  118 */	{ "IMPORT_CONST", ALL_USED },
+#endif
 	
 	/*  119 */	{ "UNKNOWN", ALL_USED },
 	/*  120 */	{ "UNKNOWN", ALL_USED },
 	
+#if defined(ZEND_ENGINE_3)
+	/*  121 */	{ "STRLEN", ALL_USED },
+	/*  122 */	{ "DEFINED", ALL_USED },
+	/*  123 */	{ "TYPE_CHECK", ALL_USED | EXT_VAL },
+	/*  124 */	{ "VERIFY_RETURN_TYPE", ALL_USED },
+	/*  125 */	{ "FE_RESET_RW", SPECIAL },
+	/*  126 */	{ "FE_FETCH_RW", SPECIAL },
+	/*  127 */	{ "FE_FREE", ALL_USED },
+	/*  128 */	{ "INIT_DYNAMIC_CALL", ALL_USED },
+	/*  129 */	{ "DO_ICALL", ALL_USED },
+	/*  130 */	{ "DO_UCALL", ALL_USED },
+	/*  131 */	{ "DO_FCALL_BY_NAME", SPECIAL },
+#else
 	/*  121 */	{ "ASSIGN_ADD_OBJ", ALL_USED },
 	/*  122 */	{ "ASSIGN_SUB_OBJ", ALL_USED },
 	/*  123 */	{ "ASSIGN_MUL_OBJ", ALL_USED },
 	/*  124 */	{ "ASSIGN_DIV_OBJ", ALL_USED },
-#if defined(ZEND_ENGINE_3)
-	/*  125 */	{ "FE_RESET_RW", SPECIAL },
-	/*  126 */	{ "FE_FETCH_RW", SPECIAL },
-#else
 	/*  125 */	{ "ASSIGN_MOD_OBJ", ALL_USED },
 	/*  126 */	{ "ASSIGN_SL_OBJ", ALL_USED },
-#endif
 	/*  127 */	{ "ASSIGN_SR_OBJ", ALL_USED },
 	/*  128 */	{ "ASSIGN_CONCAT_OBJ", ALL_USED },
 	/*  129 */	{ "ASSIGN_BW_OR_OBJ", ALL_USED },
 	/*  130 */	{ "ASSIGN_BW_AND_OBJ", ALL_USED },
 	/*  131 */	{ "ASSIGN_BW_XOR_OBJ", ALL_USED },
+#endif
 
 	/*  132 */	{ "PRE_INC_OBJ", ALL_USED },
 	/*  133 */	{ "PRE_DEC_OBJ", ALL_USED },
@@ -235,22 +269,34 @@ static const op_usage opcodes[] = {
 	/*  148 */	{ "ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "HANDLE_EXCEPTION", NONE_USED },
 	/*  150 */	{ "USER_OPCODE", ALL_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  151 */	{ "ASSERT_CHECK", ALL_USED },
+#else
 	/*  151 */	{ "UNKNOWN", ALL_USED },
+#endif
 	/*  152 */	{ "JMP_SET", ALL_USED | OP2_OPLINE },
 	/*  153 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
 	/*  154 */	{ "ADD_TRAIT", ALL_USED },
 	/*  155 */	{ "BIND_TRAITS", OP1_USED },
 	/*  156 */	{ "SEPARATE", OP1_USED | RES_USED },
+#if defined(ZEND_ENGINE_3)
+	/*  157 */	{ "FETCH_CLASS_NAME", ALL_USED },
+#else
 	/*  157 */	{ "QM_ASSIGN_VAR", OP1_USED | RES_USED },
+#endif
 	/*  158 */	{ "JMP_SET_VAR", OP1_USED | RES_USED },
 	/*  159 */	{ "DISCARD_EXCEPTION", NONE_USED },
 	/*  160 */	{ "YIELD", ALL_USED },
 	/*  161 */	{ "GENERATOR_RETURN", NONE_USED },
 	/*  162 */	{ "FAST_CALL", SPECIAL },
 	/*  163 */	{ "FAST_RET", SPECIAL },
-	/*  164 */	{ "ZEND_RECV_VARIADIC", ALL_USED },
-	/*  165 */	{ "POW", ALL_USED },
-	/*  166 */	{ "ASSIGN_POW", ALL_USED | EXT_VAL },
+	/*  164 */	{ "RECV_VARIADIC", ALL_USED },
+	/*  165 */	{ "SEND_UNPACK", ALL_USED },
+	/*  166 */	{ "POW", ALL_USED },
+	/*  167 */	{ "ASSIGN_POW", ALL_USED },
+	/*  168 */	{ "BIND_GLOBAL", ALL_USED },
+	/*  169 */	{ "COALESCE", ALL_USED },
+	/*  170 */	{ "SPACESHIP", ALL_USED },
 #endif
 };
 
