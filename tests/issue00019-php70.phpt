@@ -1,7 +1,7 @@
 --TEST--
 Test for issue #19
 --SKIPIF--
-<?php if (PHP_VERSION_ID < 70000) { echo "skip PHP 7.0 required"; } ?> 
+<?php if (PHP_VERSION_ID < 70000) { echo "skip PHP 7.0 required\n"; } ?> 
 --INI--
 vld.active=1
 --FILE--
