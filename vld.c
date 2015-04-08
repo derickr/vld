@@ -45,6 +45,21 @@ static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
 #endif
 
+/* {{{ forward declarations */
+static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC);
+static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
+#if defined(ZEND_ENGINE_3)
+static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC);
+#elif defined(ZEND_ENGINE_2)
+static int vld_dump_cle (zend_class_entry **class_entry TSRMLS_DC);
+#else
+static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC);
+#endif
+/* }}} */
+
+#if PHP_VERSION_ID < 50300
+# define ZEND_FE_END { NULL, NULL, NULL }
+#endif
 
 zend_function_entry vld_functions[] = {
 	{NULL, NULL, NULL}
@@ -203,6 +218,32 @@ PHP_MINFO_FUNCTION(vld)
 
 }
 
+/* {{{ PHP 7 wrappers */
+#if defined(ZEND_ENGINE_3)
+
+#define VLD_WRAP_PHP7(name) name ## _wrapper
+
+static int vld_check_fe_wrapper (zval *el, zend_bool *have_fe TSRMLS_DC)
+{
+	return vld_check_fe((zend_op_array *) Z_PTR_P(el), have_fe TSRMLS_CC);
+}
+
+static int vld_dump_fe_wrapper(zval *el APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	return vld_dump_fe((zend_op_array *) Z_PTR_P(el) APPLY_TSRMLS_CC, num_args, args, hash_key);
+}
+
+static int vld_dump_cle_wrapper (zval *el TSRMLS_DC)
+{
+	return vld_dump_cle((zend_class_entry *) Z_PTR_P(el) TSRMLS_CC);
+}
+#else
+
+#define VLD_WRAP_PHP7(name) name
+
+#endif
+/* }}} */
+
 int vld_printf(FILE *stream, const char* fmt, ...)
 {
 	char *message;
@@ -245,13 +286,6 @@ static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
 	return 0;
 }
 
-#if defined(ZEND_ENGINE_3)
-static int vld_check_fe_wrapper (zval *el, zend_bool *have_fe TSRMLS_DC)
-{
-	return vld_check_fe((zend_op_array *) Z_PTR_P(el), have_fe TSRMLS_CC);
-}
-#endif
-
 static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 #if PHP_VERSION_ID < 50300
@@ -271,12 +305,6 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-#if defined(ZEND_ENGINE_3)
-static int vld_dump_fe_wrapper(zval *el APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
-{
-	return vld_dump_fe((zend_op_array *) Z_PTR_P(el) APPLY_TSRMLS_CC, num_args, args, hash_key);
-}
-#endif
 
 #if defined(ZEND_ENGINE_2)
 static int vld_dump_cle (zend_class_entry **class_entry TSRMLS_DC)
@@ -298,18 +326,11 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_%s { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
 		}
 
-#if defined(ZEND_ENGINE_3)
-		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe_wrapper, (void *)&have_fe TSRMLS_CC);
-#else
-		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
-#endif
+		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) VLD_WRAP_PHP7(vld_check_fe), (void *)&have_fe TSRMLS_CC);
+
 		if (have_fe) {
 			vld_printf(stderr, "Class %s:\n", ZSTRING_VALUE(ce->name));
-#if defined(ZEND_ENGINE_3)
-			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe_wrapper, 0);
-#else
-			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
-#endif
+			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) VLD_WRAP_PHP7(vld_dump_fe), 0);
 			vld_printf(stderr, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
 		} else {
 			vld_printf(stderr, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
@@ -322,13 +343,6 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 	return ZEND_HASH_APPLY_KEEP;
 }
-
-#if defined(ZEND_ENGINE_3)
-static int vld_dump_cle_wrapper (zval *el TSRMLS_DC)
-{
-	return vld_dump_cle((zend_class_entry *) Z_PTR_P(el) TSRMLS_CC);
-}
-#endif
 
 
 /* {{{ zend_op_array vld_compile_file (file_handle, type)
@@ -363,13 +377,8 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
-#if defined(ZEND_ENGINE_3)
-	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe_wrapper, 0);
-	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle_wrapper TSRMLS_CC);
-#else
-	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
-	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
-#endif
+	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) VLD_WRAP_PHP7(vld_dump_fe), 0);
+	zend_hash_apply (CG(class_table), (apply_func_t) VLD_WRAP_PHP7(vld_dump_cle) TSRMLS_CC);
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
