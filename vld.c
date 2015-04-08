@@ -62,7 +62,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC);
 #endif
 
 zend_function_entry vld_functions[] = {
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 
@@ -293,7 +293,9 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 #endif
 	if (fe->type == ZEND_USER_FUNCTION) {
 		ZVAL_VALUE_STRING_TYPE *new_str;
+#if PHP_VERSION_ID < 70000
 		int new_len;
+#endif
 
 		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) PHP_URLENCODE_NEW_LEN(new_len));
 		vld_printf(stderr, "Function %s:\n", ZSTRING_VALUE(new_str));
