@@ -965,7 +965,14 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		return 1;
 #endif
-	} else if (opcode.opcode == ZEND_EXIT || opcode.opcode == ZEND_THROW || opcode.opcode == ZEND_RETURN) {
+	} else if (
+#if PHP_VERSION_ID >= 50500
+		opcode.opcode == ZEND_GENERATOR_RETURN ||
+#endif
+		opcode.opcode == ZEND_EXIT ||
+		opcode.opcode == ZEND_THROW ||
+		opcode.opcode == ZEND_RETURN
+	) {
 		*jmp1 = VLD_JMP_EXIT;
 		return 1;
 	}
