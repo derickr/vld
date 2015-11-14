@@ -300,7 +300,9 @@ static const op_usage opcodes[] = {
 #endif
 };
 
+#if PHP_VERSION_ID < 70000
 zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array);
+#endif
 
 static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
 {
@@ -863,6 +865,7 @@ void opt_set_nop (zend_op_array *opa, int nr)
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
 
+#if PHP_VERSION_ID < 70000
 zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array)
 {
 	zend_brk_cont_element *jmp_to;
@@ -873,6 +876,7 @@ zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend
 	} while (--nest_levels > 0);
 	return jmp_to;
 }
+#endif
 
 int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
@@ -911,6 +915,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		*jmp2 = opcode.extended_value;
 		return 1;
+#if PHP_VERSION_ID < 70000
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
 		zend_brk_cont_element *el;
 
@@ -919,9 +924,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		    && VLD_ZNODE_ELEM(opcode.op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
 #endif
 		) {
-#if PHP_VERSION_ID >= 70000
-			el = vld_find_brk_cont(Z_LVAL_P(RT_CONSTANT_EX(opa, opcode.op2)), VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
-#elif PHP_VERSION_ID >= 50399
+#if PHP_VERSION_ID >= 50399
 			el = vld_find_brk_cont(Z_LVAL_P(opcode.op2.zv), VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
 #else
 			el = vld_find_brk_cont(opcode.op2.u.constant.value.lval, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
@@ -929,6 +932,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
 		}
+#endif
 #if PHP_VERSION_ID >= 70000
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW || opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 #else
