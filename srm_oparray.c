@@ -142,7 +142,7 @@ static const op_usage opcodes[] = {
 #endif
 #if defined(ZEND_ENGINE_3)
 	/*  77 */	{ "FE_RESET_R", SPECIAL },
-	/*  78 */	{ "FE_FETCH_R", ALL_USED | EXT_VAL_JMP },
+	/*  78 */	{ "FE_FETCH_R", ALL_USED | EXT_VAL_JMP_REL },
 #else
 	/*  77 */	{ "FE_RESET", SPECIAL },
 	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
@@ -184,7 +184,7 @@ static const op_usage opcodes[] = {
 	/*  105 */	{ "TICKS", ALL_USED },
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED | EXT_VAL },
 #if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
-	/*  107 */	{ "CATCH", ALL_USED | EXT_VAL },
+	/*  107 */	{ "CATCH", ALL_USED | EXT_VAL_JMP_ABS },
 	/*  108 */	{ "THROW", ALL_USED | EXT_VAL },
 	
 	/*  109 */	{ "FETCH_CLASS", SPECIAL },
@@ -225,7 +225,7 @@ static const op_usage opcodes[] = {
 	/*  123 */	{ "TYPE_CHECK", ALL_USED | EXT_VAL },
 	/*  124 */	{ "VERIFY_RETURN_TYPE", ALL_USED },
 	/*  125 */	{ "FE_RESET_RW", SPECIAL },
-	/*  126 */	{ "FE_FETCH_RW", ALL_USED | EXT_VAL_JMP },
+	/*  126 */	{ "FE_FETCH_RW", ALL_USED | EXT_VAL_JMP_REL },
 	/*  127 */	{ "FE_FREE", ALL_USED },
 	/*  128 */	{ "INIT_DYNAMIC_CALL", ALL_USED },
 	/*  129 */	{ "DO_ICALL", ALL_USED },
@@ -802,13 +802,20 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		VLD_PRINT(3, " ]");
 	}
 #endif
-#if PHP_VERSION_ID >= 70000
-	if (flags & EXT_VAL_JMP) {
-		VLD_PRINT(3, " EXT_JMP[ ");
-		vld_printf (stderr, ", ->%d", nr + (op.extended_value / sizeof(zend_op)));
+	if (flags & EXT_VAL_JMP_ABS) {
+		VLD_PRINT(3, " EXT_JMP_ABS[ ");
+		vld_printf (stderr, ", ->%d", op.extended_value);
 		VLD_PRINT(3, " ]");
 	}
+	if (flags & EXT_VAL_JMP_REL) {
+		VLD_PRINT(3, " EXT_JMP_REL[ ");
+#if PHP_VERSION_ID >= 70000
+		vld_printf (stderr, ", ->%d", nr + (op.extended_value / sizeof(zend_op)));
+#else
+		vld_printf (stderr, ", ->%d", nr + op.extended_value);
 #endif
+		VLD_PRINT(3, " ]");
+	}
 	if (flags & NOP2_OPNUM) {
 		zend_op next_op = op_ptr[nr+1];
 		vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, opa, nr TSRMLS_CC);
