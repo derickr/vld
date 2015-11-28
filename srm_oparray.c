@@ -142,7 +142,7 @@ static const op_usage opcodes[] = {
 #endif
 #if defined(ZEND_ENGINE_3)
 	/*  77 */	{ "FE_RESET_R", SPECIAL },
-	/*  78 */	{ "FE_FETCH_R", ALL_USED | OP2_OPNUM },
+	/*  78 */	{ "FE_FETCH_R", ALL_USED | EXT_VAL_JMP },
 #else
 	/*  77 */	{ "FE_RESET", SPECIAL },
 	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
@@ -225,7 +225,7 @@ static const op_usage opcodes[] = {
 	/*  123 */	{ "TYPE_CHECK", ALL_USED | EXT_VAL },
 	/*  124 */	{ "VERIFY_RETURN_TYPE", ALL_USED },
 	/*  125 */	{ "FE_RESET_RW", SPECIAL },
-	/*  126 */	{ "FE_FETCH_RW", SPECIAL },
+	/*  126 */	{ "FE_FETCH_RW", ALL_USED | EXT_VAL_JMP },
 	/*  127 */	{ "FE_FREE", ALL_USED },
 	/*  128 */	{ "INIT_DYNAMIC_CALL", ALL_USED },
 	/*  129 */	{ "DO_ICALL", ALL_USED },
@@ -802,6 +802,13 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		vld_printf (stderr, ", ->%d", jmp);
 		VLD_PRINT(3, " ]");
 	}
+#if PHP_VERSION_ID >= 70000
+	if (flags & EXT_VAL_JMP) {
+		VLD_PRINT(3, " EXT_JMP[ ");
+		vld_printf (stderr, ", ->%d", nr + (op.extended_value / sizeof(zend_op)));
+		VLD_PRINT(3, " ]");
+	}
+#endif
 	if (flags & NOP2_OPNUM) {
 		zend_op next_op = op_ptr[nr+1];
 		vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, opa, nr TSRMLS_CC);
@@ -917,10 +924,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 #if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address) * sizeof(zend_op);
+		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
 #else
 		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
-#endif
 		*jmp2 = opcode.extended_value;
+#endif
 		return 1;
 #if PHP_VERSION_ID < 70000
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
@@ -941,7 +949,11 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		}
 #endif
 #if PHP_VERSION_ID >= 70000
-	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW || opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
+	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
+		*jmp1 = position + 1;
+		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		return 1;
+	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
 #else
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 #endif

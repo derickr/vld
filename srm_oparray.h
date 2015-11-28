@@ -66,6 +66,7 @@
 #define VLD_IS_OPNUM  1<<14
 #define VLD_IS_CLASS  1<<15
 #define OP2_INCLUDE   1<<16
+#define EXT_VAL_JMP   1<<17
 
 typedef struct _op_usage {
 	char *name;

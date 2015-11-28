@@ -37,11 +37,11 @@ line     #* E I O op                           fetch          ext  return  opera
          1        RECV                                             !1      
    3     2        SUB                                              ~2      !0, !1
          3      > RETURN                                                   ~2
-         4*     > RETURN                                                   null
+   4     4*     > RETURN                                                   null
 
 End of function foo
 
 branch: #  0; line:     2-    4; sop:     0; eop:     1; out1:  -2
 path #1: 0, 
-branch: #  0; line:     2-    3; sop:     0; eop:     4
+branch: #  0; line:     2-    4; sop:     0; eop:     4
 path #1: 0,
