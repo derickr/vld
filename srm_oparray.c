@@ -750,7 +750,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		VLD_PRINT(3, " OP1[ ");
 		vld_dump_znode (&print_sep, op1_type, op.op1, base_address, opa, nr TSRMLS_CC);
 		VLD_PRINT(3, " ]");
-	}		
+	}
 	if (flags & OP2_USED) {
 		VLD_PRINT(3, " OP2[ ");
 		if (flags & OP2_INCLUDE) {
@@ -891,7 +891,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-#if defined(ZEND_ENGINE_3)
+#if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
 #elif defined(ZEND_ENGINE_2)
 		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
@@ -906,7 +906,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
-#if defined(ZEND_ENGINE_3)
+#if PHP_VERSION_ID >= 70000
 		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 #elif defined(ZEND_ENGINE_2)
 		*jmp2 = ((long) VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - (long) base_address) / sizeof(zend_op);
@@ -915,7 +915,7 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-#if defined(ZEND_ENGINE_3)
+#if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address) * sizeof(zend_op);
 #else
 		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
@@ -967,9 +967,9 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 			*jmp2 = VLD_JMP_EXIT;
 		}
 		return 1;
-#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+#if PHP_VERSION_ID >= 50300
 	} else if (opcode.opcode == ZEND_GOTO) {
-#if defined(ZEND_ENGINE_3)
+#if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
 #else
 		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
