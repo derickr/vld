@@ -24,7 +24,7 @@ typedef struct _vld_branch {
 	unsigned int start_lineno;
 	unsigned int end_lineno;
 	unsigned int end_op;
-	unsigned int out[2];
+	int          out[2];
 } vld_branch;
 
 typedef struct _vld_path {

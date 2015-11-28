@@ -103,18 +103,18 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
 PHP_INI_END()
  
-static void vld_init_globals(zend_vld_globals *vld_globals)
+static void vld_init_globals(zend_vld_globals *vg)
 {
-	vld_globals->active       = 0;
-	vld_globals->skip_prepend = 0;
-	vld_globals->skip_append  = 0;
-	vld_globals->execute      = 1;
-	vld_globals->format       = 0;
-	vld_globals->col_sep	  = "\t";
-	vld_globals->path_dump_file = NULL;
-	vld_globals->dump_paths   = 1;
-	vld_globals->save_paths   = 0;
-	vld_globals->verbosity    = 1;
+	vg->active       = 0;
+	vg->skip_prepend = 0;
+	vg->skip_append  = 0;
+	vg->execute      = 1;
+	vg->format       = 0;
+	vg->col_sep	  = "\t";
+	vg->path_dump_file = NULL;
+	vg->dump_paths   = 1;
+	vg->save_paths   = 0;
+	vg->verbosity    = 1;
 }
 
 
@@ -249,7 +249,8 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 	char *message;
 	int len;
 	va_list args;
-	int i = 0, j = 0;
+	int i = 0;
+	size_t j = 0;
 	char *ptr;
 	const char EOL='\n';
 	TSRMLS_FETCH();
@@ -373,7 +374,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 
 	if (VLD_G(path_dump_file)) {
-		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%08x { label=\"file %s\";\n", op_array, op_array->filename ? ZSTRING_VALUE(op_array->filename) : "__main");
+		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%p { label=\"file %s\";\n", op_array, op_array->filename ? ZSTRING_VALUE(op_array->filename) : "__main");
 	}
 	if (op_array) {
 		vld_dump_oparray (op_array TSRMLS_CC);

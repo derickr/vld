@@ -15,6 +15,7 @@
 
 #include "php.h"
 #include "zend_alloc.h"
+#include "zend_compile.h"
 #include "branchinfo.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
@@ -322,7 +323,10 @@ static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value)
 static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value)
 {
 	ZVAL_VALUE_STRING_TYPE *new_str;
-	int new_len, len;
+#if PHP_VERSION_ID < 70000
+	int new_len;
+#endif
+	int len;
 
 	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value) PHP_URLENCODE_NEW_LEN(new_len));
 	len = vld_printf (stderr, "'%s'", ZSTRING_VALUE(new_str));
@@ -811,6 +815,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 {
 	unsigned int i;
+	int          j;
 	vld_set *set;
 	vld_branch_info *branch_info;
 	unsigned int base_address = (unsigned int)(zend_intptr_t)&(opa->opcodes[0]);
@@ -832,8 +837,8 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	}
 #ifdef IS_CV /* PHP >= 5.1 */
 	vld_printf (stderr, "compiled vars:  ");
-	for (i = 0; i < opa->last_var; i++) {
-		vld_printf (stderr, "!%d = $%s%s", i, OPARRAY_VAR_NAME(opa->vars[i]), ((i + 1) == opa->last_var) ? "\n" : ", ");
+	for (j = 0; j < opa->last_var; j++) {
+		vld_printf (stderr, "!%d = $%s%s", j, OPARRAY_VAR_NAME(opa->vars[j]), ((j + 1) == opa->last_var) ? "\n" : ", ");
 	}
 	if (!opa->last_var) {
 		vld_printf(stderr, "none\n");
@@ -880,7 +885,9 @@ zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend
 
 int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
+#if PHP_VERSION_ID < 70000 || ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
+#endif
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
