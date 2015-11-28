@@ -786,14 +786,13 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		}
 		VLD_PRINT(3, " ]");
 	}
+#if PHP_VERSION_ID < 70000
 	if (flags & OP2_BRK_CONT) {
 		long jmp;
 		zend_brk_cont_element *el;
 
 		VLD_PRINT(3, " BRK_CONT[ ");
-#if PHP_VERSION_ID >= 70000
-		el = vld_find_brk_cont(Z_LVAL_P(RT_CONSTANT_EX(opa, op.op2)), VLD_ZNODE_ELEM(op.op1, opline_num), opa);
-#elif PHP_VERSION_ID >= 50399
+#if PHP_VERSION_ID >= 50399
 		el = vld_find_brk_cont(Z_LVAL_P(op.op2.zv), VLD_ZNODE_ELEM(op.op1, opline_num), opa);
 #else
 		el = vld_find_brk_cont(op.op2.u.constant.value.lval, VLD_ZNODE_ELEM(op.op1, opline_num), opa);
@@ -802,6 +801,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		vld_printf (stderr, ", ->%d", jmp);
 		VLD_PRINT(3, " ]");
 	}
+#endif
 #if PHP_VERSION_ID >= 70000
 	if (flags & EXT_VAL_JMP) {
 		VLD_PRINT(3, " EXT_JMP[ ");
