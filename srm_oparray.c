@@ -186,11 +186,8 @@ static const op_usage opcodes[] = {
 #if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 	/*  107 */	{ "CATCH", ALL_USED | EXT_VAL_JMP_ABS },
 	/*  108 */	{ "THROW", ALL_USED | EXT_VAL },
-	
 	/*  109 */	{ "FETCH_CLASS", SPECIAL },
-	
 	/*  110 */	{ "CLONE", ALL_USED },
-
 #if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 2)
 	/*  111 */	{ "INIT_CTOR_CALL", ALL_USED },
 #else 
@@ -202,7 +199,6 @@ static const op_usage opcodes[] = {
 #endif
 	/*  112 */	{ "INIT_METHOD_CALL", ALL_USED },
 	/*  113 */	{ "INIT_STATIC_METHOD_CALL", ALL_USED },
-	
 	/*  114 */	{ "ISSET_ISEMPTY_VAR", ALL_USED | EXT_VAL },
 	/*  115 */	{ "ISSET_ISEMPTY_DIM_OBJ", ALL_USED | EXT_VAL },
 	
@@ -249,20 +245,14 @@ static const op_usage opcodes[] = {
 	/*  133 */	{ "PRE_DEC_OBJ", ALL_USED },
 	/*  134 */	{ "POST_INC_OBJ", ALL_USED },
 	/*  135 */	{ "POST_DEC_OBJ", ALL_USED },
-
 	/*  136 */	{ "ASSIGN_OBJ", ALL_USED },
 	/*  137 */	{ "OP_DATA", ALL_USED },
-	
 	/*  138 */	{ "INSTANCEOF", ALL_USED },
-	
 	/*  139 */	{ "DECLARE_CLASS", ALL_USED },
 	/*  140 */	{ "DECLARE_INHERITED_CLASS", ALL_USED },
 	/*  141 */	{ "DECLARE_FUNCTION", ALL_USED },
-	
 	/*  142 */	{ "RAISE_ABSTRACT_ERROR", ALL_USED },
-	
 	/*  143 */	{ "DECLARE_CONST", OP1_USED | OP2_USED },
-	
 	/*  144 */	{ "ADD_INTERFACE", ALL_USED },
 	/*  145 */	{ "VERIFY_INSTANCEOF", ALL_USED },
 	/*  146 */	{ "VERIFY_ABSTRACT_CLASS", ALL_USED },
@@ -298,6 +288,19 @@ static const op_usage opcodes[] = {
 	/*  168 */	{ "BIND_GLOBAL", ALL_USED },
 	/*  169 */	{ "COALESCE", ALL_USED },
 	/*  170 */	{ "SPACESHIP", ALL_USED },
+#endif
+#if PHP_VERSION_ID >= 70100
+    /*  171 */ { "ZEND_DECLARE_ANON_CLASS", OP2_USED | RES_USED | RES_CLASS },
+    /*  172 */ { "ZEND_DECLARE_ANON_INHERITED_CLASS", OP2_USED | RES_USED | RES_CLASS },
+    /*  173 */ { "FETCH_STATIC_PROP_R", RES_USED | OP1_USED | OP_FETCH },
+    /*  174 */ { "FETCH_STATIC_PROP_W", RES_USED | OP1_USED | OP_FETCH },
+    /*  175 */ { "FETCH_STATIC_PROP_RW", RES_USED | OP1_USED | OP_FETCH },
+    /*  176 */ { "FETCH_STATIC_PROP_IS", ALL_USED },
+    /*  177 */ { "FETCH_STATIC_PROP_FUNC_ARG", RES_USED | OP1_USED | OP_FETCH },
+    /*  178 */ { "FETCH_STATIC_PROP_UNSET", ALL_USED },
+    /*  179 */ { "UNSET_STATIC_PROP", ALL_USED },
+    /*  180 */ { "ISSET_ISEMPTY_STATIC_PROP", RES_USED | OP1_USED },
+    /*  181 */ { "FETCH_CLASS_CONSTANT", ALL_USED },
 #endif
 };
 
@@ -678,9 +681,11 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			case ZEND_FETCH_STATIC:
 				fetch_type = "static";
 				break;
+#if PHP_VERSION_ID < 70100
 			case ZEND_FETCH_STATIC_MEMBER:
 				fetch_type = "static member";
 				break;
+#endif
 #ifdef ZEND_FETCH_GLOBAL_LOCK
 			case ZEND_FETCH_GLOBAL_LOCK:
 				fetch_type = "global lock";
