@@ -183,8 +183,8 @@ static const op_usage opcodes[] = {
 	/*  104 */	{ "EXT_NOP", ALL_USED },
 	/*  105 */	{ "TICKS", ALL_USED },
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED | EXT_VAL },
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
-	/*  107 */	{ "CATCH", ALL_USED | EXT_VAL_JMP_ABS },
+#if PHP_VERSION_ID >= 50000
+	/*  107 */	{ "CATCH", SPECIAL },
 	/*  108 */	{ "THROW", ALL_USED | EXT_VAL },
 	/*  109 */	{ "FETCH_CLASS", SPECIAL },
 	/*  110 */	{ "CLONE", ALL_USED },
@@ -619,6 +619,18 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			}
 			break;
 #endif
+#if PHP_VERSION_ID >= 50000
+		case ZEND_CATCH:
+			flags = ALL_USED;
+			if (!op->result.num) {
+#if PHP_VERSION_ID >= 70100
+				flags |= EXT_VAL_JMP_REL;
+#else
+				flags |= EXT_VAL_JMP_ABS;
+#endif
+			}
+			break;
+#endif
 	}
 	return flags;
 }
@@ -815,7 +827,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	if (flags & EXT_VAL_JMP_REL) {
 		VLD_PRINT(3, " EXT_JMP_REL[ ");
 #if PHP_VERSION_ID >= 70000
-		vld_printf (stderr, ", ->%d", nr + (op.extended_value / sizeof(zend_op)));
+		vld_printf (stderr, ", ->%d", nr + ((int) op.extended_value / sizeof(zend_op)));
 #else
 		vld_printf (stderr, ", ->%d", nr + op.extended_value);
 #endif
@@ -979,15 +991,19 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jmp1 = position + 1;
 #if PHP_VERSION_ID >= 50400
-        if (!opcode.result.num) {
+		if (!opcode.result.num) {
 #else
-        if (!opcode.op1.u.EA.type) {
+		if (!opcode.op1.u.EA.type) {
 #endif
-            *jmp2 = opcode.extended_value;
-            if (*jmp2 == *jmp1) {
-                *jmp2 = VLD_JMP_NOT_SET;
-            }
-        } else {
+#if PHP_VERSION_ID >= 70100
+			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+#else
+			*jmp2 = opcode.extended_value;
+#endif
+			if (*jmp2 == *jmp1) {
+				*jmp2 = VLD_JMP_NOT_SET;
+			}
+		} else {
 			*jmp2 = VLD_JMP_EXIT;
 		}
 		return 1;
