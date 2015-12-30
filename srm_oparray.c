@@ -681,6 +681,23 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		res_type = VLD_IS_CLASS;
 	}
 
+#if PHP_VERSION_ID >= 50600
+	switch (op.opcode) {
+		case ZEND_FAST_RET:
+			if (op.extended_value == ZEND_FAST_RET_TO_FINALLY) {
+				fetch_type = "to_finally";
+			} else if (op.extended_value == ZEND_FAST_RET_TO_CATCH) {
+				fetch_type = "to_catch";
+			}
+			break;
+		case ZEND_FAST_CALL:
+			if (op.extended_value == ZEND_FAST_CALL_FROM_FINALLY) {
+				fetch_type = "from_finally";
+			}
+			break;
+	}
+#endif
+
 	if (flags & OP_FETCH) {
 #if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 		switch (op.VLD_EXTENDED_VALUE(op2)) {
@@ -1016,6 +1033,26 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #endif
 		return 1;
 #endif
+
+#if PHP_VERSION_ID >= 50500
+	} else if (opcode.opcode == ZEND_FAST_CALL) {
+#if PHP_VERSION_ID >= 70000
+		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+#else
+		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
+#endif
+		if (opcode.extended_value) {
+			*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
+		}
+		return 1;
+	} else if (opcode.opcode == ZEND_FAST_RET) {
+		*jmp1 = position + 1;
+		if (opcode.extended_value) {
+			*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
+		}
+		return 1;
+#endif
+
 	} else if (
 #if PHP_VERSION_ID >= 50500
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
