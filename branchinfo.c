@@ -65,7 +65,12 @@ void vld_only_leave_first_catch(zend_op_array *opa, vld_branch_info *branch_info
 	if (opa->opcodes[position].opcode == ZEND_FETCH_CLASS) {
 		position++;
 	}
+
+#if PHP_VERSION_ID >= 70100
+	exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
+#else
 	exit_jmp = opa->opcodes[position].extended_value;
+#endif
 
 	if (opa->opcodes[position].opcode != ZEND_CATCH) {
 		return;
@@ -90,7 +95,11 @@ void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
 	 * considered entry points */
 	for (i = 0; i < branch_info->entry_points->size; i++) {
 		if (vld_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
+#if PHP_VERSION_ID >= 70100
+			vld_only_leave_first_catch(opa, branch_info, i + ((signed int) opa->opcodes[i].extended_value / sizeof(zend_op)));
+#else
 			vld_only_leave_first_catch(opa, branch_info, opa->opcodes[i].extended_value);
+#endif
 		}
 	}
 
