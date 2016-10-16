@@ -301,6 +301,8 @@ static const op_usage opcodes[] = {
     /*  179 */ { "UNSET_STATIC_PROP", ALL_USED },
     /*  180 */ { "ISSET_ISEMPTY_STATIC_PROP", RES_USED | OP1_USED },
     /*  181 */ { "FETCH_CLASS_CONSTANT", ALL_USED },
+    /*  182 */ { "BIND_LEXICAL", ALL_USED },
+    /*  183 */ { "BIND_STATIC", ALL_USED },
 #endif
 };
 
@@ -707,10 +709,10 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			case ZEND_FETCH_LOCAL:
 				fetch_type = "local";
 				break;
+#if PHP_VERSION_ID < 70100
 			case ZEND_FETCH_STATIC:
 				fetch_type = "static";
 				break;
-#if PHP_VERSION_ID < 70100
 			case ZEND_FETCH_STATIC_MEMBER:
 				fetch_type = "static member";
 				break;
