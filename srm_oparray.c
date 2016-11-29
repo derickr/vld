@@ -979,8 +979,8 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 #if PHP_VERSION_ID >= 70000
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address) * sizeof(zend_op);
-		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jmp2 = (int32_t) (position + ((int32_t)opcode.extended_value / sizeof(zend_op)));
 #else
 		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
 		*jmp2 = opcode.extended_value;
@@ -1056,15 +1056,10 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 #else
 		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 #endif
-		if (opcode.extended_value) {
-			*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
-		}
+		*jmp2 = position + 1;
 		return 1;
 	} else if (opcode.opcode == ZEND_FAST_RET) {
-		*jmp1 = position + 1;
-		if (opcode.extended_value) {
-			*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
-		}
+		*jmp1 = VLD_JMP_EXIT;
 		return 1;
 #endif
 
@@ -1136,7 +1131,11 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 
 		/* See if we have a jump instruction */
 		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			VLD_PRINT1(1, "Jump found. Position 1 = %d", jump_pos1);
+			VLD_PRINT2(
+				1, "Jump found. (Code = %d) Position 1 = %d",
+				opa->opcodes[position].opcode,
+				jump_pos1
+			);
 			if (jump_pos2 != VLD_JMP_NOT_SET) {
 				VLD_PRINT1(1, ", Position 2 = %d\n", jump_pos2);
 			} else {
