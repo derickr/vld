@@ -776,7 +776,11 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		vld_printf(stderr, "     ");
 	}
 
+#if PHP_VERSION_ID >= 70100
+	if ((flags & RES_USED) && op.result_type != IS_UNUSED) {
+#else
 	if ((flags & RES_USED) && !(op.VLD_EXTENDED_VALUE(result) & EXT_TYPE_UNUSED)) {
+#endif
 		VLD_PRINT(3, " RES[ ");
 		len = vld_dump_znode (NULL, res_type, op.result, base_address, opa, nr TSRMLS_CC);
 		VLD_PRINT(3, " ]");
