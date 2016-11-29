@@ -76,7 +76,13 @@ static const op_usage opcodes[] = {
 	/*  38 */	{ "ASSIGN", ALL_USED },
 	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
+#if PHP_VERSION_ID < 70000
 	/*  41 */	{ "PRINT", RES_USED | OP1_USED },
+#elif PHP_VERSION_ID < 70100
+	/*  41 */	{ "UNKNOWN", ALL_USED },
+#else
+	/*  41 */	{ "GENERATOR_CREATE", RES_USED },
+#endif
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
 	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  44 */	{ "JMPNZ", OP1_USED | OP2_USED | OP2_OPLINE },
@@ -303,6 +309,9 @@ static const op_usage opcodes[] = {
     /*  181 */ { "FETCH_CLASS_CONSTANT", ALL_USED },
     /*  182 */ { "BIND_LEXICAL", ALL_USED },
     /*  183 */ { "BIND_STATIC", ALL_USED },
+	/*  184 */	{ "FETCH_THIS", ALL_USED },
+	/*  185 */	{ "UNKNOWN", ALL_USED },
+	/*  186 */	{ "ISSET_ISEMPTY_THIS", ALL_USED },
 #endif
 };
 
