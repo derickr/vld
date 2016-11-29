@@ -692,7 +692,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		res_type = VLD_IS_CLASS;
 	}
 
-#if PHP_VERSION_ID >= 50600
+#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70100
 	switch (op.opcode) {
 		case ZEND_FAST_RET:
 			if (op.extended_value == ZEND_FAST_RET_TO_FINALLY) {
