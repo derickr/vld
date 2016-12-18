@@ -42,7 +42,7 @@ dumps all the opcodes (execution units) of a script.
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="LICENSE" role="doc" />
-   <file name="README" role="doc" />
+   <file name="README.rst" role="doc" />
    <file name="Makefile.in" role="src" />
    <file name="php_vld.h" role="src" />
    <file name="set.c" role="src" />
