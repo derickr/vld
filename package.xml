@@ -16,11 +16,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2014-11-14</date>
+ <date>2016-12-18</date>
  <time>11:27:14</time>
  <version>
-  <release>0.13.0</release>
-  <api>0.13.0</api>
+  <release>0.14.0</release>
+  <api>0.14.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -28,10 +28,8 @@ dumps all the opcodes (execution units) of a script.
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-- PHP 5.6 and PHPNG (preliminary) compatibility
-- Fixed issues with brk/cnt
-- Fixed memory leaks 
-- Support for showing entry and exit points when generating dot files
+- PHP 7.0 and 7.1 support
+- Fixes for dead code and path analysis
  </notes>
  <contents>
   <dir name="/">
