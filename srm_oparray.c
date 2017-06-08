@@ -313,6 +313,17 @@ static const op_usage opcodes[] = {
 	/*  185 */	{ "UNKNOWN", ALL_USED },
 	/*  186 */	{ "ISSET_ISEMPTY_THIS", ALL_USED },
 #endif
+#if PHP_VERSION_ID >= 70200
+	/*  187 */	{ "SWITCH_LONG", OP1_USED | OP2_USED | OP2_JMP_ARRAY | EXT_VAL_JMP_REL },
+	/*  188 */	{ "SWITCH_STRING", OP1_USED | OP2_USED | OP2_JMP_ARRAY | EXT_VAL_JMP_REL },
+	/*  189 */	{ "IN_ARRAY", ALL_USED },
+	/*  190 */	{ "COUNT", ALL_USED },
+	/*  191 */	{ "GET_CLASS", ALL_USED },
+	/*  192 */	{ "GET_CALLED_CLASS", ALL_USED },
+	/*  193 */	{ "GET_TYPE", ALL_USED },
+	/*  194 */	{ "FUNC_NUM_ARGS", ALL_USED },
+	/*  195 */	{ "FUNC_GET_ARGS", ALL_USED },
+#endif
 };
 
 #if PHP_VERSION_ID < 70000
@@ -522,6 +533,30 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
+# if PHP_VERSION_ID >= 70200
+		case VLD_IS_JMP_ARRAY: {
+			zval *array_value;
+			HashTable *myht;
+			zend_ulong num;
+			zend_string *key;
+			zval *val;
+
+			array_value = RT_CONSTANT_EX(op_array->literals, node);
+			myht = Z_ARRVAL_P(array_value);
+
+			len += vld_printf (stderr, "[ ");
+			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
+				if (key == NULL) {
+					len += vld_printf (stderr, "%d:->%d, ", num, opline + (val->value.lval / sizeof(zend_op)));
+				} else {
+					len += vld_printf (stderr, "'%s':->%d, ", ZSTRING_VALUE(key), opline + (val->value.lval / sizeof(zend_op)));
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			len += vld_printf (stderr, "]");
+		}
+			break;
+# endif /* PHP_VERSION_ID */
 #else /* ZEND_ENGINE_1 */
 		case IS_TMP_VAR: /* 2 */
 			len += vld_printf (stderr, "~%d", node.u.var);
@@ -690,6 +725,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	}
 	if (flags & RES_CLASS) {
 		res_type = VLD_IS_CLASS;
+	}
+	if (flags & OP2_JMP_ARRAY) {
+		op2_type = VLD_IS_JMP_ARRAY;
 	}
 
 #if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70100
