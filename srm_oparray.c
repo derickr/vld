@@ -476,7 +476,9 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 #endif
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70300
+			vld_dump_zval(*RT_CONSTANT((op_array->opcodes) + opline, node));
+#elif PHP_VERSION_ID >= 70000
 			vld_dump_zval(*RT_CONSTANT_EX(op_array->literals, node));
 #else
 # if PHP_VERSION_ID >= 50399
