@@ -9,7 +9,6 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: set.h,v 1.2 2006-11-12 13:59:53 helly Exp $ */
 
 #ifndef __BRANCHINFO_H__
 #define __BRANCHINFO_H__

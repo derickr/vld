@@ -76,9 +76,7 @@ static const op_usage opcodes[] = {
 	/*  38 */	{ "ASSIGN", ALL_USED },
 	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
-#if PHP_VERSION_ID < 70000
-	/*  41 */	{ "PRINT", RES_USED | OP1_USED },
-#elif PHP_VERSION_ID < 70100
+#if PHP_VERSION_ID < 70100
 	/*  41 */	{ "UNKNOWN", ALL_USED },
 #else
 	/*  41 */	{ "GENERATOR_CREATE", RES_USED },
@@ -94,65 +92,32 @@ static const op_usage opcodes[] = {
 	/*  50 */	{ "BRK", SPECIAL },
 	/*  51 */	{ "CONT", ALL_USED },
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
-#if defined(ZEND_ENGINE_3)
 	/*  53 */	{ "FAST_CONCAT", ALL_USED },
 	/*  54 */	{ "ROPE_INIT", ALL_USED | EXT_VAL },
 	/*  55 */	{ "ROPE_ADD", ALL_USED | EXT_VAL },
 	/*  56 */	{ "ROPE_END", ALL_USED | EXT_VAL },
-#else
-	/*  53 */	{ "INIT_STRING", RES_USED },
-	/*  54 */	{ "ADD_CHAR", ALL_USED },
-	/*  55 */	{ "ADD_STRING", ALL_USED },
-	/*  56 */	{ "ADD_VAR", ALL_USED },
-#endif
 	/*  57 */	{ "BEGIN_SILENCE", ALL_USED },
 	/*  58 */	{ "END_SILENCE", ALL_USED },
 	/*  59 */	{ "INIT_FCALL_BY_NAME", SPECIAL },
 	/*  60 */	{ "DO_FCALL", SPECIAL },
-#if defined(ZEND_ENGINE_3)
 	/*  61 */	{ "INIT_FCALL", ALL_USED },
-#else
-	/*  61 */	{ "DO_FCALL_BY_NAME", SPECIAL },
-#endif
 	/*  62 */	{ "RETURN", OP1_USED },
 	/*  63 */	{ "RECV", RES_USED | OP1_USED },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
 	/*  65 */	{ "SEND_VAL", OP1_USED },
-#if defined(ZEND_ENGINE_3)
 	/*  66 */	{ "SEND_VAR_EX", ALL_USED },
-#else
-	/*  66 */	{ "SEND_VAR", OP1_USED },
-#endif
 	/*  67 */	{ "SEND_REF", ALL_USED },
 	/*  68 */	{ "NEW", SPECIAL },
-#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
-	/*  69 */	{ "JMP_NO_CTOR", SPECIAL },
-#else
-# if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	/*  69 */	{ "INIT_NS_FCALL_BY_NAME", SPECIAL },
-# else
-	/*  69 */	{ "UNKNOWN", ALL_USED },
-# endif
-#endif
 	/*  70 */	{ "FREE", OP1_USED },
 	/*  71 */	{ "INIT_ARRAY", ALL_USED },
 	/*  72 */	{ "ADD_ARRAY_ELEMENT", ALL_USED },
 	/*  73 */	{ "INCLUDE_OR_EVAL", ALL_USED | OP2_INCLUDE },
 	/*  74 */	{ "UNSET_VAR", ALL_USED },
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 	/*  75 */	{ "UNSET_DIM", ALL_USED },
 	/*  76 */	{ "UNSET_OBJ", ALL_USED },
-#else
-	/*  75 */	{ "UNSET_DIM_OBJ", ALL_USED },
-	/*  76 */	{ "ISSET_ISEMPTY", ALL_USED },
-#endif
-#if defined(ZEND_ENGINE_3)
 	/*  77 */	{ "FE_RESET_R", SPECIAL },
 	/*  78 */	{ "FE_FETCH_R", ALL_USED | EXT_VAL_JMP_REL },
-#else
-	/*  77 */	{ "FE_RESET", SPECIAL },
-	/*  78 */	{ "FE_FETCH", ALL_USED | OP2_OPNUM },
-#endif
 	/*  79 */	{ "EXIT", ALL_USED },
 	/*  80 */	{ "FETCH_R", RES_USED | OP1_USED | OP_FETCH },
 	/*  81 */	{ "FETCH_DIM_R", ALL_USED },
@@ -172,56 +137,32 @@ static const op_usage opcodes[] = {
 	/*  95 */	{ "FETCH_UNSET", ALL_USED },
 	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
-#if defined(ZEND_ENGINE_3)
 	/*  98 */	{ "FETCH_LIST", ALL_USED },
-#else
-	/*  98 */	{ "FETCH_DIM_TMP_VAR", ALL_USED },
-#endif
 	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
-#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
-	/*  100 */	{ "DECLARE_FUNCTION_OR_CLASS", ALL_USED },
-#else
 	/*  100 */	{ "GOTO", ALL_USED | OP1_OPLINE },
-#endif
 	/*  101 */	{ "EXT_STMT", ALL_USED },
 	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
 	/*  103 */	{ "EXT_FCALL_END", ALL_USED },
 	/*  104 */	{ "EXT_NOP", ALL_USED },
 	/*  105 */	{ "TICKS", ALL_USED },
 	/*  106 */	{ "SEND_VAR_NO_REF", ALL_USED | EXT_VAL },
-#if PHP_VERSION_ID >= 50000
 	/*  107 */	{ "CATCH", SPECIAL },
 	/*  108 */	{ "THROW", ALL_USED | EXT_VAL },
 	/*  109 */	{ "FETCH_CLASS", SPECIAL },
 	/*  110 */	{ "CLONE", ALL_USED },
-#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 2)
-	/*  111 */	{ "INIT_CTOR_CALL", ALL_USED },
-#else 
-# if PHP_VERSION_ID >= 50400
 	/*  111 */	{ "RETURN_BY_REF", OP1_USED },
-# else 
-	/*  111 */	{ "UNKNOWN", ALL_USED },
-# endif
-#endif
 	/*  112 */	{ "INIT_METHOD_CALL", ALL_USED },
 	/*  113 */	{ "INIT_STATIC_METHOD_CALL", ALL_USED },
 	/*  114 */	{ "ISSET_ISEMPTY_VAR", ALL_USED | EXT_VAL },
 	/*  115 */	{ "ISSET_ISEMPTY_DIM_OBJ", ALL_USED | EXT_VAL },
-	
-#if defined(ZEND_ENGINE_3)
+
 	/*  116 */	{ "SEND_VAL_EX", ALL_USED },
 	/*  117 */	{ "SEND_VAR", ALL_USED },
 	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
-#else
-	/*  116 */	{ "IMPORT_FUNCTION", ALL_USED },
-	/*  117 */	{ "IMPORT_CLASS", ALL_USED },
-	/*  118 */	{ "IMPORT_CONST", ALL_USED },
-#endif
-	
+
 	/*  119 */	{ "UNKNOWN", ALL_USED },
 	/*  120 */	{ "UNKNOWN", ALL_USED },
-	
-#if defined(ZEND_ENGINE_3)
+
 	/*  121 */	{ "STRLEN", ALL_USED },
 	/*  122 */	{ "DEFINED", ALL_USED },
 	/*  123 */	{ "TYPE_CHECK", ALL_USED | EXT_VAL },
@@ -233,19 +174,6 @@ static const op_usage opcodes[] = {
 	/*  129 */	{ "DO_ICALL", ALL_USED },
 	/*  130 */	{ "DO_UCALL", ALL_USED },
 	/*  131 */	{ "DO_FCALL_BY_NAME", SPECIAL },
-#else
-	/*  121 */	{ "ASSIGN_ADD_OBJ", ALL_USED },
-	/*  122 */	{ "ASSIGN_SUB_OBJ", ALL_USED },
-	/*  123 */	{ "ASSIGN_MUL_OBJ", ALL_USED },
-	/*  124 */	{ "ASSIGN_DIV_OBJ", ALL_USED },
-	/*  125 */	{ "ASSIGN_MOD_OBJ", ALL_USED },
-	/*  126 */	{ "ASSIGN_SL_OBJ", ALL_USED },
-	/*  127 */	{ "ASSIGN_SR_OBJ", ALL_USED },
-	/*  128 */	{ "ASSIGN_CONCAT_OBJ", ALL_USED },
-	/*  129 */	{ "ASSIGN_BW_OR_OBJ", ALL_USED },
-	/*  130 */	{ "ASSIGN_BW_AND_OBJ", ALL_USED },
-	/*  131 */	{ "ASSIGN_BW_XOR_OBJ", ALL_USED },
-#endif
 
 	/*  132 */	{ "PRE_INC_OBJ", ALL_USED },
 	/*  133 */	{ "PRE_DEC_OBJ", ALL_USED },
@@ -266,21 +194,13 @@ static const op_usage opcodes[] = {
 	/*  148 */	{ "ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "HANDLE_EXCEPTION", NONE_USED },
 	/*  150 */	{ "USER_OPCODE", ALL_USED },
-#if defined(ZEND_ENGINE_3)
 	/*  151 */	{ "ASSERT_CHECK", ALL_USED },
-#else
-	/*  151 */	{ "UNKNOWN", ALL_USED },
-#endif
 	/*  152 */	{ "JMP_SET", ALL_USED | OP2_OPLINE },
 	/*  153 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
 	/*  154 */	{ "ADD_TRAIT", ALL_USED },
 	/*  155 */	{ "BIND_TRAITS", OP1_USED },
 	/*  156 */	{ "SEPARATE", OP1_USED | RES_USED },
-#if defined(ZEND_ENGINE_3)
 	/*  157 */	{ "FETCH_CLASS_NAME", ALL_USED },
-#else
-	/*  157 */	{ "QM_ASSIGN_VAR", OP1_USED | RES_USED },
-#endif
 	/*  158 */	{ "JMP_SET_VAR", OP1_USED | RES_USED },
 	/*  159 */	{ "DISCARD_EXCEPTION", NONE_USED },
 	/*  160 */	{ "YIELD", ALL_USED },
@@ -294,7 +214,6 @@ static const op_usage opcodes[] = {
 	/*  168 */	{ "BIND_GLOBAL", ALL_USED },
 	/*  169 */	{ "COALESCE", ALL_USED },
 	/*  170 */	{ "SPACESHIP", ALL_USED },
-#endif
 #if PHP_VERSION_ID >= 70100
     /*  171 */ { "DECLARE_ANON_CLASS", OP2_USED | RES_USED | RES_CLASS },
     /*  172 */ { "DECLARE_ANON_INHERITED_CLASS", OP2_USED | RES_USED | RES_CLASS },
@@ -326,10 +245,6 @@ static const op_usage opcodes[] = {
 #endif
 };
 
-#if PHP_VERSION_ID < 70000
-zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array);
-#endif
-
 static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "null");
@@ -348,9 +263,6 @@ static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value)
 static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value)
 {
 	ZVAL_VALUE_STRING_TYPE *new_str;
-#if PHP_VERSION_ID < 70000
-	int new_len;
-#endif
 	int len;
 
 	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value) PHP_URLENCODE_NEW_LEN(new_len));
@@ -394,17 +306,10 @@ static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value)
 	return vld_printf (stderr, "<const:'%s'>", ZVAL_STRING_VALUE(value));
 }
 
-#if PHP_VERSION_ID >= 50600
 static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<const ast>");
 }
-#else
-static inline int vld_dump_zval_constant_array(ZVAL_VALUE_TYPE value)
-{
-	return vld_printf (stderr, "<const array>");
-}
-#endif
 
 static inline int vld_dump_zval_undef(ZVAL_VALUE_TYPE value)
 {
@@ -433,11 +338,7 @@ static inline int vld_dump_zval_ptr(ZVAL_VALUE_TYPE value)
 
 int vld_dump_zval (zval val)
 {
-#if PHP_VERSION_ID >= 70000
 	switch (val.u1.v.type) {
-#else
-	switch (val.type) {
-#endif
 		case IS_NULL:           return vld_dump_zval_null (val.value);
 		case IS_LONG:           return vld_dump_zval_long (val.value);
 		case IS_DOUBLE:         return vld_dump_zval_double (val.value);
@@ -446,12 +347,7 @@ int vld_dump_zval (zval val)
 		case IS_OBJECT:         return vld_dump_zval_object (val.value);
 		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
 		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
-#if PHP_VERSION_ID >= 50600
 		case IS_CONSTANT_AST:   return vld_dump_zval_constant_ast (val.value);
-#else
-		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
-#endif
-#if PHP_VERSION_ID >= 70000
 		case IS_UNDEF:          return vld_dump_zval_undef (val.value);
 		case IS_FALSE:          return vld_dump_zval_false (val.value);
 		case IS_TRUE:           return vld_dump_zval_true (val.value);
@@ -459,9 +355,6 @@ int vld_dump_zval (zval val)
 		case IS_CALLABLE:       return vld_dump_zval_callable (val.value);
 		case IS_INDIRECT:       return vld_dump_zval_indirect (val.value);
 		case IS_PTR:            return vld_dump_zval_ptr (val.value);
-#else
-		case IS_BOOL:           return vld_dump_zval_bool (val.value);
-#endif
 	}
 	return vld_printf(stderr, "<unknown>");
 }
@@ -482,24 +375,14 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			VLD_PRINT(3, " IS_UNUSED ");
 			break;
 		case IS_CONST: /* 1 */
-#if PHP_VERSION_ID >= 70000
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(zval));
-#else
-			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
-#endif
 #if PHP_VERSION_ID >= 70300
 			vld_dump_zval(*RT_CONSTANT((op_array->opcodes) + opline, node));
 #elif PHP_VERSION_ID >= 70000
 			vld_dump_zval(*RT_CONSTANT_EX(op_array->literals, node));
-#else
-# if PHP_VERSION_ID >= 50399
-			vld_dump_zval(*node.zv);
-# else
-			vld_dump_zval(node.u.constant);
-# endif
 #endif
 			break;
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
+
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
 			len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
@@ -508,34 +391,20 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			VLD_PRINT(3, " IS_VAR ");
 			len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
-#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
 			VLD_PRINT(3, " IS_CV ");
-#if PHP_VERSION_ID >= 70000
 			len += vld_printf (stderr, "!%d", (VLD_ZNODE_ELEM(node, var)-sizeof(zend_execute_data)) / sizeof(zval));
-#else
-			len += vld_printf (stderr, "!%d", VLD_ZNODE_ELEM(node, var));
-#endif
 			break;
-#endif
 		case VLD_IS_OPNUM:
-#if PHP_VERSION_ID >= 70000
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
-#else
-			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
-#endif
 			break;
 		case VLD_IS_OPLINE:
-#if PHP_VERSION_ID >= 70000
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
-#else
-			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
-#endif
 			break;
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
 			break;
-# if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID >= 70200
 		case VLD_IS_JMP_ARRAY: {
 			zval *array_value;
 			HashTable *myht;
@@ -558,21 +427,6 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			len += vld_printf (stderr, "]");
 		}
 			break;
-# endif /* PHP_VERSION_ID */
-#else /* ZEND_ENGINE_1 */
-		case IS_TMP_VAR: /* 2 */
-			len += vld_printf (stderr, "~%d", node.u.var);
-			break;
-		case IS_VAR: /* 4 */
-			len += vld_printf (stderr, "$%d", node.u.var);
-			break;           
-		case VLD_IS_OPNUM:
-		case VLD_IS_OPLINE:
-			len += vld_printf (stderr, "->%d", node.u.opline_num);
-			break;
-		case VLD_IS_CLASS:
-			len += vld_printf (stderr, ":%d", node.u.var);
-			break;
 #endif
 		default:
 			return 0;
@@ -585,18 +439,10 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 	unsigned int flags = 0;
 
 	switch (op->opcode) {
-#if PHP_VERSION_ID >= 70000
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
-#else
-		case ZEND_FE_RESET:
-#endif
 			flags = ALL_USED;
-#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 			flags |= OP2_OPNUM;
-#elif (PHP_MAJOR_VERSION > 4) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION >= 11)
-			flags |= NOP2_OPNUM;
-#endif
 			break;
 
 		case ZEND_ASSIGN_REF:
@@ -606,9 +452,6 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			}
 			break;
 
-#if PHP_VERSION_ID < 70000
-		case ZEND_DO_FCALL_BY_NAME:
-#endif
 		case ZEND_DO_FCALL:
 			flags = OP1_USED | RES_USED | EXT_VAL;
 			/*flags = ALL_USED | EXT_VAL;
@@ -628,33 +471,19 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 //			op->result = op->op1;
 			break;
 
-#if (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1)
-		case ZEND_JMP_NO_CTOR:
-			flags = OP2_USED | OP2_OPNUM;
-			if (op->VLD_TYPE(op1) != IS_UNUSED) {
-				flags |= OP1_USED;
-			}
-			break;
-#endif
-
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 		case ZEND_FETCH_CLASS:
 			flags = EXT_VAL|RES_USED|OP2_USED|RES_CLASS;
 			break;
-#endif
 
 		case ZEND_NEW:
 			flags = RES_USED|OP1_USED;
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 			flags |= OP1_CLASS;
-#endif
 			break;
 
 		case ZEND_BRK:
 		case ZEND_CONT:
 			flags = OP2_USED|OP2_BRK_CONT;
 			break;
-#if PHP_VERSION_ID >= 50500
 		case ZEND_FAST_CALL:
 			flags = OP1_USED|OP1_OPLINE;
 			if (op->extended_value) {
@@ -666,8 +495,6 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 				flags = OP2_USED|OP2_OPNUM|EXT_VAL;
 			}
 			break;
-#endif
-#if PHP_VERSION_ID >= 50000
 		case ZEND_CATCH:
 			flags = ALL_USED;
 			if (!op->result.num) {
@@ -678,7 +505,6 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 #endif
 			}
 			break;
-#endif
 	}
 	return flags;
 }
@@ -692,7 +518,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	char *fetch_type = "";
 	unsigned int flags, op1_type, op2_type, res_type;
 	const zend_op op = op_ptr[nr];
-	
+
 	if (op.lineno == 0) {
 		return;
 	}
@@ -750,7 +576,6 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 #endif
 
 	if (flags & OP_FETCH) {
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 		switch (op.VLD_EXTENDED_VALUE(op2)) {
 			case ZEND_FETCH_GLOBAL:
 				fetch_type = "global";
@@ -780,13 +605,6 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 				fetch_type = "unknown";
 				break;
 		}
-#else /* ZEND_ENGINE_1 */
-		if (op.op2.u.fetch_type == ZEND_FETCH_GLOBAL) {
-			fetch_type = "global";
-		} else if (op.op2.u.fetch_type == ZEND_FETCH_STATIC) {
-			fetch_type = "static";
-		}
-#endif
 	}
 
 	if (op.lineno == last_lineno) {
@@ -846,11 +664,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			if (VLD_G(verbosity) < 3 && print_sep) {
 				vld_printf(stderr, ", ");
 			}
-#if PHP_VERSION_ID >= 50399
 			switch (op.extended_value) {
-#else
-			switch (Z_LVAL(op.op2.u.constant)) {
-#endif
 				case ZEND_INCLUDE_ONCE:
 					vld_printf(stderr, "INCLUDE_ONCE");
 					break;
@@ -875,22 +689,6 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		}
 		VLD_PRINT(3, " ]");
 	}
-#if PHP_VERSION_ID < 70000
-	if (flags & OP2_BRK_CONT) {
-		long jmp;
-		zend_brk_cont_element *el;
-
-		VLD_PRINT(3, " BRK_CONT[ ");
-#if PHP_VERSION_ID >= 50399
-		el = vld_find_brk_cont(Z_LVAL_P(op.op2.zv), VLD_ZNODE_ELEM(op.op1, opline_num), opa);
-#else
-		el = vld_find_brk_cont(op.op2.u.constant.value.lval, VLD_ZNODE_ELEM(op.op1, opline_num), opa);
-#endif
-		jmp = op.opcode == ZEND_BRK ? el->brk : el->cont;
-		vld_printf (stderr, ", ->%d", jmp);
-		VLD_PRINT(3, " ]");
-	}
-#endif
 	if (flags & EXT_VAL_JMP_ABS) {
 		VLD_PRINT(3, " EXT_JMP_ABS[ ");
 		vld_printf (stderr, ", ->%d", op.extended_value);
@@ -898,11 +696,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	}
 	if (flags & EXT_VAL_JMP_REL) {
 		VLD_PRINT(3, " EXT_JMP_REL[ ");
-#if PHP_VERSION_ID >= 70000
 		vld_printf (stderr, ", ->%d", nr + ((int) op.extended_value / sizeof(zend_op)));
-#else
-		vld_printf (stderr, ", ->%d", nr + op.extended_value);
-#endif
 		VLD_PRINT(3, " ]");
 	}
 	if (flags & NOP2_OPNUM) {
@@ -938,7 +732,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf (stderr, "function name:  %s\n", ZSTRING_VALUE(opa->function_name));
 		vld_printf (stderr, "number of ops:  %d\n", opa->last);
 	}
-#ifdef IS_CV /* PHP >= 5.1 */
+
 	vld_printf (stderr, "compiled vars:  ");
 	for (j = 0; j < opa->last_var; j++) {
 		vld_printf (stderr, "!%d = $%s%s", j, OPARRAY_VAR_NAME(opa->vars[j]), ((j + 1) == opa->last_var) ? "\n" : ", ");
@@ -946,7 +740,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	if (!opa->last_var) {
 		vld_printf(stderr, "none\n");
 	}
-#endif
+
 	if (VLD_G(format)) {
 		vld_printf(stderr, "line%s# *%s%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
 	} else {
@@ -973,35 +767,17 @@ void opt_set_nop (zend_op_array *opa, int nr)
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
 
-#if PHP_VERSION_ID < 70000
-zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array)
-{
-	zend_brk_cont_element *jmp_to;
-
-	do {
-		jmp_to = &op_array->brk_cont_array[array_offset];
-		array_offset = jmp_to->parent;
-	} while (--nest_levels > 0);
-	return jmp_to;
-}
-#endif
-
 int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
-#if PHP_VERSION_ID < 70000 || ZEND_USE_ABS_JMP_ADDR
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
 #endif
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-#if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#elif defined(ZEND_ENGINE_2)
-		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp1 = opcode.op1.u.opline_num;
-#endif
 		return 1;
+
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
 		opcode.opcode == ZEND_JMPNZ ||
@@ -1009,64 +785,27 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 70000
 		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-#elif defined(ZEND_ENGINE_2)
-		*jmp2 = ((long) VLD_ZNODE_ELEM(opcode.op2, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp2 = opcode.op1.u.opline_num;
-#endif
 		return 1;
+
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-#if PHP_VERSION_ID >= 70000
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jmp2 = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
-#else
-		*jmp1 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
-		*jmp2 = opcode.extended_value;
-#endif
 		return 1;
-#if PHP_VERSION_ID < 70000
-	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
-		zend_brk_cont_element *el;
 
-		if (VLD_TYPE(opcode.op2) == IS_CONST
-#ifdef ZEND_ENGINE_2
-		    && VLD_ZNODE_ELEM(opcode.op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
-#endif
-		) {
-#if PHP_VERSION_ID >= 50399
-			el = vld_find_brk_cont(Z_LVAL_P(opcode.op2.zv), VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
-#else
-			el = vld_find_brk_cont(opcode.op2.u.constant.value.lval, VLD_ZNODE_ELEM(opcode.op1, opline_num), opa);
-#endif
-			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
-			return 1;
-		}
-#endif
-#if PHP_VERSION_ID >= 70000
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 		*jmp1 = position + 1;
 		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
 		return 1;
+
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
-#else
-	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
-#endif
 		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 70000
 		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-#else
-		*jmp2 = VLD_ZNODE_ELEM(opcode.op2, opline_num);
-#endif
 		return 1;
+
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 50400
 		if (!opcode.result.num) {
-#else
-		if (!opcode.op1.u.EA.type) {
-#endif
 #if PHP_VERSION_ID >= 70100
 			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
 #else
@@ -1079,34 +818,22 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 			*jmp2 = VLD_JMP_EXIT;
 		}
 		return 1;
-#if PHP_VERSION_ID >= 50300
-	} else if (opcode.opcode == ZEND_GOTO) {
-#if PHP_VERSION_ID >= 70000
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#else
-		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
-		return 1;
-#endif
 
-#if PHP_VERSION_ID >= 50500
-	} else if (opcode.opcode == ZEND_FAST_CALL) {
-#if PHP_VERSION_ID >= 70000
+	} else if (opcode.opcode == ZEND_GOTO) {
 		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#else
-		*jmp1 = ((long) VLD_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
+		return 1;
+
+	} else if (opcode.opcode == ZEND_FAST_CALL) {
+		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
 		*jmp2 = position + 1;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_FAST_RET) {
 		*jmp1 = VLD_JMP_EXIT;
 		return 1;
-#endif
 
 	} else if (
-#if PHP_VERSION_ID >= 50500
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
-#endif
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_RETURN
@@ -1127,7 +854,6 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 		if (position == 0) {
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
 			vld_set_add(branch_info->entry_points, position);
-#if PHP_MAJOR_VERSION >= 5
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			if (VLD_G(format)) {
 				VLD_PRINT2(1, "Found catch point at position:%s%d\n", VLD_G(col_sep),position);
@@ -1136,7 +862,6 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 			}
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
 			vld_set_add(branch_info->entry_points, position);
-#endif
 		}
 		position++;
 	}
@@ -1195,7 +920,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			}
 			break;
 		}
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
+
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			VLD_PRINT1(1, "Throw found at %d\n", position);
@@ -1203,7 +928,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
-#endif
+
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			VLD_PRINT(1, "Exit found\n");
@@ -1214,9 +939,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 		/* See if we have a return instruction */
 		if (
 			opa->opcodes[position].opcode == ZEND_RETURN
-#if PHP_VERSION_ID >= 50400
 			|| opa->opcodes[position].opcode == ZEND_RETURN_BY_REF
-#endif
 		) {
 			VLD_PRINT(1, "Return found\n");
 			vld_set_add(branch_info->ends, position);

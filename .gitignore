@@ -34,7 +34,7 @@
 /config.guess
 /*swo
 /*swp
-/*swn
+/*sw?
 tags
 /config.log
 /libtool
@@ -55,3 +55,11 @@ tags
 .svn
 /*~
 /debugclient/*.o
+tests/*.diff
+tests/*.out
+tests/*.php
+tests/*.exp
+tests/*.log
+tests/*.sh
+tests/*.mem
+
