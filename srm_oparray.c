@@ -767,7 +767,7 @@ void opt_set_nop (zend_op_array *opa, int nr)
 	opa->opcodes[nr].opcode = ZEND_NOP;
 }
 
-int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
+int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
@@ -775,7 +775,8 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 
 	} else if (
@@ -784,52 +785,60 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		opcode.opcode == ZEND_JMPZ_EX ||
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
-		*jmp1 = position + 1;
-		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[0] = position + 1;
+		jumps[1] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-		*jmp2 = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
+		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
-		*jmp1 = position + 1;
-		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		jumps[0] = position + 1;
+		jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
-		*jmp1 = position + 1;
-		*jmp2 = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[0] = position + 1;
+		jumps[1] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_CATCH) {
-		*jmp1 = position + 1;
+		jumps[0] = position + 1;
 		if (!opcode.result.num) {
 #if PHP_VERSION_ID >= 70100
-			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
 #else
-			*jmp2 = opcode.extended_value;
+			jumps[1] = opcode.extended_value;
 #endif
-			if (*jmp2 == *jmp1) {
-				*jmp2 = VLD_JMP_NOT_SET;
+			if (jumps[1] == jumps[0]) {
+				jumps[1] = VLD_JMP_NOT_SET;
 			}
 		} else {
-			*jmp2 = VLD_JMP_EXIT;
+			jumps[1] = VLD_JMP_EXIT;
 		}
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_GOTO) {
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_FAST_CALL) {
-		*jmp1 = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-		*jmp2 = position + 1;
+		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[1] = position + 1;
+		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_FAST_RET) {
-		*jmp1 = VLD_JMP_EXIT;
+		jumps[0] = VLD_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
 
 	} else if (
@@ -838,7 +847,8 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_RETURN
 	) {
-		*jmp1 = VLD_JMP_EXIT;
+		jumps[0] = VLD_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
 	}
 
@@ -871,9 +881,6 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
-	long jump_pos1 = VLD_JMP_NOT_SET;
-	long jump_pos2 = VLD_JMP_NOT_SET;
-
 	if (VLD_G(format)) {
 		VLD_PRINT2(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
 	} else {
@@ -891,33 +898,34 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 	VLD_PRINT1(2, "Add %d\n", position);
 	vld_set_add(set, position);
 	while (position < opa->last) {
-		jump_pos1 = VLD_JMP_NOT_SET;
-		jump_pos2 = VLD_JMP_NOT_SET;
+		size_t jump_count = 0;
+		int    jumps[VLD_BRANCH_MAX_OUTS];
+		size_t i;
 
 		/* See if we have a jump instruction */
-		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			VLD_PRINT2(
-				1, "Jump found. (Code = %d) Position 1 = %d",
-				opa->opcodes[position].opcode,
-				jump_pos1
+		if (vld_find_jumps(opa, position, &jump_count, jumps)) {
+			VLD_PRINT1(
+				1, "Jump found. (Code = %d) ",
+				opa->opcodes[position].opcode
 			);
-			if (jump_pos2 != VLD_JMP_NOT_SET) {
-				VLD_PRINT1(1, ", Position 2 = %d\n", jump_pos2);
-			} else {
-				VLD_PRINT(1, "\n");
+
+			for (i = 0; i < jump_count; i++) {
+				if (i > 0) {
+					VLD_PRINT(1, ", ");
+				}
+				VLD_PRINT2(1, "Position %d = %d", i + 1, jumps[i]);
 			}
-			if (jump_pos1 == VLD_JMP_EXIT || jump_pos1 >= 0) {
-				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
-				if (jump_pos1 != VLD_JMP_EXIT) {
-					vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
+			VLD_PRINT(1, "\n");
+
+			for (i = 0; i < jump_count; i++) {
+				if (jumps[i] == VLD_JMP_EXIT || jumps[i] >= 0) {
+					vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, i, jumps[i]);
+					if (jumps[i] != VLD_JMP_EXIT) {
+						vld_analyse_branch(opa, jumps[i], set, branch_info TSRMLS_CC);
+					}
 				}
 			}
-			if (jump_pos2 == VLD_JMP_EXIT || jump_pos2 >= 0) {
-				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
-				if (jump_pos2 != VLD_JMP_EXIT) {
-					vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
-				}
-			}
+
 			break;
 		}
 

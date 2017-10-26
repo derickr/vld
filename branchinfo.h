@@ -19,11 +19,14 @@
 #define VLD_JMP_NOT_SET -1
 #define VLD_JMP_EXIT    -2
 
+#define VLD_BRANCH_MAX_OUTS 32
+
 typedef struct _vld_branch {
 	unsigned int start_lineno;
 	unsigned int end_lineno;
 	unsigned int end_op;
-	int          out[2];
+	unsigned int outs_count;
+	int          outs[VLD_BRANCH_MAX_OUTS];
 } vld_branch;
 
 typedef struct _vld_path {
