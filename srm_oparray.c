@@ -467,7 +467,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			break;
 
 		case ZEND_JMPZNZ:
-			flags = OP1_USED | OP2_USED | EXT_VAL | OP2_OPNUM;
+			flags = OP1_USED | OP2_USED | EXT_VAL_JMP_REL | OP2_OPNUM;
 //			op->result = op->op1;
 			break;
 
@@ -809,6 +809,7 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		return 1;
 
 	} else if (opcode.opcode == ZEND_CATCH) {
+		*jump_count = 2;
 		jumps[0] = position + 1;
 		if (!opcode.result.num) {
 #if PHP_VERSION_ID >= 70100
@@ -818,11 +819,11 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 #endif
 			if (jumps[1] == jumps[0]) {
 				jumps[1] = VLD_JMP_NOT_SET;
+				*jump_count = 1;
 			}
 		} else {
 			jumps[1] = VLD_JMP_EXIT;
 		}
-		*jump_count = 2;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_GOTO) {
@@ -850,6 +851,36 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[0] = VLD_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+#if PHP_VERSION_ID >= 70200
+	} else if (
+		opcode.opcode == ZEND_SWITCH_LONG ||
+		opcode.opcode == ZEND_SWITCH_STRING
+	) {
+		zval *array_value;
+		HashTable *myht;
+		zval *val;
+
+		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
+		myht = Z_ARRVAL_P(array_value);
+
+		/* All 'case' statements */
+		ZEND_HASH_FOREACH_VAL_IND(myht, val) {
+			if (*jump_count < VLD_BRANCH_MAX_OUTS - 2) {
+				jumps[*jump_count] = position + (val->value.lval / sizeof(zend_op));
+				(*jump_count)++;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* The 'default' case */
+		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
+		(*jump_count)++;
+
+		/* The 'next' opcode */
+		jumps[*jump_count] = position + 1;
+		(*jump_count)++;
+
+		return 1;
+#endif
 	}
 
 	return 0;
@@ -904,8 +935,9 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 
 		/* See if we have a jump instruction */
 		if (vld_find_jumps(opa, position, &jump_count, jumps)) {
-			VLD_PRINT1(
-				1, "Jump found. (Code = %d) ",
+			VLD_PRINT2(
+				1, "%d jumps found. (Code = %d) ",
+				jump_count,
 				opa->opcodes[position].opcode
 			);
 

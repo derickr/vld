@@ -58,6 +58,7 @@ void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsi
 		branch_info->branches[pos].outs[branch_info->branches[pos].outs_count] = jump_pos;
 		branch_info->branches[pos].outs_count++;
 	}
+
 	branch_info->branches[pos].start_lineno = lineno;
 }
 
