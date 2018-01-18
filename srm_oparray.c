@@ -352,7 +352,9 @@ int vld_dump_zval (zval val)
 		case IS_ARRAY:          return vld_dump_zval_array (val.value);
 		case IS_OBJECT:         return vld_dump_zval_object (val.value);
 		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
+#if PHP_VERSION_ID < 70300
 		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
+#endif
 		case IS_CONSTANT_AST:   return vld_dump_zval_constant_ast (val.value);
 		case IS_UNDEF:          return vld_dump_zval_undef (val.value);
 		case IS_FALSE:          return vld_dump_zval_false (val.value);
@@ -418,7 +420,11 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			zend_string *key;
 			zval *val;
 
+#if PHP_VERSION_ID >= 70300
+			array_value = RT_CONSTANT((op_array->literals) + opline, node);
+#else
 			array_value = RT_CONSTANT_EX(op_array->literals, node);
+#endif
 			myht = Z_ARRVAL_P(array_value);
 
 			len += vld_printf (stderr, "[ ");
@@ -866,7 +872,11 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		HashTable *myht;
 		zval *val;
 
+#if PHP_VERSION_ID >= 70300
+		array_value = RT_CONSTANT((opa->literals) + position, opcode.op2);
+#else
 		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
+#endif
 		myht = Z_ARRVAL_P(array_value);
 
 		/* All 'case' statements */
