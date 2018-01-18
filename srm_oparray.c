@@ -88,9 +88,15 @@ static const op_usage opcodes[] = {
 	/*  46 */	{ "JMPZ_EX", ALL_USED | OP2_OPLINE },
 	/*  47 */	{ "JMPNZ_EX", ALL_USED | OP2_OPLINE },
 	/*  48 */	{ "CASE", ALL_USED },
+#if PHP_VERSION_ID < 70200
 	/*  49 */	{ "SWITCH_FREE", RES_USED | OP1_USED },
 	/*  50 */	{ "BRK", SPECIAL },
 	/*  51 */	{ "CONT", ALL_USED },
+#else
+	/*  49 */	{ "CHECK_VAR", OP1_USED },
+	/*  50 */	{ "SEND_VAR_NO_REF_EX", ALL_USED },
+	/*  51 */	{ "MAKE_REF", RES_USED| OP1_USED },
+#endif
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
 	/*  53 */	{ "FAST_CONCAT", ALL_USED },
 	/*  54 */	{ "ROPE_INIT", ALL_USED | EXT_VAL },
