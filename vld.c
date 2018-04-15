@@ -193,6 +193,9 @@ PHP_RINIT_FUNCTION(vld)
 PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
+	zend_compile_string = old_compile_string;
+#endif
 #if PHP_VERSION_ID >= 50500
 	zend_execute_ex   = old_execute_ex;
 #else
