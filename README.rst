@@ -21,7 +21,7 @@ There are a few options in the form of ``php.ini`` settings available.
 
 In order for VLD to do anything, you need to set ``vld.active=1``.
 
-If you want to prevent VLD from executing coe, set ``vld.execute=0``.
+If you want to prevent VLD from executing code, set ``vld.execute=0``.
 
 Other settings are also available, but not documented yet.
 
