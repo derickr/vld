@@ -77,7 +77,7 @@ static const op_usage opcodes[] = {
 	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
 #if PHP_VERSION_ID < 70100
-	/*  41 */	{ "UNKNOWN", ALL_USED },
+	/*  41 */	{ "UNKNOWN [41]", ALL_USED },
 #else
 	/*  41 */	{ "GENERATOR_CREATE", RES_USED },
 #endif
@@ -166,8 +166,8 @@ static const op_usage opcodes[] = {
 	/*  117 */	{ "SEND_VAR", ALL_USED },
 	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
 
-	/*  119 */	{ "UNKNOWN", ALL_USED },
-	/*  120 */	{ "UNKNOWN", ALL_USED },
+	/*  119 */	{ "UNKNOWN [119]", ALL_USED },
+	/*  120 */	{ "UNKNOWN [120]", ALL_USED },
 
 	/*  121 */	{ "STRLEN", ALL_USED },
 	/*  122 */	{ "DEFINED", ALL_USED },
@@ -235,7 +235,7 @@ static const op_usage opcodes[] = {
     /*  182 */ { "BIND_LEXICAL", ALL_USED },
     /*  183 */ { "BIND_STATIC", ALL_USED },
 	/*  184 */	{ "FETCH_THIS", ALL_USED },
-	/*  185 */	{ "UNKNOWN", ALL_USED },
+	/*  185 */	{ "UNKNOWN [185]", ALL_USED },
 	/*  186 */	{ "ISSET_ISEMPTY_THIS", ALL_USED },
 #endif
 #if PHP_VERSION_ID >= 70200
