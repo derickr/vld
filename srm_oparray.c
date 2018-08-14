@@ -476,6 +476,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			break;
 
 		case ZEND_INIT_FCALL_BY_NAME:
+		case ZEND_INIT_NS_FCALL_BY_NAME:
 			flags = OP2_USED;
 			if (op->VLD_TYPE(op1) != IS_UNUSED) {
 				flags |= OP1_USED;
