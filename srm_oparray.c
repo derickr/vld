@@ -167,7 +167,11 @@ static const op_usage opcodes[] = {
 	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
 
 	/*  119 */	{ "UNKNOWN [119]", ALL_USED },
+#if PHP_VERSION_ID >= 70000
+	/*  120 */	{ "SEND_USER", ALL_USED },
+#else
 	/*  120 */	{ "UNKNOWN [120]", ALL_USED },
+#endif
 
 	/*  121 */	{ "STRLEN", ALL_USED },
 	/*  122 */	{ "DEFINED", ALL_USED },
