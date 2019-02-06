@@ -143,9 +143,19 @@ static const op_usage opcodes[] = {
 	/*  95 */	{ "FETCH_UNSET", ALL_USED },
 	/*  96 */	{ "FETCH_DIM_UNSET", ALL_USED },
 	/*  97 */	{ "FETCH_OBJ_UNSET", ALL_USED },
+#if PHP_VERSION_ID >= 70300
+	/*  98 */	{ "FETCH_LIST_R", ALL_USED },
+#else
 	/*  98 */	{ "FETCH_LIST", ALL_USED },
+#endif
 	/*  99 */	{ "FETCH_CONSTANT", ALL_USED },
-	/*  100 */	{ "GOTO", ALL_USED | OP1_OPLINE },
+
+#if PHP_VERSION_ID >= 70300
+	/*  100 */	{ "CHECK_FUNC_ARG", ALL_USED },
+#else
+	/*  100 */	{ "UNKNOWN [100]", ALL_USED },
+#endif
+
 	/*  101 */	{ "EXT_STMT", ALL_USED },
 	/*  102 */	{ "EXT_FCALL_BEGIN", ALL_USED },
 	/*  103 */	{ "EXT_FCALL_END", ALL_USED },
@@ -164,12 +174,14 @@ static const op_usage opcodes[] = {
 
 	/*  116 */	{ "SEND_VAL_EX", ALL_USED },
 	/*  117 */	{ "SEND_VAR", ALL_USED },
-	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
 
-	/*  119 */	{ "UNKNOWN [119]", ALL_USED },
 #if PHP_VERSION_ID >= 70000
+	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
+	/*  119 */	{ "SEND_ARRAY", ALL_USED },
 	/*  120 */	{ "SEND_USER", ALL_USED },
 #else
+	/*  118 */	{ "UNKNOWN [118]", ALL_USED },
+	/*  119 */	{ "UNKNOWN [119]", ALL_USED },
 	/*  120 */	{ "UNKNOWN [120]", ALL_USED },
 #endif
 
@@ -239,7 +251,11 @@ static const op_usage opcodes[] = {
     /*  182 */ { "BIND_LEXICAL", ALL_USED },
     /*  183 */ { "BIND_STATIC", ALL_USED },
 	/*  184 */	{ "FETCH_THIS", ALL_USED },
+#if PHP_VERSION_ID >= 70300
+	/*  185 */	{ "SEND_FUNC_ARG", ALL_USED },
+#else
 	/*  185 */	{ "UNKNOWN [185]", ALL_USED },
+#endif
 	/*  186 */	{ "ISSET_ISEMPTY_THIS", ALL_USED },
 #endif
 #if PHP_VERSION_ID >= 70200
@@ -252,6 +268,11 @@ static const op_usage opcodes[] = {
 	/*  193 */	{ "GET_TYPE", ALL_USED },
 	/*  194 */	{ "FUNC_NUM_ARGS", ALL_USED },
 	/*  195 */	{ "FUNC_GET_ARGS", ALL_USED },
+	/*  196 */	{ "UNSET_CV", ALL_USED },
+	/*  197 */	{ "ISSET_ISEMPTY_CV", ALL_USED },
+#endif
+#if PHP_VERSION_ID >= 70300
+	/*  198 */	{ "FETCH_LIST_W", ALL_USED },
 #endif
 };
 
@@ -552,7 +573,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 
 	if (flags == SPECIAL) {
 		flags = vld_get_special_flags(&op, base_address);
-	} 
+	}
 	if (flags & OP1_OPLINE) {
 		op1_type = VLD_IS_OPLINE;
 	}
