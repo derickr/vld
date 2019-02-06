@@ -272,7 +272,7 @@ static const op_usage opcodes[] = {
 	/*  197 */	{ "ISSET_ISEMPTY_CV", ALL_USED },
 #endif
 #if PHP_VERSION_ID >= 70300
-	/*  198 */  { "FETCH_LIST_W", ALL_USED },
+	/*  198 */	{ "FETCH_LIST_W", ALL_USED },
 #endif
 };
 
