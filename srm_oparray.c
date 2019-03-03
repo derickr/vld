@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 Derick Rethans                               |
+   | Copyright (c) 1997-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -175,15 +175,9 @@ static const op_usage opcodes[] = {
 	/*  116 */	{ "SEND_VAL_EX", ALL_USED },
 	/*  117 */	{ "SEND_VAR", ALL_USED },
 
-#if PHP_VERSION_ID >= 70000
 	/*  118 */	{ "INIT_USER_CALL", ALL_USED | EXT_VAL },
 	/*  119 */	{ "SEND_ARRAY", ALL_USED },
 	/*  120 */	{ "SEND_USER", ALL_USED },
-#else
-	/*  118 */	{ "UNKNOWN [118]", ALL_USED },
-	/*  119 */	{ "UNKNOWN [119]", ALL_USED },
-	/*  120 */	{ "UNKNOWN [120]", ALL_USED },
-#endif
 
 	/*  121 */	{ "STRLEN", ALL_USED },
 	/*  122 */	{ "DEFINED", ALL_USED },
@@ -411,7 +405,7 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(zval));
 #if PHP_VERSION_ID >= 70300
 			vld_dump_zval(*RT_CONSTANT((op_array->opcodes) + opline, node));
-#elif PHP_VERSION_ID >= 70000
+#else
 			vld_dump_zval(*RT_CONSTANT_EX(op_array->literals, node));
 #endif
 			break;
@@ -596,7 +590,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		op2_type = VLD_IS_JMP_ARRAY;
 	}
 
-#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70100
+#if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70100
 	switch (op.opcode) {
 		case ZEND_FAST_RET:
 			if (op.extended_value == ZEND_FAST_RET_TO_FINALLY) {
