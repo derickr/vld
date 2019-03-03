@@ -110,7 +110,7 @@ static void vld_init_globals(zend_vld_globals *vg)
 	vg->skip_append  = 0;
 	vg->execute      = 1;
 	vg->format       = 0;
-	vg->col_sep	  = "\t";
+	vg->col_sep      = (char*) "\t";
 	vg->path_dump_file = NULL;
 	vg->dump_paths   = 1;
 	vg->save_paths   = 0;
@@ -362,16 +362,12 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
 	{
 		zval nop;
-#if PHP_VERSION_ID >= 70000
+
 		zend_op_array *ret;
 		ZVAL_STRINGL(&nop, "RETURN ;", 8);
-		ret = compile_string(&nop, "NOP" TSRMLS_CC);
+		ret = compile_string(&nop, (char*) "NOP" TSRMLS_CC);
 		zval_dtor(&nop);
 		return ret;
-#else
-		ZVAL_STRINGL(&nop, "RETURN ;", 8, 0);
-		return compile_string(&nop, "NOP" TSRMLS_CC);
-#endif
 	}
 
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);

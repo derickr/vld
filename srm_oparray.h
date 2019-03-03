@@ -72,7 +72,7 @@
 #define VLD_IS_JMP_ARRAY  1<<26
 
 typedef struct _op_usage {
-	char *name;
+	const char  *name;
 	unsigned int flags;
 } op_usage;
 

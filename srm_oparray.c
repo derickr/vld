@@ -553,7 +553,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 {
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
-	char *fetch_type = "";
+	const char *fetch_type = "";
 	unsigned int flags, op1_type, op2_type, res_type;
 	const zend_op op = op_ptr[nr];
 
