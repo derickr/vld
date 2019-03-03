@@ -15,6 +15,13 @@
 
 #include "set.h"
 #include "php_vld.h"
+#include "zend_compile.h"
+
+#if ZEND_USE_ABS_JMP_ADDR
+# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
+#else
+# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
+#endif
 
 #define VLD_JMP_NOT_SET -1
 #define VLD_JMP_EXIT    -2

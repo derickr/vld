@@ -15,7 +15,6 @@
 
 #include "php.h"
 #include "zend_alloc.h"
-#include "zend_compile.h"
 #include "branchinfo.h"
 #include "srm_oparray.h"
 #include "ext/standard/url.h"
@@ -23,12 +22,6 @@
 #include "php_vld.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(vld)
-
-#if ZEND_USE_ABS_JMP_ADDR
-# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
-#else
-# define VLD_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
-#endif
 
 /* Input zend_compile.h
  * And replace [^(...)(#define )([^ \t]+).*$]
@@ -528,14 +521,23 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			}
 			break;
 		case ZEND_CATCH:
+#if PHP_VERSION_ID >= 70300
+			flags = OP1_USED;
+			if (op->extended_value & ZEND_LAST_CATCH) {
+				flags |= EXT_VAL;
+			} else {
+				flags |= OP2_USED|OP2_OPLINE;
+			}
+#else
 			flags = ALL_USED;
 			if (!op->result.num) {
-#if PHP_VERSION_ID >= 70100
+# if PHP_VERSION_ID >= 70100
 				flags |= EXT_VAL_JMP_REL;
-#else
+# else
 				flags |= EXT_VAL_JMP_ABS;
-#endif
+# endif
 			}
+#endif
 			break;
 	}
 	return flags;
@@ -667,7 +669,15 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	}
 
 	if (flags & EXT_VAL) {
+#if PHP_VERSION_ID >= 70300
+		if (op.opcode == ZEND_CATCH) {
+			vld_printf(stderr, "last ");
+		} else {
+			vld_printf(stderr, "%3d  ", op.extended_value);
+		}
+#else
 		vld_printf(stderr, "%3d  ", op.extended_value);
+#endif
 	} else {
 		vld_printf(stderr, "     ");
 	}
@@ -849,11 +859,16 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jump_count = 2;
 		jumps[0] = position + 1;
-		if (!opcode.result.num) {
-#if PHP_VERSION_ID >= 70100
-			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+#if PHP_VERSION_ID >= 70300
+		if (!(opcode.extended_value & ZEND_LAST_CATCH)) {
+			jumps[1] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 #else
+		if (!opcode.result.num) {
+# if PHP_VERSION_ID >= 70100
+			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+# else
 			jumps[1] = opcode.extended_value;
+# endif
 #endif
 			if (jumps[1] == jumps[0]) {
 				jumps[1] = VLD_JMP_NOT_SET;
