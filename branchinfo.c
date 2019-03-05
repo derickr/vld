@@ -112,7 +112,14 @@ void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
 	for (i = 0; i < branch_info->entry_points->size; i++) {
 		if (vld_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
 #if PHP_VERSION_ID >= 70300
-			vld_only_leave_first_catch(opa, branch_info, VLD_ZNODE_JMP_LINE(opa->opcodes[i].op2, i, base_address));
+# if ZEND_USE_ABS_JMP_ADDR
+			if (opa->opcodes[i].op2.jmp_addr != NULL) {
+# else
+			if (opa->opcodes[i].op2.jmp_offset != 0) {
+# endif
+				vld_only_leave_first_catch(opa, branch_info, VLD_ZNODE_JMP_LINE(opa->opcodes[i].op2, i, base_address));
+			}
+
 #elif PHP_VERSION_ID >= 70100
 			vld_only_leave_first_catch(opa, branch_info, i + ((signed int) opa->opcodes[i].extended_value / sizeof(zend_op)));
 #else
