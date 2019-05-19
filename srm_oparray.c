@@ -261,6 +261,18 @@ static const op_usage opcodes[] = {
 #if PHP_VERSION_ID >= 70300
 	/*  198 */	{ "FETCH_LIST_W", ALL_USED },
 #endif
+#if PHP_VERSION_ID >= 70400
+	/*  199 */  { "ARRAY_KEY_EXISTS", ALL_USED },
+	/*  200 */  { "ASSIGN_OBJ_REF", ALL_USED },
+	/*  201 */  { "ASSIGN_STATIC_PROP", ALL_USED },
+	/*  202 */  { "ASSIGN_STATIC_PROP_REF", ALL_USED },
+	/*  203 */  { "PRE_INC_STATIC_PROP", ALL_USED },
+	/*  204 */  { "PRE_DEC_STATIC_PROP", ALL_USED },
+	/*  205 */  { "POST_INC_STATIC_PROP", ALL_USED },
+	/*  206 */  { "POST_DEC_STATIC_PROP", ALL_USED },
+	/*  207 */  { "COPY_TMP", ALL_USED },
+	/*  208 */  { "ADD_ARRAY_UNPACK", ALL_USED },
+#endif
 };
 
 static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
