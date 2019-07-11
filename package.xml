@@ -16,11 +16,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2018-12-04</date>
- <time>11:30:12</time>
+ <date>2019-05-29</date>
+ <time>08:45:12</time>
  <version>
-  <release>0.15.0</release>
-  <api>0.15.0</api>
+  <release>0.16.0</release>
+  <api>0.16.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -28,7 +28,7 @@ dumps all the opcodes (execution units) of a script.
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-- Preliminary PHP 7.3 support.
+- Preliminary PHP 7.4 support.
  </notes>
  <contents>
   <dir name="/">

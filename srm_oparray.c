@@ -197,7 +197,11 @@ static const op_usage opcodes[] = {
 	/*  142 */	{ "RAISE_ABSTRACT_ERROR", ALL_USED },
 	/*  143 */	{ "DECLARE_CONST", OP1_USED | OP2_USED },
 	/*  144 */	{ "ADD_INTERFACE", ALL_USED },
-	/*  145 */	{ "VERIFY_INSTANCEOF", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  145 */	{ "DECLARE_CLASS_DELAYED", ALL_USED },
+#else
+	/*  145 */	{ "DECLARE_INHERITED_CLASS_DELAYED", ALL_USED },
+#endif
 	/*  146 */	{ "VERIFY_ABSTRACT_CLASS", ALL_USED },
 	/*  147 */	{ "ASSIGN_DIM", ALL_USED },
 	/*  148 */	{ "ISSET_ISEMPTY_PROP_OBJ", ALL_USED },

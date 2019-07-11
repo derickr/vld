@@ -52,7 +52,7 @@ zend_module_entry vld_module_entry = {
 	PHP_RINIT(vld),	
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
-	"0.16.0-dev",
+	"0.16.0",
 	STANDARD_MODULE_PROPERTIES
 };
 
