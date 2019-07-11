@@ -50,6 +50,20 @@ static const op_usage opcodes[] = {
 	/*  19 */	{ "IS_SMALLER", ALL_USED },
 	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
 	/*  21 */	{ "CAST", ALL_USED | EXT_VAL },
+#if PHP_VERSION_ID >= 70400
+	/*  22 */	{ "ASSIGN", ALL_USED },
+	/*  23 */	{ "ASSIGN_DIM", ALL_USED },
+	/*  24 */	{ "ASSIGN_OBJ", ALL_USED },
+	/*  25 */	{ "ASSIGN_STATIC_PROP", ALL_USED },
+	/*  26 */	{ "ASSIGN_OP", ALL_USED | EXT_VAL },
+	/*  27 */	{ "ASSIGN_DIM_OP", ALL_USED | EXT_VAL },
+	/*  28 */	{ "ASSIGN_OBJ_OP", ALL_USED | EXT_VAL },
+	/*  29 */	{ "ASSIGN_STATIC_PROP_OP", ALL_USED | EXT_VAL },
+	/*  30 */	{ "ASSIGN_REF", SPECIAL },
+	/*  31 */	{ "QM_ASSIGN", RES_USED | OP1_USED },
+	/*  32 */	{ "ASSIGN_OBJ_REF", ALL_USED },
+	/*  33 */	{ "ASSIGN_STATIC_PROP_REF", ALL_USED },
+#else
 	/*  22 */	{ "QM_ASSIGN", RES_USED | OP1_USED },
 	/*  23 */	{ "ASSIGN_ADD", ALL_USED | EXT_VAL },
 	/*  24 */	{ "ASSIGN_SUB", ALL_USED | EXT_VAL },
@@ -62,17 +76,25 @@ static const op_usage opcodes[] = {
 	/*  31 */	{ "ASSIGN_BW_OR", ALL_USED | EXT_VAL },
 	/*  32 */	{ "ASSIGN_BW_AND", ALL_USED | EXT_VAL },
 	/*  33 */	{ "ASSIGN_BW_XOR", ALL_USED | EXT_VAL },
+#endif
 	/*  34 */	{ "PRE_INC", OP1_USED | RES_USED },
 	/*  35 */	{ "PRE_DEC", OP1_USED | RES_USED },
 	/*  36 */	{ "POST_INC", OP1_USED | RES_USED },
 	/*  37 */	{ "POST_DEC", OP1_USED | RES_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  38 */	{ "PRE_INC_STATIC_PROP", ALL_USED },
+	/*  39 */	{ "PRE_DEC_STATIC_PROP", ALL_USED },
+	/*  40 */	{ "POST_INC_STATIC_PROP", ALL_USED },
+	/*  41 */	{ "POST_DEC_STATIC_PROP", ALL_USED },
+#else
 	/*  38 */	{ "ASSIGN", ALL_USED },
 	/*  39 */	{ "ASSIGN_REF", SPECIAL },
 	/*  40 */	{ "ECHO", OP1_USED },
-#if PHP_VERSION_ID < 70100
+# if PHP_VERSION_ID < 70100
 	/*  41 */	{ "UNKNOWN [41]", ALL_USED },
-#else
+# else
 	/*  41 */	{ "GENERATOR_CREATE", RES_USED },
+# endif
 #endif
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
 	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
@@ -188,30 +210,46 @@ static const op_usage opcodes[] = {
 	/*  133 */	{ "PRE_DEC_OBJ", ALL_USED },
 	/*  134 */	{ "POST_INC_OBJ", ALL_USED },
 	/*  135 */	{ "POST_DEC_OBJ", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  136 */	{ "ECHO", OP1_USED },
+#else
 	/*  136 */	{ "ASSIGN_OBJ", ALL_USED },
+#endif
 	/*  137 */	{ "OP_DATA", ALL_USED },
 	/*  138 */	{ "INSTANCEOF", ALL_USED },
 	/*  139 */	{ "DECLARE_CLASS", ALL_USED },
 	/*  140 */	{ "DECLARE_INHERITED_CLASS", ALL_USED },
 	/*  141 */	{ "DECLARE_FUNCTION", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  142 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
+#else
 	/*  142 */	{ "RAISE_ABSTRACT_ERROR", ALL_USED },
+#endif
 	/*  143 */	{ "DECLARE_CONST", OP1_USED | OP2_USED },
 	/*  144 */	{ "ADD_INTERFACE", ALL_USED },
 #if PHP_VERSION_ID >= 70400
 	/*  145 */	{ "DECLARE_CLASS_DELAYED", ALL_USED },
+    /*  146 */	{ "DECLARE_ANON_CLASS", OP2_USED | RES_USED | RES_CLASS },
+	/*  147 */	{ "ADD_ARRAY_UNPACK", ALL_USED },
 #else
 	/*  145 */	{ "DECLARE_INHERITED_CLASS_DELAYED", ALL_USED },
-#endif
 	/*  146 */	{ "VERIFY_ABSTRACT_CLASS", ALL_USED },
 	/*  147 */	{ "ASSIGN_DIM", ALL_USED },
+#endif
 	/*  148 */	{ "ISSET_ISEMPTY_PROP_OBJ", ALL_USED },
 	/*  149 */	{ "HANDLE_EXCEPTION", NONE_USED },
 	/*  150 */	{ "USER_OPCODE", ALL_USED },
 	/*  151 */	{ "ASSERT_CHECK", ALL_USED },
 	/*  152 */	{ "JMP_SET", ALL_USED | OP2_OPLINE },
+#if PHP_VERSION_ID >= 70400
+	/*  153 */	{ "UNSET_CV", ALL_USED },
+	/*  154 */	{ "ISSET_ISEMPTY_CV", ALL_USED },
+	/*  155 */	{ "FETCH_LIST_W", ALL_USED },
+#else
 	/*  153 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
 	/*  154 */	{ "ADD_TRAIT", ALL_USED },
 	/*  155 */	{ "BIND_TRAITS", OP1_USED },
+#endif
 	/*  156 */	{ "SEPARATE", OP1_USED | RES_USED },
 	/*  157 */	{ "FETCH_CLASS_NAME", ALL_USED },
 	/*  158 */	{ "JMP_SET_VAR", OP1_USED | RES_USED },
@@ -222,14 +260,24 @@ static const op_usage opcodes[] = {
 	/*  163 */	{ "FAST_RET", SPECIAL },
 	/*  164 */	{ "RECV_VARIADIC", ALL_USED },
 	/*  165 */	{ "SEND_UNPACK", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  166 */  { "YIELD_FROM", ALL_USED },
+	/*  167 */  { "COPY_TMP", ALL_USED },
+#else
 	/*  166 */	{ "POW", ALL_USED },
 	/*  167 */	{ "ASSIGN_POW", ALL_USED },
+#endif
 	/*  168 */	{ "BIND_GLOBAL", ALL_USED },
 	/*  169 */	{ "COALESCE", ALL_USED },
 	/*  170 */	{ "SPACESHIP", ALL_USED },
 #if PHP_VERSION_ID >= 70100
+# if PHP_VERSION_ID >= 70400
+	/*  171 */	{ "FUNC_NUM_ARGS", ALL_USED },
+	/*  172 */	{ "FUNC_GET_ARGS", ALL_USED },
+# else
     /*  171 */ { "DECLARE_ANON_CLASS", OP2_USED | RES_USED | RES_CLASS },
     /*  172 */ { "DECLARE_ANON_INHERITED_CLASS", OP2_USED | RES_USED | RES_CLASS },
+# endif
     /*  173 */ { "FETCH_STATIC_PROP_R", RES_USED | OP1_USED | OP_FETCH },
     /*  174 */ { "FETCH_STATIC_PROP_W", RES_USED | OP1_USED | OP_FETCH },
     /*  175 */ { "FETCH_STATIC_PROP_RW", RES_USED | OP1_USED | OP_FETCH },
@@ -257,25 +305,17 @@ static const op_usage opcodes[] = {
 	/*  191 */	{ "GET_CLASS", ALL_USED },
 	/*  192 */	{ "GET_CALLED_CLASS", ALL_USED },
 	/*  193 */	{ "GET_TYPE", ALL_USED },
+# if PHP_VERSION_ID >= 70400
+	/*  194 */	{ "ARRAY_KEY_EXISTS", ALL_USED },
+# else
 	/*  194 */	{ "FUNC_NUM_ARGS", ALL_USED },
 	/*  195 */	{ "FUNC_GET_ARGS", ALL_USED },
 	/*  196 */	{ "UNSET_CV", ALL_USED },
 	/*  197 */	{ "ISSET_ISEMPTY_CV", ALL_USED },
-#endif
-#if PHP_VERSION_ID >= 70300
+#  if PHP_VERSION_ID >= 70300
 	/*  198 */	{ "FETCH_LIST_W", ALL_USED },
-#endif
-#if PHP_VERSION_ID >= 70400
-	/*  199 */  { "ARRAY_KEY_EXISTS", ALL_USED },
-	/*  200 */  { "ASSIGN_OBJ_REF", ALL_USED },
-	/*  201 */  { "ASSIGN_STATIC_PROP", ALL_USED },
-	/*  202 */  { "ASSIGN_STATIC_PROP_REF", ALL_USED },
-	/*  203 */  { "PRE_INC_STATIC_PROP", ALL_USED },
-	/*  204 */  { "PRE_DEC_STATIC_PROP", ALL_USED },
-	/*  205 */  { "POST_INC_STATIC_PROP", ALL_USED },
-	/*  206 */  { "POST_DEC_STATIC_PROP", ALL_USED },
-	/*  207 */  { "COPY_TMP", ALL_USED },
-	/*  208 */  { "ADD_ARRAY_UNPACK", ALL_USED },
+#  endif
+# endif
 #endif
 };
 
@@ -561,6 +601,25 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
+static const char *get_assign_operation(uint32_t extended_value)
+{
+	switch (extended_value) {
+		case ZEND_ADD:    return "+=";
+		case ZEND_SUB:    return "-=";
+		case ZEND_MUL:    return "*=";
+		case ZEND_DIV:    return "/=";
+		case ZEND_MOD:    return "%=";
+		case ZEND_SL:     return "<<=";
+		case ZEND_SR:     return ">>=";
+		case ZEND_CONCAT: return ".=";
+		case ZEND_BW_OR:  return "|=";
+		case ZEND_BW_AND: return "&=";
+		case ZEND_BW_XOR: return "^=";
+		case ZEND_POW:    return "**=";
+		default:
+			return "";
+	}
+}
 void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
@@ -622,6 +681,12 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 				fetch_type = "from_finally";
 			}
 			break;
+	}
+#endif
+
+#if PHP_VERSION_ID >= 70400
+	if (op.opcode == ZEND_ASSIGN_DIM_OP) {
+		fetch_type = get_assign_operation(op.extended_value);
 	}
 #endif
 
