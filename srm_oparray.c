@@ -489,7 +489,7 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			zval *val;
 
 #if PHP_VERSION_ID >= 70300
-			array_value = RT_CONSTANT((op_array->literals) + opline, node);
+			array_value = RT_CONSTANT((op_array->opcodes) + opline, node);
 #else
 			array_value = RT_CONSTANT_EX(op_array->literals, node);
 #endif
@@ -995,7 +995,7 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		zval *val;
 
 #if PHP_VERSION_ID >= 70300
-		array_value = RT_CONSTANT((opa->literals) + position, opcode.op2);
+		array_value = RT_CONSTANT((opa->opcodes) + position, opcode.op2);
 #else
 		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
 #endif
