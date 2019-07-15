@@ -601,6 +601,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
+#if PHP_VERSION_ID >= 70400
 static const char *get_assign_operation(uint32_t extended_value)
 {
 	switch (extended_value) {
@@ -620,6 +621,8 @@ static const char *get_assign_operation(uint32_t extended_value)
 			return "";
 	}
 }
+#endif
+
 void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
