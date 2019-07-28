@@ -64,7 +64,7 @@ ZEND_GET_MODULE(vld)
 ZEND_DECLARE_MODULE_GLOBALS(vld)
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("vld.web",       "0", PHP_INI_ALL, OnUpdateBool, active,       zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.web",          "0", PHP_INI_ALL, OnUpdateBool, active,       zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_ALL, OnUpdateBool, active,       zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_ALL, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
     STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_ALL, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
@@ -292,7 +292,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
  *    This function provides a hook for compilation */
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
-	if (VLD_G(web)){
+	if (VLD_G(web) && VLD_G(execute)){
 		php_printf("<hr/><pre>");
 	}
 
@@ -327,7 +327,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		fprintf(VLD_G(path_dump_file), "}\n");
 	}
 
-	if (VLD_G(web)){
+	if (VLD_G(web) && VLD_G(execute)){
 		php_printf("</pre>");
 	}
 
