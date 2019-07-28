@@ -64,20 +64,22 @@ ZEND_GET_MODULE(vld)
 ZEND_DECLARE_MODULE_GLOBALS(vld)
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_SYSTEM, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.format",       "0", PHP_INI_SYSTEM, OnUpdateBool, format,       zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.col_sep",      "\t", PHP_INI_SYSTEM, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.save_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.web",       "0", PHP_INI_ALL, OnUpdateBool, active,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_ALL, OnUpdateBool, active,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_ALL, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_ALL, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_ALL, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_ALL, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.format",       "0", PHP_INI_ALL, OnUpdateBool, format,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.col_sep",      "\t", PHP_INI_ALL, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_dir",     "/tmp", PHP_INI_ALL, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_ALL, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_ALL, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vg)
 {
+	vg->web          = 0;
 	vg->active       = 0;
 	vg->skip_prepend = 0;
 	vg->skip_append  = 0;
@@ -213,9 +215,17 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 		}
 		ptr[i] = 0;
 
-		fprintf(stream, "%s%s", VLD_G(col_sep), ptr);
+		if (VLD_G(web)){
+			php_printf("%s:%s",VLD_G(col_sep), ptr);
+		} else {
+			fprintf(stream, "%s%s", VLD_G(col_sep), ptr);
+		}
 	} else {
-		fprintf(stream, "%s", message);
+		if (VLD_G(web)){
+			php_printf("%s", message);
+		} else {
+			fprintf(stream, "%s", message);
+		}
 	}
 
 	efree(message);
@@ -282,6 +292,10 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
  *    This function provides a hook for compilation */
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
+	if (VLD_G(web)){
+		php_printf("<hr/><pre>");
+	}
+
 	zend_op_array *op_array;
 
 	if (!VLD_G(execute) &&
@@ -311,6 +325,10 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
+	}
+
+	if (VLD_G(web)){
+		php_printf("</pre>");
 	}
 
 	return op_array;

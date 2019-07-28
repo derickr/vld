@@ -36,6 +36,7 @@ PHP_RSHUTDOWN_FUNCTION(vld);
 PHP_MINFO_FUNCTION(vld);
 
 ZEND_BEGIN_MODULE_GLOBALS(vld)
+	int web;
 	int active;
 	int skip_prepend;
 	int skip_append;
