@@ -292,7 +292,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
  *    This function provides a hook for compilation */
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
-	if (VLD_G(web) && VLD_G(execute)){
+	if (VLD_G(web)){
 		php_printf("<hr/><pre>");
 	}
 
@@ -327,8 +327,8 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		fprintf(VLD_G(path_dump_file), "}\n");
 	}
 
-	if (VLD_G(web) && VLD_G(execute)){
-		php_printf("</pre>");
+	if (VLD_G(web)){
+		php_printf("</pre><hr/>");
 	}
 
 	return op_array;
