@@ -298,6 +298,18 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 
 	zend_op_array *op_array;
 
+	if (VLD_G(web) && 
+		((VLD_G(skip_prepend) && PG(auto_prepend_file) && PG(auto_prepend_file)[0] && PG(auto_prepend_file) == file_handle->filename) ||
+	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename))){
+		zval nop;
+
+		zend_op_array *ret;
+		ZVAL_STRINGL(&nop, "RETURN ;", 8);
+		ret = compile_string(&nop, (char*) "NOP" TSRMLS_CC);
+		zval_dtor(&nop);
+		return ret;
+	}
+
 	if (!VLD_G(execute) &&
 		((VLD_G(skip_prepend) && PG(auto_prepend_file) && PG(auto_prepend_file)[0] && PG(auto_prepend_file) == file_handle->filename) ||
 	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
