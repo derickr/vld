@@ -2,13 +2,12 @@ language: php
 
 php:
   - 7.0
-  - 5.6
-  - 5.5
-  - 5.4
-  - 5.3
+  - 7.1
+  - 7.2
+  - 7.3
 
 before_script:
-  - ./.travis.scripts/compile.sh
+  - sh -e ./.travis.scripts/compile.sh
 
 notifications:
   email:

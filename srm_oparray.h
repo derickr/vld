@@ -18,27 +18,12 @@
 #include "php.h"
 
 
-#if PHP_VERSION_ID >= 50399
-# define VLD_ZNODE znode_op
-# define VLD_ZNODE_ELEM(node,var) node.var
-# define VLD_TYPE(t) t##_type
-# define VLD_EXTENDED_VALUE(o) extended_value
-#else
-# define VLD_ZNODE znode
-# define VLD_ZNODE_ELEM(node,var) node.u.var
-# define VLD_TYPE(t) t.op_type
-# define VLD_EXTENDED_VALUE(o) o.u.EA.type
-#endif
+#define VLD_ZNODE znode_op
+#define VLD_ZNODE_ELEM(node,var) node.var
+#define VLD_TYPE(t) t##_type
+#define VLD_EXTENDED_VALUE(o) extended_value
 
-#if PHP_VERSION_ID >= 50700
-# define VAR_NUM(v) EX_VAR_TO_NUM(v)
-#else
-# if PHP_VERSION_ID >= 50500
-#  define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
-# else
-#  define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
-# endif
-#endif
+#define VAR_NUM(v) EX_VAR_TO_NUM(v)
 
 // flags used in the op array list
 #define OP1_USED   1<<0
