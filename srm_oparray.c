@@ -478,7 +478,11 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
 			break;
 		case VLD_IS_CLASS:
-			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+#if PHP_VERSION_ID >= 70300
+			len += vld_dump_zval(*RT_CONSTANT((op_array->opcodes) + opline, node));
+#else
+			len += vld_dump_zval(*RT_CONSTANT_EX(op_array->literals, node));
+#endif
 			break;
 #if PHP_VERSION_ID >= 70200
 		case VLD_IS_JMP_ARRAY: {
