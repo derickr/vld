@@ -40,6 +40,18 @@ static const op_usage opcodes[] = {
 	/*  9 */	{ "BW_OR", ALL_USED },
 	/*  10 */	{ "BW_AND", ALL_USED },
 	/*  11 */	{ "BW_XOR", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  12 */	{ "POW", ALL_USED },
+	/*  13 */	{ "BW_NOT", RES_USED | OP1_USED },
+	/*  14 */	{ "BOOL_NOT", RES_USED | OP1_USED },
+	/*  15 */	{ "BOOL_XOR", ALL_USED },
+	/*  16 */	{ "IS_IDENTICAL", ALL_USED },
+	/*  17 */	{ "IS_NOT_IDENTICAL", ALL_USED },
+	/*  18 */	{ "IS_EQUAL", ALL_USED },
+	/*  19 */	{ "IS_NOT_EQUAL", ALL_USED },
+	/*  20 */	{ "IS_SMALLER", ALL_USED },
+	/*  21 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
+#else
 	/*  12 */	{ "BW_NOT", RES_USED | OP1_USED },
 	/*  13 */	{ "BOOL_NOT", RES_USED | OP1_USED },
 	/*  14 */	{ "BOOL_XOR", ALL_USED },
@@ -50,6 +62,8 @@ static const op_usage opcodes[] = {
 	/*  19 */	{ "IS_SMALLER", ALL_USED },
 	/*  20 */	{ "IS_SMALLER_OR_EQUAL", ALL_USED },
 	/*  21 */	{ "CAST", ALL_USED | EXT_VAL },
+#endif
+
 #if PHP_VERSION_ID >= 70400
 	/*  22 */	{ "ASSIGN", ALL_USED },
 	/*  23 */	{ "ASSIGN_DIM", ALL_USED },
@@ -110,7 +124,11 @@ static const op_usage opcodes[] = {
 #else
 	/*  49 */	{ "CHECK_VAR", OP1_USED },
 	/*  50 */	{ "SEND_VAR_NO_REF_EX", ALL_USED },
-	/*  51 */	{ "MAKE_REF", RES_USED| OP1_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  51 */	{ "CAST", ALL_USED | EXT_VAL },
+#else
+	/*	51 */	{ "MAKE_REF", RES_USED| OP1_USED},
+#endif
 #endif
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
 	/*  53 */	{ "FAST_CONCAT", ALL_USED },
@@ -217,8 +235,13 @@ static const op_usage opcodes[] = {
 #endif
 	/*  137 */	{ "OP_DATA", ALL_USED },
 	/*  138 */	{ "INSTANCEOF", ALL_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  139 */	{ "GENERATOR_CREATE", ALL_USED },
+	/*  140 */	{ "MAKE_REF", RES_USED| OP1_USED },
+#else
 	/*  139 */	{ "DECLARE_CLASS", ALL_USED },
 	/*  140 */	{ "DECLARE_INHERITED_CLASS", ALL_USED },
+#endif
 	/*  141 */	{ "DECLARE_FUNCTION", ALL_USED },
 #if PHP_VERSION_ID >= 70400
 	/*  142 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
@@ -226,7 +249,11 @@ static const op_usage opcodes[] = {
 	/*  142 */	{ "RAISE_ABSTRACT_ERROR", ALL_USED },
 #endif
 	/*  143 */	{ "DECLARE_CONST", OP1_USED | OP2_USED },
+#if PHP_VERSION_ID >= 70400
+	/*  144 */	{ "DECLARE_CLASS", ALL_USED },
+#else
 	/*  144 */	{ "ADD_INTERFACE", ALL_USED },
+#endif
 #if PHP_VERSION_ID >= 70400
 	/*  145 */	{ "DECLARE_CLASS_DELAYED", ALL_USED },
     /*  146 */	{ "DECLARE_ANON_CLASS", OP2_USED | RES_USED | RES_CLASS },
