@@ -127,7 +127,7 @@ static const op_usage opcodes[] = {
 #if PHP_VERSION_ID >= 70400
 	/*  51 */	{ "CAST", ALL_USED | EXT_VAL },
 #else
-	/*	51 */	{ "MAKE_REF", RES_USED| OP1_USED},
+	/*  51 */	{ "MAKE_REF", RES_USED| OP1_USED},
 #endif
 #endif
 	/*  52 */	{ "BOOL", RES_USED | OP1_USED },
