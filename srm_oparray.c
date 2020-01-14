@@ -584,7 +584,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			break;
 
 		case ZEND_FETCH_CLASS:
-			flags = EXT_VAL|RES_USED|OP2_USED|RES_CLASS;
+			flags = EXT_VAL|RES_USED|OP2_USED;
 			break;
 
 		case ZEND_NEW:
