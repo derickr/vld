@@ -656,7 +656,7 @@ static const char *get_assign_operation(uint32_t extended_value)
 
 void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
-	static unsigned last_lineno = (unsigned) -1;
+	static unsigned int last_lineno = (unsigned int) -1;
 	int print_sep = 0, len;
 	const char *fetch_type = "";
 	unsigned int flags, op1_type, op2_type, res_type;
