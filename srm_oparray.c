@@ -527,11 +527,14 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			myht = Z_ARRVAL_P(array_value);
 
 			len += vld_printf (stderr, "[ ");
+			ZVAL_VALUE_STRING_TYPE *new_str;
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				if (key == NULL) {
 					len += vld_printf (stderr, "%d:->%d, ", num, opline + (val->value.lval / sizeof(zend_op)));
 				} else {
-					len += vld_printf (stderr, "'%s':->%d, ", ZSTRING_VALUE(key), opline + (val->value.lval / sizeof(zend_op)));
+					new_str = php_url_encode(ZSTRING_VALUE(key), key->len PHP_URLENCODE_NEW_LEN(new_len));
+					len += vld_printf (stderr, "'%s':->%d, ", ZSTRING_VALUE(new_str), opline + (val->value.lval / sizeof(zend_op)));
+					efree(new_str);
 				}
 			} ZEND_HASH_FOREACH_END();
 
