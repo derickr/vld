@@ -527,11 +527,14 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			myht = Z_ARRVAL_P(array_value);
 
 			len += vld_printf (stderr, "[ ");
+			ZVAL_VALUE_STRING_TYPE *new_str;
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				if (key == NULL) {
 					len += vld_printf (stderr, "%d:->%d, ", num, opline + (val->value.lval / sizeof(zend_op)));
 				} else {
-					len += vld_printf (stderr, "'%s':->%d, ", ZSTRING_VALUE(key), opline + (val->value.lval / sizeof(zend_op)));
+					new_str = php_url_encode(ZSTRING_VALUE(key), key->len PHP_URLENCODE_NEW_LEN(new_len));
+					len += vld_printf (stderr, "'%s':->%d, ", ZSTRING_VALUE(new_str), opline + (val->value.lval / sizeof(zend_op)));
+					efree(new_str);
 				}
 			} ZEND_HASH_FOREACH_END();
 
@@ -656,7 +659,7 @@ static const char *get_assign_operation(uint32_t extended_value)
 
 void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
 {
-	static uint last_lineno = (uint) -1;
+	static unsigned int last_lineno = (unsigned int) -1;
 	int print_sep = 0, len;
 	const char *fetch_type = "";
 	unsigned int flags, op1_type, op2_type, res_type;
