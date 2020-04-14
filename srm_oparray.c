@@ -762,7 +762,7 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	if (op.lineno == last_lineno) {
 		vld_printf(stderr, "     ");
 	} else {
-		vld_printf(stderr, "%4d ", op.lineno);
+		vld_printf(stderr, "%5d ", op.lineno);
 		last_lineno = op.lineno;
 	}
 
