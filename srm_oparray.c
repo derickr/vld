@@ -591,8 +591,11 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 			break;
 
 		case ZEND_NEW:
-			flags = RES_USED|OP1_USED;
-			flags |= OP1_CLASS;
+			flags = RES_USED;
+			if (op->VLD_TYPE(op1) != IS_UNUSED) {
+				flags |= OP1_USED;
+			}
+			flags != OP1_CLASS;
 			break;
 
 		case ZEND_BRK:
@@ -726,6 +729,28 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		fetch_type = get_assign_operation(op.extended_value);
 	}
 #endif
+#if PHP_VERSION_ID >= 70100
+	if (op.opcode == ZEND_NEW/* && op1_type == IS_UNUSED*/) {
+		int ftype = op.op1.num & ZEND_FETCH_CLASS_MASK;
+#else
+	if (op.opcode == ZEND_FETCH_CLASS) {
+		int ftype = op.extended_value & ZEND_FETCH_CLASS_MASK;
+#endif
+		switch (ftype) {
+			case ZEND_FETCH_CLASS_SELF:
+				fetch_type = "self";
+				break;
+			case ZEND_FETCH_CLASS_PARENT:
+				fetch_type = "parent";
+				break;
+			case ZEND_FETCH_CLASS_STATIC:
+				fetch_type = "static";
+				break;
+			case ZEND_FETCH_CLASS_AUTO:
+				fetch_type = "auto";
+				break;
+		}
+	}
 
 	if (flags & OP_FETCH) {
 		switch (op.VLD_EXTENDED_VALUE(op2)) {
