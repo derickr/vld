@@ -253,7 +253,7 @@ void vld_branch_find_paths(vld_branch_info *branch_info)
 	}
 }
 
-void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC)
+void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info)
 {
 	unsigned int i, j;
 	const char *fname = opa->function_name ? ZSTRING_VALUE(opa->function_name) : "__main";

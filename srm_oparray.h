@@ -61,7 +61,7 @@ typedef struct _op_usage {
 	unsigned int flags;
 } op_usage;
 
-void vld_dump_oparray (zend_op_array *opa TSRMLS_DC);
+void vld_dump_oparray (zend_op_array *opa);
 void vld_mark_dead_code (zend_op_array *opa);
 
 #endif
