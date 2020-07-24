@@ -422,11 +422,6 @@ static inline int vld_dump_zval_reference(ZVAL_VALUE_TYPE value)
 	return vld_printf (stderr, "<reference>");
 }
 
-static inline int vld_dump_zval_callable(ZVAL_VALUE_TYPE value)
-{
-	return vld_printf (stderr, "<callable>");
-}
-
 static inline int vld_dump_zval_indirect(ZVAL_VALUE_TYPE value)
 {
 	return vld_printf (stderr, "<indirect>");
@@ -455,7 +450,6 @@ int vld_dump_zval (zval val)
 		case IS_FALSE:          return vld_dump_zval_false (val.value);
 		case IS_TRUE:           return vld_dump_zval_true (val.value);
 		case IS_REFERENCE:      return vld_dump_zval_reference (val.value);
-		case IS_CALLABLE:       return vld_dump_zval_callable (val.value);
 		case IS_INDIRECT:       return vld_dump_zval_indirect (val.value);
 		case IS_PTR:            return vld_dump_zval_ptr (val.value);
 	}
