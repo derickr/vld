@@ -334,6 +334,13 @@ static const op_usage opcodes[] = {
 	/*  193 */	{ "GET_TYPE", ALL_USED },
 # if PHP_VERSION_ID >= 70400
 	/*  194 */	{ "ARRAY_KEY_EXISTS", ALL_USED },
+#  if PHP_VERSION_ID >= 80000
+	/*  195 */	{ "MATCH", ALL_USED | OP2_JMP_ARRAY },
+	/*  196 */	{ "CASE_STRICT", ALL_USED },
+	/*  197 */	{ "MATCH_ERROR", ALL_USED },
+	/*  198 */	{ "JMP_NULL", ALL_USED },
+	/*  199 */	{ "CHECK_UNDEF_ARGS", ALL_USED },
+#  endif
 # else
 	/*  194 */	{ "FUNC_NUM_ARGS", ALL_USED },
 	/*  195 */	{ "FUNC_GET_ARGS", ALL_USED },
@@ -1038,6 +1045,9 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
+#if PHP_VERSION_ID >= 80000
+		opcode.opcode == ZEND_MATCH_ERROR ||
+#endif
 		opcode.opcode == ZEND_RETURN
 	) {
 		jumps[0] = VLD_JMP_EXIT;
@@ -1045,6 +1055,9 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		return 1;
 #if PHP_VERSION_ID >= 70200
 	} else if (
+# if PHP_VERSION_ID >= 80000
+		opcode.opcode == ZEND_MATCH ||
+# endif
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
 	) {
@@ -1052,11 +1065,11 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		HashTable *myht;
 		zval *val;
 
-#if PHP_VERSION_ID >= 70300
+# if PHP_VERSION_ID >= 70300
 		array_value = RT_CONSTANT((opa->opcodes) + position, opcode.op2);
-#else
+# else
 		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
-#endif
+# endif
 		myht = Z_ARRVAL_P(array_value);
 
 		/* All 'case' statements */
@@ -1071,9 +1084,13 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
 		(*jump_count)++;
 
-		/* The 'next' opcode */
-		jumps[*jump_count] = position + 1;
-		(*jump_count)++;
+# if PHP_VERSION_ID >= 80000
+		if (opcode.opcode != ZEND_MATCH) {
+			/* The 'next' opcode */
+			jumps[*jump_count] = position + 1;
+			(*jump_count)++;
+		}
+# endif
 
 		return 1;
 #endif
@@ -1156,6 +1173,16 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 
 			break;
 		}
+
+#if PHP_VERSION_ID >= 80000
+		/* See if we have a match_error instruction */
+		if (opa->opcodes[position].opcode == ZEND_MATCH_ERROR) {
+			VLD_PRINT1(1, "Match error found at %d\n", position);
+			vld_set_add(branch_info->ends, position);
+			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			break;
+		}
+#endif
 
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
