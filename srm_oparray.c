@@ -938,7 +938,7 @@ void vld_dump_oparray(zend_op_array *opa)
 	if (VLD_G(format)) {
 		vld_printf(stderr, "line%s# *%s%s%sop%sfetch%sext%sreturn%soperands\n",VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep),VLD_G(col_sep));
 	} else {
-		vld_printf(stderr, "line     #* E I O op                           fetch          ext  return  operands\n");
+		vld_printf(stderr, "line      #* E I O op                           fetch          ext  return  operands\n");
 		vld_printf(stderr, "-------------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
