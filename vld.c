@@ -54,10 +54,10 @@ zend_module_entry vld_module_entry = {
 	vld_functions,
 	PHP_MINIT(vld),
 	PHP_MSHUTDOWN(vld),
-	PHP_RINIT(vld),	
+	PHP_RINIT(vld),
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
-	"0.16.0",
+	"0.17.1",
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -80,7 +80,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
 PHP_INI_END()
- 
+
 static void vld_init_globals(zend_vld_globals *vg)
 {
 	vg->active       = 0;
@@ -203,7 +203,7 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 	size_t j = 0;
 	char *ptr;
 	const char EOL='\n';
-	
+
 	va_start(args, fmt);
 	len = vspprintf(&message, 0, fmt, args);
 	va_end(args);
@@ -223,7 +223,7 @@ int vld_printf(FILE *stream, const char* fmt, ...)
 	}
 
 	efree(message);
-	
+
 	return len;
 }
 
@@ -258,7 +258,7 @@ static int vld_dump_cle (zend_class_entry *class_entry)
 	zend_bool have_fe = 0;
 	ce = class_entry;
 
-	if (ce->type != ZEND_INTERNAL_CLASS) {	
+	if (ce->type != ZEND_INTERNAL_CLASS) {
 		if (VLD_G(path_dump_file)) {
 			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_%s { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
 		}

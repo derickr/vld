@@ -16,11 +16,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2020-01-13</date>
- <time>17:09:44</time>
+ <date>2021-01-11</date>
+ <time>14:38:54</time>
  <version>
-  <release>0.17.0</release>
-  <api>0.17.0</api>
+  <release>0.17.1</release>
+  <api>0.17.1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -28,9 +28,7 @@ dumps all the opcodes (execution units) of a script.
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-- Fixed segfault while reading of jump tables for SWITCH_LONG/STRING
-- Removed support for PHP 5 (Peter McDonald)
-- Fixed issue #47: Display for NEW does not mention classname
+- Added support for PHP 8.0.
  </notes>
  <contents>
   <dir name="/">
