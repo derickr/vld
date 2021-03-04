@@ -243,7 +243,9 @@ static const op_usage opcodes[] = {
 	/*  140 */	{ "DECLARE_INHERITED_CLASS", ALL_USED },
 #endif
 	/*  141 */	{ "DECLARE_FUNCTION", ALL_USED },
-#if PHP_VERSION_ID >= 70400
+#if PHP_VERSION_ID >= 80100
+	/*  142 */	{ "DECLARE_LAMBDA_FUNCTION", OP2_USED | OP2_INDEX | RES_USED },
+#elif PHP_VERSION_ID >= 70400
 	/*  142 */	{ "DECLARE_LAMBDA_FUNCTION", OP1_USED },
 #else
 	/*  142 */	{ "RAISE_ABSTRACT_ERROR", ALL_USED },
@@ -505,6 +507,9 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 		case VLD_IS_OPLINE:
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_JMP_LINE(node, opline, base_address));
 			break;
+		case VLD_IS_INDEX:
+			len += vld_printf (stderr, "[%d]", VLD_ZNODE_ELEM(node, var));
+			break;
 		case VLD_IS_CLASS:
 #if PHP_VERSION_ID >= 70300
 			len += vld_dump_zval(*RT_CONSTANT((op_array->opcodes) + opline, node));
@@ -699,6 +704,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	}
 	if (flags & OP2_OPNUM) {
 		op2_type = VLD_IS_OPNUM;
+	}
+	if (flags & OP2_INDEX) {
+		op2_type = VLD_IS_INDEX;
 	}
 	if (flags & OP1_CLASS) {
 		op1_type = VLD_IS_CLASS;
@@ -954,6 +962,30 @@ void vld_dump_oparray(zend_op_array *opa)
 
 	vld_set_free(set);
 	vld_branch_info_free(branch_info);
+
+#if PHP_VERSION_ID >= 80100
+	if (!opa->num_dynamic_func_defs) {
+		return;
+	}
+	vld_printf(stderr, "\nDynamic Functions:\n");
+
+	for (i = 0; i < opa->num_dynamic_func_defs; i++) {
+		if (VLD_G(format)) {
+			vld_printf (stderr, "Dynamic Function:%s%d\n", VLD_G(col_sep), i);
+		} else {
+			vld_printf (stderr, "Dynamic Function %d\n", i);
+		}
+
+		vld_dump_oparray(opa->dynamic_func_defs[i]);
+
+		if (VLD_G(format)) {
+			vld_printf (stderr, "End of Dynamic Function:%s%d\n", VLD_G(col_sep), i);
+		} else {
+			vld_printf (stderr, "End of Dynamic Function %d\n", i);
+		}
+		vld_printf(stderr, "\n");
+	}
+#endif
 }
 
 void opt_set_nop (zend_op_array *opa, int nr)
