@@ -287,10 +287,15 @@ static int vld_dump_cle (zend_class_entry *class_entry)
 static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *op_array;
+#if PHP_VERSION_ID < 80100
+	char *filename = file_handle->filename;
+#else
+	char *filename = ZSTR_VAL(file_handle->filename);
+#endif
 
 	if (!VLD_G(execute) &&
-		((VLD_G(skip_prepend) && PG(auto_prepend_file) && PG(auto_prepend_file)[0] && PG(auto_prepend_file) == file_handle->filename) ||
-	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == file_handle->filename)))
+		((VLD_G(skip_prepend) && PG(auto_prepend_file) && PG(auto_prepend_file)[0] && PG(auto_prepend_file) == filename) ||
+	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == filename)))
 	{
 		zend_op_array *ret;
 #if PHP_VERSION_ID < 80000
