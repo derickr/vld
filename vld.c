@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2019 Derick Rethans                               |
+   | Copyright (c) 1997-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -9,7 +9,6 @@
    | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
    +----------------------------------------------------------------------+
  */
-/* $Id: vld.c,v 1.40 2009-03-30 18:36:55 derick Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +56,7 @@ zend_module_entry vld_module_entry = {
 	PHP_RINIT(vld),
 	PHP_RSHUTDOWN(vld),
 	PHP_MINFO(vld),
-	"0.17.1",
+	"0.17.2",
 	STANDARD_MODULE_PROPERTIES
 };
 
