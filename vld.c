@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2021 Derick Rethans                               |
+   | Copyright (c) 1997-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -17,6 +17,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "php_vld.h"
 #include "srm_oparray.h"
@@ -259,7 +260,13 @@ static int vld_dump_cle (zend_class_entry *class_entry)
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {
 		if (VLD_G(path_dump_file)) {
-			fprintf(VLD_G(path_dump_file), "subgraph cluster_class_%s { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
+#if PHP_VERSION_ID >= 70300
+			zend_string *tmp_zstr = php_addcslashes(ce->name, "\\", 1);
+			fprintf(VLD_G(path_dump_file), "subgraph \"cluster_class_%s\" { label=\"class %s\";\n", ZSTR_VAL(tmp_zstr), ZSTR_VAL(tmp_zstr));
+			zend_string_release(tmp_zstr);
+#else
+			fprintf(VLD_G(path_dump_file), "subgraph \"cluster_class_%s\" { label=\"class %s\";\n", ZSTRING_VALUE(ce->name), ZSTRING_VALUE(ce->name));
+#endif
 		}
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) VLD_WRAP_PHP7(vld_check_fe), (void *)&have_fe);
