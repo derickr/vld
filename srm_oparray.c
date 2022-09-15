@@ -586,12 +586,12 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 				flags |= OP1_USED;
 			}
 			break;
-
+#if PHP_VERSION_ID < 80200
 		case ZEND_JMPZNZ:
 			flags = OP1_USED | OP2_USED | EXT_VAL_JMP_REL | OP2_OPNUM;
 //			op->result = op->op1;
 			break;
-
+#endif
 		case ZEND_FETCH_CLASS:
 			flags = EXT_VAL|RES_USED|OP2_USED;
 			break;
@@ -1015,13 +1015,13 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[1] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jump_count = 2;
 		return 1;
-
+#if PHP_VERSION_ID < 80200
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
 		*jump_count = 2;
 		return 1;
-
+#endif
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 		jumps[0] = position + 1;
 		jumps[1] = position + (opcode.extended_value / sizeof(zend_op));

@@ -26,12 +26,15 @@
 static zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
 static zend_op_array* vld_compile_file(zend_file_handle*, int);
 
-#if PHP_VERSION_ID < 80000
-static zend_op_array* (*old_compile_string)(zval *source_string, char *filename);
-static zend_op_array* vld_compile_string(zval *source_string, char *filename);
-#else
+#if PHP_VERSION_ID >= 80200
+static zend_op_array* (*old_compile_string)(zend_string *source_string, const char *filename, zend_compile_position p);
+static zend_op_array* vld_compile_string(zend_string *source_string, const char *filename, zend_compile_position p);
+#elif PHP_VERSION_ID >= 80000
 static zend_op_array* (*old_compile_string)(zend_string *source_string, const char *filename);
 static zend_op_array* vld_compile_string(zend_string *source_string, const char *filename);
+#else
+static zend_op_array* (*old_compile_string)(zval *source_string, char *filename);
+static zend_op_array* vld_compile_string(zval *source_string, char *filename);
 #endif
 
 static void (*old_execute_ex)(zend_execute_data *execute_data);
@@ -304,17 +307,22 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type)
 	     (VLD_G(skip_append)  && PG(auto_append_file)  && PG(auto_append_file)[0]  && PG(auto_append_file)  == filename)))
 	{
 		zend_op_array *ret;
-#if PHP_VERSION_ID < 80000
+#if PHP_VERSION_ID >= 80200
+		zend_string *nop = zend_string_init("RETURN ;", 8, 0);
+
+		ret = compile_string(nop, (const char*) "NOP", ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
+		zend_string_release(nop);
+#elif PHP_VERSION_ID >= 80000
+		zend_string *nop = zend_string_init("RETURN ;", 8, 0);
+
+		ret = compile_string(nop, (const char*) "NOP");
+		zend_string_release(nop);
+#else
 		zval nop;
 
 		ZVAL_STRINGL(&nop, "RETURN ;", 8);
 		ret = compile_string(&nop, (char*) "NOP");
 		zval_dtor(&nop);
-#else
-		zend_string *nop = zend_string_init("RETURN ;", 8, 0);
-
-		ret = compile_string(nop, (const char*) "NOP");
-		zend_string_release(nop);
 #endif
 		return ret;
 	}
@@ -341,15 +349,21 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type)
 
 /* {{{ zend_op_array vld_compile_string (source_string, filename)
  *    This function provides a hook for compilation */
-#if PHP_VERSION_ID < 80000
-static zend_op_array *vld_compile_string(zval *source_string, char *filename)
-#else
+#if PHP_VERSION_ID >= 80200
+static zend_op_array *vld_compile_string(zend_string *source_string, const char *filename, zend_compile_position p)
+#elif PHP_VERSION_ID >= 80000
 static zend_op_array *vld_compile_string(zend_string *source_string, const char *filename)
+#else
+static zend_op_array *vld_compile_string(zval *source_string, char *filename)
 #endif
 {
 	zend_op_array *op_array;
 
-	op_array = old_compile_string (source_string, filename);
+#if PHP_VERSION_ID >= 80200
+	op_array = old_compile_string(source_string, filename, p);
+#else
+	op_array = old_compile_string(source_string, filename);
+#endif
 
 	if (op_array) {
 		vld_dump_oparray (op_array);
