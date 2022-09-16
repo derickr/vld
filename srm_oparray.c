@@ -346,6 +346,11 @@ static const op_usage opcodes[] = {
 	/*  197 */	{ "MATCH_ERROR", ALL_USED },
 	/*  198 */	{ "JMP_NULL", ALL_USED },
 	/*  199 */	{ "CHECK_UNDEF_ARGS", ALL_USED },
+#   if PHP_VERSION_ID >= 80100
+	/*  200 */	{ "FETCH_GLOBALS", ALL_USED },
+	/*  201 */	{ "VERIFY_NEVER_TYPE", ALL_USED },
+	/*  202 */	{ "ZEND_CALLABLE_CONVERT", ALL_USED },
+#   endif
 #  endif
 # else
 	/*  194 */	{ "FUNC_NUM_ARGS", ALL_USED },
