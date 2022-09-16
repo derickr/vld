@@ -113,7 +113,11 @@ static const op_usage opcodes[] = {
 	/*  42 */	{ "JMP", OP1_USED | OP1_OPLINE },
 	/*  43 */	{ "JMPZ", OP1_USED | OP2_USED | OP2_OPLINE },
 	/*  44 */	{ "JMPNZ", OP1_USED | OP2_USED | OP2_OPLINE },
+#if PHP_VERSION_ID < 80200
 	/*  45 */	{ "JMPZNZ", SPECIAL },
+#else
+	/*  45 */	{ "UNKNOWN [45]", ALL_USED },
+#endif
 	/*  46 */	{ "JMPZ_EX", ALL_USED | OP2_OPLINE },
 	/*  47 */	{ "JMPNZ_EX", ALL_USED | OP2_OPLINE },
 	/*  48 */	{ "CASE", ALL_USED },
