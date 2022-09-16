@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2019 Derick Rethans                               |
+   | Copyright (c) 1997-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -47,7 +47,7 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	char *save_dir;
 	FILE *path_dump_file;
 	int dump_paths;
-ZEND_END_MODULE_GLOBALS(vld) 
+ZEND_END_MODULE_GLOBALS(vld)
 
 int vld_printf(FILE *stream, const char* fmt, ...);
 
