@@ -113,7 +113,11 @@ void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
 		if (vld_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
 #if PHP_VERSION_ID >= 70300
 # if ZEND_USE_ABS_JMP_ADDR
+#  if PHP_VERSION_ID >= 80200
+			if (opa->opcodes[i].op2.jmp_addr != -1) {
+#  else
 			if (opa->opcodes[i].op2.jmp_addr != NULL) {
+# endif
 # else
 			if (opa->opcodes[i].op2.jmp_offset != 0) {
 # endif
@@ -264,9 +268,9 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info)
 		for (i = 0; i < branch_info->starts->size; i++) {
 			if (vld_set_in(branch_info->starts, i)) {
 				fprintf(
-					VLD_G(path_dump_file), 
-					"\t\"%s_%d\" [ label = \"{ op #%d-%d | line %d-%d }\" ];\n", 
-					fname, i, i, 
+					VLD_G(path_dump_file),
+					"\t\"%s_%d\" [ label = \"{ op #%d-%d | line %d-%d }\" ];\n",
+					fname, i, i,
 					branch_info->branches[i].end_op,
 					branch_info->branches[i].start_lineno,
 					branch_info->branches[i].end_lineno
