@@ -341,7 +341,7 @@ static const op_usage opcodes[] = {
 # if PHP_VERSION_ID >= 70400
 	/*  194 */	{ "ARRAY_KEY_EXISTS", ALL_USED },
 #  if PHP_VERSION_ID >= 80000
-	/*  195 */	{ "MATCH", ALL_USED | OP2_JMP_ARRAY },
+	/*  195 */	{ "MATCH", ALL_USED | OP2_JMP_ARRAY | EXT_VAL_JMP_REL },
 	/*  196 */	{ "CASE_STRICT", ALL_USED },
 	/*  197 */	{ "MATCH_ERROR", ALL_USED },
 	/*  198 */	{ "JMP_NULL", ALL_USED },
