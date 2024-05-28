@@ -145,7 +145,7 @@ static const op_usage opcodes[] = {
 	/*  60 */	{ "DO_FCALL", SPECIAL },
 	/*  61 */	{ "INIT_FCALL", ALL_USED },
 	/*  62 */	{ "RETURN", OP1_USED },
-	/*  63 */	{ "RECV", RES_USED | OP1_USED },
+	/*  63 */	{ "RECV", RES_USED | OP1_USED | OP2_OPNUM },
 	/*  64 */	{ "RECV_INIT", ALL_USED },
 	/*  65 */	{ "SEND_VAL", OP1_USED },
 	/*  66 */	{ "SEND_VAR_EX", ALL_USED },
@@ -648,6 +648,9 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 # endif
 			}
 #endif
+			break;
+		case ZEND_RECV:
+			flags = OP1_USED|OP2_USED|OP2_OPNUM;
 			break;
 	}
 	return flags;
