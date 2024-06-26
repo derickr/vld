@@ -350,6 +350,16 @@ static const op_usage opcodes[] = {
 	/*  200 */	{ "FETCH_GLOBALS", ALL_USED },
 	/*  201 */	{ "VERIFY_NEVER_TYPE", ALL_USED },
 	/*  202 */	{ "ZEND_CALLABLE_CONVERT", ALL_USED },
+#    if PHP_VERSION_ID >= 80300
+	/*  203 */  { "ZEND_BIND_INIT_STATIC_OR_JMP", ALL_USED },
+#     if PHP_VERSION_ID >= 80400
+	/*  204 */  { "ZEND_FRAMELESS_ICALL_0", ALL_USED | EXT_VAL_FLF },
+	/*  205 */  { "ZEND_FRAMELESS_ICALL_1", ALL_USED | EXT_VAL_FLF },
+	/*  206 */  { "ZEND_FRAMELESS_ICALL_2", ALL_USED | EXT_VAL_FLF },
+	/*  207 */  { "ZEND_FRAMELESS_ICALL_3", ALL_USED | EXT_VAL_FLF },
+	/*  208 */  { "ZEND_JMP_FRAMELESS", ALL_USED | EXT_CACHED_PTR | OP2_OPNUM },
+#     endif
+#    endif
 #   endif
 #  endif
 # else
@@ -814,6 +824,12 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		last_lineno = op.lineno;
 	}
 
+#if PHP_VERSION_ID >= 80400
+	if (flags & EXT_VAL_FLF) {
+		fetch_type = (char*) ZEND_FLF_FUNC(&op)->common.function_name->val;
+	}
+#endif
+
 	if (op.opcode >= NUM_KNOWN_OPCODES) {
 		if (VLD_G(format)) {
 			vld_printf(stderr, "%5d %s %c %c %c %c %s <%03d>%-23s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), op.opcode, VLD_G(col_sep), fetch_type);
@@ -834,6 +850,11 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		}
 	}
 
+#if PHP_VERSION_ID >= 80400
+	if (flags & EXT_CACHED_PTR) {
+		vld_printf(stderr, "s%-3d ", op.extended_value);
+	} else
+#endif
 	if (flags & EXT_VAL) {
 #if PHP_VERSION_ID >= 70300
 		if (op.opcode == ZEND_CATCH) {
@@ -1084,6 +1105,14 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[0] = VLD_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+
+#if PHP_VERSION_ID >= 80400
+	} else if (opcode.opcode == ZEND_JMP_FRAMELESS) {
+		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[1] = position + 1;
+		*jump_count = 2;
+		return 1;
+#endif
 
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||

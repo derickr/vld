@@ -57,6 +57,8 @@
 #define EXT_VAL_JMP_ABS   1<<25
 #define VLD_IS_JMP_ARRAY  1<<26
 #define VLD_IS_INDEX      1<<27
+#define EXT_VAL_FLF       1<<28
+#define EXT_CACHED_PTR    1<<29
 
 typedef struct _op_usage {
 	const char  *name;
