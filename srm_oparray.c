@@ -1108,15 +1108,17 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 
 #if PHP_VERSION_ID >= 80400
 	} else if (opcode.opcode == ZEND_JMP_FRAMELESS) {
-		jumps[0] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-		jumps[1] = position + 1;
+		jumps[0] = position + 1;
+		jumps[1] = VLD_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jump_count = 2;
 		return 1;
 #endif
 
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
+#if PHP_VERSION_ID < 80400
 		opcode.opcode == ZEND_EXIT ||
+#endif
 		opcode.opcode == ZEND_THROW ||
 #if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH_ERROR ||
@@ -1126,6 +1128,48 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[0] = VLD_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+	} else if (
+		opcode.opcode == ZEND_INIT_FCALL
+	) {
+		zval *func_name = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
+		if (zend_string_equals_literal(Z_PTR_P(func_name), "exit")) {
+			int level = 0;
+			uint32_t start = position + 1;
+
+			for (;;) {
+				switch (opa->opcodes[start].opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+#if PHP_VERSION_ID >= 80400
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+#endif
+					case ZEND_NEW:
+						level++;
+						break;
+					case ZEND_DO_FCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+						if (level == 0) {
+							goto done;
+						}
+						level--;
+						break;
+				}
+				start++;
+			}
+ done:
+			ZEND_ASSERT(opa->opcodes[start].opcode == ZEND_DO_ICALL);
+			jumps[0] = VLD_JMP_EXIT;
+			*jump_count = 1;
+			return 1;
+		}
+
 #if PHP_VERSION_ID >= 70200
 	} else if (
 # if PHP_VERSION_ID >= 80000
@@ -1265,6 +1309,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			break;
 		}
 
+#if PHP_VERSION_ID < 80400
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			VLD_PRINT(1, "Exit found\n");
@@ -1272,6 +1317,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
+#endif
 		/* See if we have a return instruction */
 		if (
 			opa->opcodes[position].opcode == ZEND_RETURN
