@@ -1116,7 +1116,9 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
+#if PHP_VERSION_ID < 80400
 		opcode.opcode == ZEND_EXIT ||
+#endif
 		opcode.opcode == ZEND_THROW ||
 #if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH_ERROR ||
@@ -1265,6 +1267,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			break;
 		}
 
+#if PHP_VERSION_ID < 80400
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			VLD_PRINT(1, "Exit found\n");
@@ -1272,6 +1275,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 			break;
 		}
+#endif
 		/* See if we have a return instruction */
 		if (
 			opa->opcodes[position].opcode == ZEND_RETURN
