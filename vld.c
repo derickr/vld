@@ -254,6 +254,27 @@ static int vld_dump_fe (zend_op_array *fe, int num_args, va_list args, zend_hash
 	return ZEND_HASH_APPLY_KEEP;
 }
 
+#if PHP_VERSION_ID >= 80400
+static void vld_dump_property_hooks(zend_class_entry *ce)
+{
+	int i;
+	zend_property_info *prop_info;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
+		if (!prop_info->hooks) {
+			continue;
+		}
+
+		for (i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			vld_printf(stderr, "Property %s:\n", ZSTRING_VALUE(prop_info->name));
+			if (prop_info->hooks[i]) {
+				vld_dump_oparray(&prop_info->hooks[i]->op_array);
+			}
+			vld_printf(stderr, "End of property %s:\n\n", ZSTRING_VALUE(prop_info->name));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
 
 static int vld_dump_cle (zend_class_entry *class_entry)
 {
@@ -277,6 +298,11 @@ static int vld_dump_cle (zend_class_entry *class_entry)
 		if (have_fe) {
 			vld_printf(stderr, "Class %s:\n", ZSTRING_VALUE(ce->name));
 			zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) VLD_WRAP_PHP7(vld_dump_fe), 0);
+
+#if PHP_VERSION_ID >= 80400
+			vld_dump_property_hooks(ce);
+#endif
+
 			vld_printf(stderr, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
 		} else {
 			vld_printf(stderr, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
