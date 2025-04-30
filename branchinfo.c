@@ -276,14 +276,14 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info)
 					branch_info->branches[i].end_lineno
 				);
 				if (vld_set_in(branch_info->entry_points, i)) {
-					fprintf(VLD_G(path_dump_file), "\t%s_ENTRY -> %s_%d\n", fname, fname, i);
+					fprintf(VLD_G(path_dump_file), "\t\"%s_ENTRY\" -> \"%s_%d\"\n", fname, fname, i);
 				}
 				for (j = 0; j < branch_info->branches[i].outs_count; j++) {
 					if (branch_info->branches[i].outs[j]) {
 						if (branch_info->branches[i].outs[j] == VLD_JMP_EXIT) {
-							fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_EXIT;\n", fname, i, fname);
+							fprintf(VLD_G(path_dump_file), "\t\"%s_%d\" -> \"%s_EXIT\";\n", fname, i, fname);
 						} else {
-							fprintf(VLD_G(path_dump_file), "\t%s_%d -> %s_%d;\n", fname, i, fname, branch_info->branches[i].outs[j]);
+							fprintf(VLD_G(path_dump_file), "\t\"%s_%d\" -> \"%s_%d\";\n", fname, i, fname, branch_info->branches[i].outs[j]);
 						}
 					}
 				}
