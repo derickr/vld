@@ -1128,6 +1128,7 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 		jumps[0] = VLD_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+#if PHP_VERSION_ID >= 80200
 	} else if (
 		opcode.opcode == ZEND_INIT_FCALL
 	) {
@@ -1169,6 +1170,7 @@ int vld_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count
 			*jump_count = 1;
 			return 1;
 		}
+#endif
 
 #if PHP_VERSION_ID >= 70200
 	} else if (
