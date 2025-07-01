@@ -1,0 +1,9 @@
+{
+    "name": "derickr/vld",
+    "type": "php-ext",
+    "license": "BSD-2-Clause",
+    "description": "This extension dumps all the opcodes (execution units) of a script.",
+    "require": {
+        "php": ">= 8.0.0"
+    }
+}

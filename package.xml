@@ -16,11 +16,11 @@ dumps all the opcodes (execution units) of a script.
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2022-09-16</date>
- <time>08:59:12</time>
+ <date>2025-07-01</date>
+ <time>16:35:27</time>
  <version>
-  <release>0.18.0</release>
-  <api>0.18.0</api>
+  <release>0.19.0</release>
+  <api>0.19.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -28,8 +28,7 @@ dumps all the opcodes (execution units) of a script.
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-- Add support for new PHP 8.1 opcodes with examples
-- Add support for PHP 8.2 (by removing JMPZNZ opcode)
+- Add support for PHP 8.3 and PHP 8.4
  </notes>
  <contents>
   <dir name="/">
